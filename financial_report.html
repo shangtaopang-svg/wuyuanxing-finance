@@ -1,0 +1,543 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>凉山州五源兴农业科技有限公司 - 阶段性财务分析报告</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
+<style>
+:root{--primary:#2c6e49;--primary-light:#4c956c;--primary-dark:#1b4332;--accent:#d4a373;--bg:#f8f9fa;--card-bg:#fff;--text:#2d3436;--text-light:#636e72;--border:#e0e0e0;--red:#d63031;--green:#00b894;--blue:#0984e3;--orange:#e17055;--shadow:0 2px 12px rgba(0,0,0,.08)}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:-apple-system,'Microsoft YaHei',sans-serif;background:var(--bg);color:var(--text);line-height:1.6}
+.container{max-width:1200px;margin:0 auto;padding:20px}
+.header{background:linear-gradient(135deg,var(--primary-dark),var(--primary));color:#fff;padding:40px 30px;border-radius:16px;margin-bottom:30px;box-shadow:var(--shadow)}
+.header h1{font-size:28px;margin-bottom:8px}
+.header p{opacity:.85;font-size:14px}
+.summary-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:16px;margin-bottom:30px}
+.summary-card{background:var(--card-bg);border-radius:12px;padding:20px;box-shadow:var(--shadow);border-left:4px solid var(--primary)}
+.summary-card .label{font-size:13px;color:var(--text-light);margin-bottom:4px}
+.summary-card .value{font-size:22px;font-weight:700;color:var(--primary-dark)}
+.summary-card .sub{font-size:12px;color:var(--text-light);margin-top:4px}
+.summary-card.expense{border-left-color:var(--red)}.summary-card.expense .value{color:var(--red)}
+.summary-card.income{border-left-color:var(--green)}.summary-card.income .value{color:var(--green)}
+.summary-card.balance{border-left-color:var(--blue)}.summary-card.balance .value{color:var(--blue)}
+.summary-card.asset{border-left-color:var(--orange)}.summary-card.asset .value{color:var(--orange)}
+.nav-tabs{display:flex;gap:4px;background:var(--card-bg);border-radius:12px;padding:6px;margin-bottom:24px;box-shadow:var(--shadow);flex-wrap:wrap}
+.nav-tab{padding:10px 18px;border-radius:8px;cursor:pointer;font-size:14px;font-weight:500;color:var(--text-light);transition:all .2s;border:none;background:none;white-space:nowrap}
+.nav-tab:hover{background:#f0f0f0;color:var(--text)}.nav-tab.active{background:var(--primary);color:#fff}
+.section{display:none}.section.active{display:block}
+.section-header{display:flex;align-items:center;gap:12px;margin-bottom:20px}
+.section-header .icon{width:40px;height:40px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:20px;background:var(--primary);color:#fff}
+.section-header h2{font-size:22px;color:var(--primary-dark)}
+.card{background:var(--card-bg);border-radius:12px;padding:24px;margin-bottom:20px;box-shadow:var(--shadow)}
+.card-title{font-size:16px;font-weight:600;color:var(--primary-dark);margin-bottom:16px;padding-bottom:10px;border-bottom:2px solid var(--bg)}
+.table-wrap{overflow-x:auto}
+table{width:100%;border-collapse:collapse;font-size:13px}
+th{background:var(--primary);color:#fff;padding:10px 12px;text-align:left;font-weight:500;white-space:nowrap}
+td{padding:8px 12px;border-bottom:1px solid var(--border);vertical-align:top}
+tr:hover td{background:#f5f5f5}
+tr.total-row td{font-weight:700;background:#f0f7f4;border-top:2px solid var(--primary)}
+tr.sub-header td{background:#e8f5e9;font-weight:600;color:var(--primary-dark)}
+.amount{text-align:right;font-variant-numeric:tabular-nums}
+.negative{color:var(--red)}.positive{color:var(--green)}
+.badge{display:inline-block;padding:2px 8px;border-radius:4px;font-size:11px;font-weight:500}
+.badge-paid{background:#d4edda;color:#155724}.badge-unpaid{background:#f8d7da;color:#721c24}
+.badge-partial{background:#fff3cd;color:#856404}
+.badge-account{background:#cce5ff;color:#004085}.badge-petty{background:#e2d5f1;color:#4a2d7a}
+.badge-ren{background:#ffe0b2;color:#e65100}
+.chart-container{display:flex;justify-content:center;align-items:flex-start;gap:30px;flex-wrap:wrap;margin:16px 0}
+.chart-box{text-align:center;min-width:280px;max-width:360px}
+.chart-box canvas{max-width:100%;max-height:340px}
+.two-col{display:grid;grid-template-columns:1fr 1fr;gap:20px}
+@media(max-width:768px){.two-col{grid-template-columns:1fr}}
+.note-box{background:#fff8e1;border-radius:8px;padding:12px 16px;font-size:13px;color:#5d4037;margin-top:12px}
+.note-box strong{color:#e65100}
+.footer{text-align:center;padding:30px;color:var(--text-light);font-size:12px}
+@media print{.nav-tabs{display:none}.section{display:block!important;page-break-inside:avoid;margin-bottom:30px}.header{box-shadow:none}.card{box-shadow:none;border:1px solid var(--border)}}
+</style>
+</head>
+<body>
+<div class="container">
+
+<div class="header">
+<h1>🌿 凉山州五源兴农业科技有限公司</h1>
+<p>阶段性财务分析报告 &nbsp;|&nbsp; 数据区间：2025年12月 — 2026年5月</p>
+</div>
+
+<div class="summary-grid">
+<div class="summary-card income"><div class="label">公司入账</div><div class="value">¥1,060,000</div><div class="sub">股本金¥990,000 + 袁种苗款¥70,000</div></div>
+<div class="summary-card expense"><div class="label">公司账户支出</div><div class="value">¥1,050,382</div><div class="sub">含固定资产¥118,162</div></div>
+<div class="summary-card balance"><div class="label">账户余额</div><div class="value">¥9,618</div><div class="sub">实际以银行余额为准</div></div>
+<div class="summary-card asset"><div class="label">固定资产</div><div class="value">¥118,162</div><div class="sub">车辆+农业机械</div></div>
+</div>
+
+<div class="nav-tabs">
+<button class="nav-tab active" onclick="showTab('overview',this)">📊 总览</button>
+<button class="nav-tab" onclick="showTab('company',this)">🏦 公司基本户</button>
+<button class="nav-tab" onclick="showTab('capital',this)">💰 股本金</button>
+<button class="nav-tab" onclick="showTab('base',this)">🌱 种植基地</button>
+<button class="nav-tab" onclick="showTab('income',this)">📈 公司收入</button>
+<button class="nav-tab" onclick="showTab('farmer',this)">👨‍🌾 农户账单</button>
+<button class="nav-tab" onclick="showTab('ren',this)">👤 任总备用金</button>
+<button class="nav-tab" onclick="showTab('pang',this)">🧑‍💼 庞备用金</button>
+<button class="nav-tab" onclick="showTab('assets',this)">🚜 固定资产</button>
+</div>
+
+<!-- ===== 总览 ===== -->
+<div id="sec-overview" class="section active">
+<div class="section-header"><div class="icon">📊</div><h2>财务总览</h2></div>
+<div class="two-col">
+<div class="card"><div class="card-title">资金来源构成</div><div class="chart-container"><div class="chart-box"><canvas id="chartSource"></canvas></div></div></div>
+<div class="card"><div class="card-title">种植基地投入对比</div><div class="chart-container"><div class="chart-box"><canvas id="chartBaseBar"></canvas></div></div></div>
+</div>
+<div class="card"><div class="card-title">种植基地投入占比</div><div class="chart-container"><div class="chart-box"><canvas id="chartBasePie"></canvas></div></div></div>
+</div>
+
+<!-- ===== 公司基本户 ===== -->
+<div id="sec-company" class="section">
+<div class="section-header"><div class="icon">🏦</div><h2>公司基本户收支明细</h2></div>
+<div class="card"><div class="card-title">支出明细</div><div class="table-wrap"><table>
+<thead><tr><th>日期</th><th>项目</th><th>金额(元)</th><th>备注</th></tr></thead>
+<tbody>
+<tr><td>3.19</td><td>任总备用金</td><td class="amount negative">50,000</td><td>已经支付太子参种苗</td></tr>
+<tr><td>3.19</td><td>庞备用金</td><td class="amount negative">10,000</td><td></td></tr>
+<tr><td>3.19</td><td>财务记账费</td><td class="amount negative">2,000</td><td>已经收到开票</td></tr>
+<tr><td>3.19</td><td>土地流转</td><td class="amount negative">80,000</td><td></td></tr>
+<tr><td>3.19</td><td>农业机械费（含运费）</td><td class="amount negative">69,440</td><td>已经收到开票</td></tr>
+<tr><td>3.19</td><td>金银花款（不含运费）</td><td class="amount negative">96,000</td><td>已经收到开票</td></tr>
+<tr><td>3.21</td><td>化肥</td><td class="amount negative">53,048</td><td>已经收到开票</td></tr>
+<tr><td>3.21</td><td>土地流转</td><td class="amount negative">54,628</td><td></td></tr>
+<tr><td>3.22</td><td>庞备用金</td><td class="amount negative">10,000</td><td>支付房租和民工工资</td></tr>
+<tr><td>3.22</td><td>金银花种苗运输费</td><td class="amount negative">5,600</td><td></td></tr>
+<tr><td>3.23</td><td>杨德魁代为支付党参种苗款</td><td class="amount negative">150,000</td><td></td></tr>
+<tr><td>3.24</td><td>庞备用金</td><td class="amount negative">20,000</td><td>支付种植民工工资（现金支付）</td></tr>
+<tr><td>3.27</td><td>杨德魁代为支付党参种苗款</td><td class="amount negative">100,000</td><td></td></tr>
+<tr><td>3.27</td><td>庞备用金</td><td class="amount negative">15,000</td><td></td></tr>
+<tr><td>3.29</td><td>购车定金</td><td class="amount negative">4,000</td><td>转账</td></tr>
+<tr><td>3.3</td><td>购车款</td><td class="amount negative">23,200</td><td>转账</td></tr>
+<tr><td>3.3</td><td>庞备用金（支付购置税和保险）</td><td class="amount negative">15,000</td><td></td></tr>
+<tr><td>4.02</td><td>中发机械山地四驱扣半犁</td><td class="amount negative">8,383</td><td>不含运费</td></tr>
+<tr><td>4.03</td><td>杨德魁代为支付党参种苗款</td><td class="amount negative">50,000</td><td></td></tr>
+<tr><td>4.03</td><td>发3.31-4.2三天工资种植工人</td><td class="amount negative">11,460</td><td>95.5工×120</td></tr>
+<tr><td>4.03</td><td>任总备用金（发放4.3以后民工工资）</td><td class="amount negative">30,000</td><td></td></tr>
+<tr><td>4.04</td><td>村分红</td><td class="amount negative">80,000</td><td></td></tr>
+<tr><td>4.05</td><td>任总备用金</td><td class="amount negative">30,000</td><td></td></tr>
+<tr><td>4.07</td><td>任总备用金</td><td class="amount negative">30,000</td><td></td></tr>
+<tr><td>4.07</td><td>杨德魁代为支付党参种苗款</td><td class="amount negative">25,963</td><td>全部付清</td></tr>
+<tr><td>4.3</td><td>任总支付车辆按揭款</td><td class="amount negative">1,660.28</td><td></td></tr>
+<tr><td>5.01</td><td>支付黄勇耕地费</td><td class="amount negative">5,000</td><td></td></tr>
+<tr><td>5.01</td><td>庞备用金</td><td class="amount negative">20,000</td><td>主要是支付4.24-26施前华组织的除草运草、冲击处理、当归独活种植</td></tr>
+<tr class="total-row"><td></td><td><strong>支出合计</strong></td><td class="amount"><strong>1,050,382.28</strong></td><td></td></tr>
+</tbody></table></div></div>
+
+<div class="card"><div class="card-title">收入明细</div><div class="table-wrap"><table>
+<thead><tr><th>项目</th><th>金额(元)</th><th>备注</th></tr></thead>
+<tbody>
+<tr><td>股本金</td><td class="amount positive">990,000</td><td></td></tr>
+<tr><td>袁种苗款</td><td class="amount positive">70,000</td><td>农户</td></tr>
+<tr class="total-row"><td><strong>入账合计</strong></td><td class="amount"><strong>1,060,000</strong></td><td></td></tr>
+</tbody></table></div></div>
+
+<div class="card"><div class="card-title">账户汇总</div><div class="table-wrap"><table>
+<thead><tr><th>项目</th><th>金额(元)</th></tr></thead>
+<tbody>
+<tr><td>入账</td><td class="amount">1,060,000</td></tr>
+<tr><td>支出</td><td class="amount negative">1,050,382.28</td></tr>
+<tr class="total-row"><td><strong>余额</strong></td><td class="amount"><strong>9,617.72</strong></td></tr>
+</tbody></table></div></div>
+<div class="note-box"><strong>📌 说明：</strong>实际数据以银行余额为准（有手续费支出）</div>
+</div>
+
+<!-- ===== 股本金 ===== -->
+<div id="sec-capital" class="section">
+<div class="section-header"><div class="icon">💰</div><h2>公司股本金</h2></div>
+<div class="note-box" style="margin-bottom:20px"><strong>📌 说明：</strong>暂照实缴110万股本金计算</div>
+<div class="card"><div class="card-title">股东缴纳明细</div><div class="table-wrap"><table>
+<thead><tr><th>姓名</th><th>股权比例</th><th>应承担金额</th><th>第一次</th><th>第二次</th><th>状态</th></tr></thead>
+<tbody>
+<tr><td>任海涛</td><td class="amount">30%</td><td class="amount">330,000</td><td class="amount">210,000</td><td class="amount">120,000</td><td><span class="badge badge-paid">已缴清</span></td></tr>
+<tr><td>庞尚韬</td><td class="amount">25%</td><td class="amount">275,000</td><td class="amount">150,000</td><td class="amount">125,000</td><td><span class="badge badge-paid">已缴清</span></td></tr>
+<tr><td>吴生成</td><td class="amount">15%</td><td class="amount">165,000</td><td class="amount">90,000</td><td class="amount">75,000</td><td><span class="badge badge-paid">已缴清</span></td></tr>
+<tr><td>陈洪斌</td><td class="amount">10%</td><td class="amount">110,000</td><td class="amount">60,000</td><td class="amount">50,000</td><td><span class="badge badge-paid">已缴清</span></td></tr>
+<tr><td>应红林</td><td class="amount">10%</td><td class="amount">110,000</td><td class="amount">60,000</td><td class="amount">50,000</td><td><span class="badge badge-paid">已缴清</span></td></tr>
+<tr><td>朱再标</td><td class="amount">10%</td><td class="amount">110,000</td><td class="amount negative">0</td><td class="amount negative">0</td><td><span class="badge badge-unpaid">未缴纳</span></td></tr>
+<tr class="total-row"><td><strong>合计</strong></td><td class="amount"><strong>100%</strong></td><td class="amount"><strong>1,100,000</strong></td><td class="amount"><strong>570,000</strong></td><td class="amount"><strong>420,000</strong></td><td></td></tr>
+</tbody></table></div></div>
+<div class="card"><div class="card-title">股本金缴纳情况</div><div class="chart-container"><div class="chart-box"><canvas id="chartCapital"></canvas></div></div></div>
+<div class="note-box"><strong>📌 注意：</strong>朱再标应缴¥110,000（10%）尚未缴纳，实缴合计¥990,000。</div>
+</div>
+
+<!-- ===== 种植基地 ===== -->
+<div id="sec-base" class="section">
+<div class="section-header"><div class="icon">🌱</div><h2>种植基地</h2></div>
+
+<!-- 金银花基地 -->
+<div class="card"><div class="card-title">🌸 金银花种植前期成本统计表</div><div class="table-wrap"><table>
+<thead><tr><th>序号</th><th>类别</th><th>明细</th><th>金额(元)</th><th>备注</th></tr></thead>
+<tbody>
+<tr><td>1</td><td>土地流转费</td><td>101.4亩×520元/亩</td><td class="amount">52,728</td><td><span class="badge badge-account">公司账户支付</span></td></tr>
+<tr><td>2</td><td>土地翻耕</td><td>101.4亩×80元/亩（实际结算按8000）</td><td class="amount">8,000</td><td>已经支付5000，3000未付</td></tr>
+<tr><td>3</td><td>种苗费</td><td>金银花款（不含运费）</td><td class="amount">96,000</td><td><span class="badge badge-account">公司账户支付</span></td></tr>
+<tr><td>4</td><td>运输及卸货费</td><td>金银花种苗运输费</td><td class="amount">5,600</td><td><span class="badge badge-account">公司账户支付</span></td></tr>
+<tr><td>5</td><td></td><td>金银花、化肥、栽种机卸货工人工资（120×6）</td><td class="amount">720</td><td><span class="badge badge-petty">庞备用金</span></td></tr>
+<tr><td>6</td><td></td><td>卸货机械费</td><td class="amount">100</td><td><span class="badge badge-petty">庞备用金</span></td></tr>
+<tr><td>7</td><td>人工费用</td><td>金银花种植（第一天5人）</td><td class="amount">600</td><td><span class="badge badge-petty">庞备用金</span></td></tr>
+<tr><td>8</td><td></td><td>金银花种植工资（现金）</td><td class="amount">7,080</td><td><span class="badge badge-petty">庞备用金</span></td></tr>
+<tr><td>9</td><td></td><td>施前华3.24拉金银花+人工</td><td class="amount">320</td><td><span class="badge badge-petty">庞备用金</span></td></tr>
+<tr><td>10</td><td></td><td>施前华3.25拉金银花+人工</td><td class="amount">320</td><td><span class="badge badge-petty">庞备用金</span></td></tr>
+<tr><td>11</td><td></td><td>金银花种植工资（现金）</td><td class="amount">2,040</td><td><span class="badge badge-petty">庞备用金</span></td></tr>
+<tr><td>12</td><td></td><td>金银花种植人工</td><td class="amount">780</td><td><span class="badge badge-petty">庞备用金</span></td></tr>
+<tr class="total-row"><td colspan="3"><strong>合计</strong></td><td class="amount"><strong>174,288</strong></td><td></td></tr>
+</tbody></table></div></div>
+
+<!-- 党参育苗基地 -->
+<div class="card"><div class="card-title">🌿 党参育苗基地前期成本统计表</div><div class="table-wrap"><table>
+<thead><tr><th>序号</th><th>类别</th><th>明细</th><th>金额(元)</th><th>备注</th></tr></thead>
+<tbody>
+<tr><td>1</td><td>土地流转费</td><td>56.2亩×520元/亩</td><td class="amount">29,224</td><td><span class="badge badge-account">公司账户支付</span></td></tr>
+<tr><td>2</td><td>土地翻耕</td><td>56.2亩×80元/亩</td><td class="amount">4,496</td><td>未进行/未支付</td></tr>
+<tr><td>3</td><td>党参种子</td><td>260公斤×80/公斤</td><td class="amount">20,800</td><td>甘肃老杨未支付</td></tr>
+<tr><td>4</td><td>农药</td><td>除草剂</td><td class="amount">350</td><td><span class="badge badge-petty">庞备用金支付</span></td></tr>
+<tr><td></td><td></td><td>除草剂</td><td class="amount">520</td><td>施前华垫付-庞备用金支付</td></tr>
+<tr><td></td><td></td><td>农达3件=1100</td><td class="amount">1,110</td><td>已经支付/庞备用金</td></tr>
+<tr><td>5</td><td>人工</td><td>打农药人工费</td><td class="amount">240</td><td><span class="badge badge-petty">庞备用金支付</span></td></tr>
+<tr><td></td><td></td><td>处理杂草</td><td class="amount">500</td><td>施前华垫付-庞备用金支付</td></tr>
+<tr><td>7</td><td></td><td>4.24打药3×120</td><td class="amount">360</td><td>已经支付/庞备用金</td></tr>
+<tr><td>8</td><td></td><td>4.24处理杂草5×120</td><td class="amount">600</td><td>已经支付/庞备用金</td></tr>
+<tr><td>9</td><td></td><td>4.24三轮车</td><td class="amount">100</td><td>已经支付/庞备用金</td></tr>
+<tr class="total-row"><td colspan="3"><strong>合计</strong></td><td class="amount"><strong>58,300</strong></td><td></td></tr>
+</tbody></table></div></div>
+
+<!-- 元胡试种基地 -->
+<div class="card"><div class="card-title">🌱 元胡试种基地（2025年种植期间费用未计入）</div><div class="table-wrap"><table>
+<thead><tr><th>序号</th><th>类目</th><th>明细</th><th>金额(元)</th><th>备注</th><th>支付状态</th></tr></thead>
+<tbody>
+<tr><td>1</td><td>除草打药</td><td></td><td class="amount">930</td><td>张书记负责</td><td><span class="badge badge-unpaid">未支付</span></td></tr>
+<tr><td>2</td><td>4.30除草</td><td>4×120=480+60</td><td class="amount">540</td><td>施前华负责</td><td><span class="badge badge-unpaid">未支付</span></td></tr>
+<tr class="total-row"><td colspan="3"><strong>合计</strong></td><td class="amount"><strong>1,470</strong></td><td></td><td></td></tr>
+</tbody></table></div></div>
+
+<!-- 党参等基地 -->
+<div class="card"><div class="card-title">🌿 党参等种植前期成本统计表（包含当归/独活/黄芪）</div><div class="table-wrap"><table>
+<thead><tr><th style="width:6%">序号</th><th style="width:14%">类目</th><th style="width:40%">明细</th><th style="width:12%">金额(元)</th><th style="width:28%">备注</th></tr></thead>
+<tbody>
+<tr><td>1</td><td>土地流转费</td><td>106.3-5（太极药业在用）=101.3亩</td><td class="amount">52,676</td><td><span class="badge badge-account">公司账户支付</span></td></tr>
+<tr><td>2</td><td>土地翻耕</td><td>马路北侧：未测</td><td class="amount">—</td><td><span class="badge badge-unpaid">未结算未支付/马路北侧</span></td></tr>
+<tr><td></td><td></td><td>约26亩×80元/亩+900（约3000）</td><td class="amount">3,000</td><td>黄勇：马路南侧/未支付</td></tr>
+<tr class="sub-header"><td>3</td><td>种苗</td><td colspan="3">党参等种苗费【此处不扣除农户种植使用部分】</td></tr>
+<tr><td></td><td></td><td>党参种苗（9543.5公斤×37.89元/公斤）</td><td class="amount">361,648</td><td><span class="badge badge-account">公司账户打给甘肃老杨</span>，已经付清</td></tr>
+<tr><td>4</td><td></td><td>当归/独活/黄芪种苗</td><td class="amount">14,315</td><td>独活470kg×9.5=4,465；黄芪500kg×12.5=6,250；当归15件×240=3,600</td></tr>
+<tr><td>5</td><td></td><td>党参苗开票费用</td><td class="amount">1,000</td><td>甘肃老杨/未付</td></tr>
+<tr class="sub-header"><td>6</td><td>种苗运输卸货费</td><td colspan="3"></td></tr>
+<tr><td></td><td></td><td>党参种苗卸货5个人（现金）</td><td class="amount">600</td><td><span class="badge badge-petty">庞备用金</span></td></tr>
+<tr><td>7</td><td></td><td>临时工</td><td class="amount">240</td><td><span class="badge badge-petty">庞备用金</span></td></tr>
+<tr><td>8</td><td></td><td>党参运输费（现金）</td><td class="amount">6,000</td><td><span class="badge badge-petty">庞备用金</span></td></tr>
+<tr class="sub-header"><td>9</td><td>地膜及运输卸货费【此处不扣除农户种植使用部分】</td><td colspan="3"></td></tr>
+<tr><td></td><td></td><td>栽党参地膜250卷×48元/卷</td><td class="amount">12,000</td><td>甘肃老杨/未付</td></tr>
+<tr><td>10</td><td></td><td>育苗打拱地膜40×145元/卷</td><td class="amount">5,800</td><td>甘肃老杨/未付</td></tr>
+<tr><td>11</td><td></td><td>地膜卸货费</td><td class="amount">100</td><td>无发票给村小金（文书）</td></tr>
+<tr><td>12</td><td></td><td>地膜运费</td><td class="amount">3,000</td><td>转任总，任总支付对方/无票</td></tr>
+<tr class="sub-header"><td>13</td><td>化肥等费用【此处不扣除农户种植使用部分】</td><td colspan="3"></td></tr>
+<tr><td></td><td></td><td>三环复合化肥76×240元/袋</td><td class="amount">18,240</td><td><span class="badge badge-account">公司对公账户划账</span></td></tr>
+<tr><td>14</td><td></td><td>迪斯科黑科技76×260元/袋</td><td class="amount">9,760</td><td></td></tr>
+<tr><td>15</td><td></td><td>威粒杀虫剂456袋×25元/包</td><td class="amount">11,400</td><td></td></tr>
+<tr><td>16</td><td></td><td>除草剂228×16元/组</td><td class="amount">3,648</td><td></td></tr>
+<tr class="sub-header"><td>17</td><td>种植人工费用</td><td colspan="3"></td></tr>
+<tr><td></td><td></td><td>黄芪种植人工【3.26】</td><td class="amount">1,140</td><td><span class="badge badge-petty">庞备用金</span></td></tr>
+<tr><td></td><td></td><td>捡石头拖拉机【3.26】</td><td class="amount">500</td><td><span class="badge badge-petty">庞备用金</span></td></tr>
+<tr><td></td><td></td><td>捡石头人工费【3.26】</td><td class="amount">480</td><td><span class="badge badge-petty">庞备用金</span></td></tr>
+<tr><td></td><td></td><td>农民工资【3.27】</td><td class="amount">4,080</td><td>庞备用金（庞不在交陈总发）</td></tr>
+<tr><td></td><td></td><td>农民工资【3.28】</td><td class="amount">4,440</td><td>庞备用金（庞不在交陈总发）</td></tr>
+<tr><td></td><td></td><td>之前独活扫尾3个人半工【3.31】</td><td class="amount">180</td><td><span class="badge badge-petty">庞备用金</span></td></tr>
+<tr><td></td><td></td><td>临时三轮车运当归和独活种苗【3.31】</td><td class="amount">150</td><td><span class="badge badge-petty">庞备用金</span></td></tr>
+<tr><td></td><td></td><td>拖拉机：人工工资200+油费400+配件220【3.31】</td><td class="amount">820</td><td><span class="badge badge-petty">庞备用金</span></td></tr>
+<tr><td></td><td></td><td>25工【3.31】</td><td class="amount">3,000</td><td>合计11,460，公司账户转给任总</td></tr>
+<tr><td></td><td></td><td>31工【4.1】</td><td class="amount">3,720</td><td></td></tr>
+<tr><td></td><td></td><td>39.5工【4.2】</td><td class="amount">4,740</td><td></td></tr>
+<tr><td></td><td></td><td>8.19亩×1200【4.3】</td><td class="amount">9,828</td><td><span class="badge badge-ren">任总备用金支付</span></td></tr>
+<tr><td></td><td></td><td>12.27亩×1200【4.4】</td><td class="amount">14,724</td><td><span class="badge badge-ren">任总备用金支付</span></td></tr>
+<tr><td></td><td></td><td>拖拉机1.5天【4.4】</td><td class="amount">1,500</td><td><span class="badge badge-ren">任总备用金支付</span></td></tr>
+<tr><td></td><td></td><td>20.91亩×1200【4.5】</td><td class="amount">25,092</td><td><span class="badge badge-ren">任总备用金支付/承办</span></td></tr>
+<tr><td></td><td></td><td>18.68亩×1200【4.6】</td><td class="amount">22,416</td><td><span class="badge badge-ren">任总备用金支付/承办</span></td></tr>
+<tr><td></td><td></td><td>10.66亩×1200【4.7】</td><td class="amount">12,792</td><td><span class="badge badge-ren">任总备用金支付/承办</span></td></tr>
+<tr><td></td><td></td><td>4.6打药3×120</td><td class="amount">360</td><td>施前华垫付-庞备用金支付</td></tr>
+<tr><td></td><td></td><td>4.7打药3×120</td><td class="amount">360</td><td>施前华垫付-庞备用金支付</td></tr>
+<tr><td></td><td></td><td>打药3×120（4.4未翻地部分打药）</td><td class="amount">360</td><td>施前华垫付-庞备用金支付</td></tr>
+<tr><td></td><td></td><td>甘肃两个师傅3.31-4.7【300元/天：8×300×2=4800+路费5400=5340】</td><td class="amount">5,340</td><td><span class="badge badge-ren">任总备用金支付</span></td></tr>
+<tr><td></td><td></td><td>4.16-当归和独活9.4亩×800=7520</td><td class="amount">7,520</td><td>已经支付/庞备用金/施组织</td></tr>
+<tr><td></td><td></td><td>4.25处理雨水冲击2天15工×120=1800</td><td class="amount">1,800</td><td>已经支付/庞备用金</td></tr>
+<tr class="total-row"><td colspan="3"><strong>合计（已结算）</strong></td><td class="amount"><strong>628,769</strong></td><td></td></tr>
+</tbody></table></div></div>
+<div class="note-box"><strong>📌 注意：</strong>①马路北侧土地翻耕费用尚未结算，待结算后计入总成本；②黄勇马路南侧翻耕¥3,000未支付。</div>
+</div>
+
+<!-- ===== 公司收入 ===== -->
+<div id="sec-income" class="section">
+<div class="section-header"><div class="icon">📈</div><h2>公司收入账单（实际）</h2></div>
+<div class="card"><div class="card-title">业务收入明细</div><div class="table-wrap"><table>
+<thead><tr><th>序号</th><th>明细</th><th>金额(元)</th><th>归处</th><th>备注</th></tr></thead>
+<tbody>
+<tr><td>1</td><td>袁朝国种苗预付款</td><td class="amount">70,000</td><td>公账</td><td></td></tr>
+<tr><td>2</td><td>袁朝国化肥等农资款</td><td class="amount">11,400</td><td>任总</td><td></td></tr>
+<tr><td>3</td><td>村民种苗和化肥等</td><td class="amount">12,780</td><td>任总</td><td>何福友750；袁成贵1400；孙怀龙5080；施福华750；胡立勇1600；叶书记介绍的5个人1500；杨文富1700</td></tr>
+<tr><td>4</td><td>张书记种苗款</td><td class="amount">2,808</td><td>庞</td><td><span class="badge badge-unpaid">未付/五一去收取</span></td></tr>
+<tr><td>5</td><td>张书记化肥等农资款</td><td class="amount">1,146</td><td>庞</td><td><span class="badge badge-unpaid">未付/五一去收取</span></td></tr>
+<tr><td>6</td><td>施前华化肥等农资款</td><td class="amount">2,000</td><td>庞</td><td></td></tr>
+<tr><td>7</td><td>约甲克古独活种苗款</td><td class="amount">700</td><td>庞</td><td><span class="badge badge-unpaid">未付/五一去收取</span></td></tr>
+<tr class="total-row"><td colspan="2"><strong>合计</strong></td><td class="amount"><strong>100,834</strong></td><td></td><td></td></tr>
+</tbody></table></div></div>
+</div>
+
+<!-- ===== 农户账单 ===== -->
+<div id="sec-farmer" class="section">
+<div class="section-header"><div class="icon">👨‍🌾</div><h2>坪坝村党参种苗和农资账单【农户】</h2></div>
+<div class="card"><div class="card-title">农户账单汇总</div><div class="table-wrap"><table>
+<thead><tr><th>序号</th><th>姓名</th><th>规模(亩)</th><th>种苗金额</th><th>预付款</th><th>未付种苗款</th><th>农资小计</th><th>农资已付</th><th>农资未付</th><th>未付合计</th><th>备注</th></tr></thead>
+<tbody>
+<tr><td>1</td><td>张全勤</td><td class="amount">2</td><td class="amount">4,680</td><td class="amount">2,808</td><td class="amount">1,872</td><td class="amount">1,146</td><td class="amount">1,146</td><td class="amount">0</td><td class="amount negative">1,872</td><td></td></tr>
+<tr><td>2</td><td>李锡兵</td><td class="amount">1</td><td class="amount">2,340</td><td class="amount">300</td><td class="amount">2,040</td><td class="amount">289</td><td class="amount">0</td><td class="amount">289</td><td class="amount negative">2,329</td><td>一起5人叶书记介绍</td></tr>
+<tr><td>3</td><td>汪德明/李玖琼</td><td class="amount">1</td><td class="amount">2,340</td><td class="amount">300</td><td class="amount">2,040</td><td class="amount">289</td><td class="amount">0</td><td class="amount">289</td><td class="amount negative">2,329</td><td>一起5人叶书记介绍</td></tr>
+<tr><td>4</td><td>丁玉强</td><td class="amount">1</td><td class="amount">2,340</td><td class="amount">300</td><td class="amount">2,040</td><td class="amount">289</td><td class="amount">0</td><td class="amount">289</td><td class="amount negative">2,329</td><td>一起5人叶书记介绍</td></tr>
+<tr><td>5</td><td>汪希权</td><td class="amount">1</td><td class="amount">2,340</td><td class="amount">300</td><td class="amount">2,040</td><td class="amount">289</td><td class="amount">0</td><td class="amount">289</td><td class="amount negative">2,329</td><td>一起5人叶书记介绍</td></tr>
+<tr><td>6</td><td>孙则拉打</td><td class="amount">1</td><td class="amount">2,340</td><td class="amount">300</td><td class="amount">2,040</td><td class="amount">289</td><td class="amount">0</td><td class="amount">289</td><td class="amount negative">2,329</td><td>一起5人叶书记介绍</td></tr>
+<tr><td>7</td><td>袁成贵</td><td class="amount">1</td><td class="amount">2,340</td><td class="amount">1,400</td><td class="amount">940</td><td class="amount">382</td><td class="amount">0</td><td class="amount">382</td><td class="amount negative">1,322</td><td></td></tr>
+<tr><td>8</td><td>胡立勇（蓉蓉）</td><td class="amount">1</td><td class="amount">2,340</td><td class="amount">1,600</td><td class="amount">740</td><td class="amount">382</td><td class="amount">0</td><td class="amount">382</td><td class="amount negative">1,122</td><td></td></tr>
+<tr><td>9</td><td>孙怀龙</td><td class="amount">3</td><td class="amount">7,020</td><td class="amount">5,080</td><td class="amount">1,940</td><td class="amount">698</td><td class="amount">0</td><td class="amount">698</td><td class="amount negative">2,638</td><td></td></tr>
+<tr><td>10</td><td>杨文富</td><td class="amount">1</td><td class="amount">2,340</td><td class="amount">1,400</td><td class="amount">940</td><td class="amount">300</td><td class="amount">300</td><td class="amount">0</td><td class="amount negative">940</td><td>张书记朋友</td></tr>
+<tr><td>11</td><td>何福友</td><td class="amount">0.5</td><td class="amount">1,170</td><td class="amount">750</td><td class="amount">420</td><td class="amount">0</td><td class="amount">0</td><td class="amount">0</td><td class="amount negative">420</td><td></td></tr>
+<tr><td>12</td><td>施福华</td><td class="amount">0.5</td><td class="amount">1,170</td><td class="amount">750</td><td class="amount">420</td><td class="amount">0</td><td class="amount">0</td><td class="amount">0</td><td class="amount negative">420</td><td></td></tr>
+<tr><td>13</td><td>施前华</td><td class="amount">9</td><td class="amount">24,375</td><td class="amount">0</td><td class="amount">24,375</td><td class="amount">2,000</td><td class="amount">2,000</td><td class="amount">0</td><td class="amount negative">24,375</td><td>按25袋计算，2袋质量问题</td></tr>
+<tr><td>14</td><td>约甲克古（独活）</td><td class="amount">2</td><td class="amount">700</td><td class="amount">700</td><td class="amount">0</td><td class="amount">0</td><td class="amount">0</td><td class="amount">0</td><td class="amount">0</td><td></td></tr>
+<tr><td>15</td><td>袁朝国</td><td class="amount">50</td><td class="amount">117,000</td><td class="amount">70,000</td><td class="amount">47,000</td><td class="amount">11,400</td><td class="amount">11,400</td><td class="amount">0</td><td class="amount negative">47,000</td><td>物资赠送5亩合计1,330；运费950，合计11,420，实际收取11,400</td></tr>
+<tr><td>16</td><td>袁朝国（新增35亩）</td><td class="amount">35</td><td class="amount">20,475</td><td class="amount">0</td><td class="amount">20,475</td><td class="amount">5,000</td><td class="amount">0</td><td class="amount">5,000</td><td class="amount negative">25,475</td><td>优惠1,720</td></tr>
+<tr class="total-row"><td></td><td><strong>合计</strong></td><td class="amount"><strong>110</strong></td><td class="amount"><strong>195,310</strong></td><td class="amount"><strong>85,988</strong></td><td class="amount"><strong>109,322</strong></td><td class="amount"><strong>22,753</strong></td><td class="amount"><strong>14,846</strong></td><td class="amount"><strong>7,907</strong></td><td class="amount"><strong>117,229</strong></td><td></td></tr>
+</tbody></table></div></div>
+
+<div class="card"><div class="card-title">农户未付款分布</div><div class="chart-container"><div class="chart-box"><canvas id="chartFarmer"></canvas></div></div></div>
+</div>
+
+<!-- ===== 任总备用金 ===== -->
+<div id="sec-ren" class="section">
+<div class="section-header"><div class="icon">👤</div><h2>任海涛个人款项</h2></div>
+<div class="two-col">
+<div class="card"><div class="card-title">收入</div><div class="table-wrap"><table>
+<thead><tr><th>序号</th><th>明细</th><th>金额(元)</th><th>来源</th></tr></thead>
+<tbody>
+<tr><td>1</td><td>备用金</td><td class="amount">140,000</td><td>公司账户</td></tr>
+<tr><td>2</td><td>袁化肥款</td><td class="amount">11,400</td><td>袁朝国</td></tr>
+<tr><td>3</td><td>村民种苗和化肥等</td><td class="amount">12,780</td><td>农户</td></tr>
+<tr><td>4</td><td>种植工资</td><td class="amount">11,460</td><td>公司账户</td></tr>
+<tr><td>5</td><td>地膜运输费</td><td class="amount">3,000</td><td>庞备用金</td></tr>
+<tr class="total-row"><td></td><td><strong>收入合计</strong></td><td class="amount"><strong>178,640</strong></td><td></td></tr>
+</tbody></table></div></div>
+
+<div class="card"><div class="card-title">支出</div><div class="table-wrap"><table>
+<thead><tr><th>序号</th><th>明细</th><th>金额(元)</th><th>去向</th></tr></thead>
+<tbody>
+<tr><td>1</td><td>党参种苗</td><td class="amount">50,000</td><td>甘肃种苗款</td></tr>
+<tr><td>2</td><td>地膜运费</td><td class="amount">3,000</td><td>运输</td></tr>
+<tr><td>3</td><td>种植工资【3.31-4.2】</td><td class="amount">11,460</td><td>农民</td></tr>
+<tr><td>4</td><td>种植工资【4.3】</td><td class="amount">9,828</td><td>农民</td></tr>
+<tr><td>5</td><td>种植工资【4.4】</td><td class="amount">16,224</td><td>农民</td></tr>
+<tr><td>6</td><td>种植工资【4.5】</td><td class="amount">25,092</td><td>农民</td></tr>
+<tr><td>7</td><td>种植工资【4.6】</td><td class="amount">22,836</td><td>农民</td></tr>
+<tr><td>8</td><td>种植工资【4.7】</td><td class="amount">12,792</td><td>农民</td></tr>
+<tr><td>9</td><td>甘肃两个工资和路费</td><td class="amount">5,340</td><td>甘肃两个帮扶</td></tr>
+<tr><td>10</td><td>其他【请给我明细】</td><td class="amount">22,068</td><td>请给我明细</td></tr>
+</tbody></table></div></div>
+</div>
+</div>
+
+<!-- ===== 庞备用金 ===== -->
+<div id="sec-pang" class="section">
+<div class="section-header"><div class="icon">🧑‍💼</div><h2>庞备用金</h2></div>
+
+<div class="card"><div class="card-title">备用金拨付记录</div><div class="table-wrap"><table>
+<thead><tr><th>批次</th><th>金额(元)</th></tr></thead>
+<tbody>
+<tr><td>第一次</td><td class="amount">10,000</td></tr>
+<tr><td>第二次</td><td class="amount">10,000</td></tr>
+<tr><td>第三次</td><td class="amount">20,000</td></tr>
+<tr><td>第四次</td><td class="amount">15,000</td></tr>
+<tr><td>第五次</td><td class="amount">15,000</td></tr>
+<tr><td>第六次（5.1）</td><td class="amount">20,000</td></tr>
+<tr class="total-row"><td><strong>总领取</strong></td><td class="amount"><strong>90,000</strong></td></tr>
+</tbody></table></div></div>
+
+<div class="card"><div class="card-title">备用金使用情况</div>
+<div class="note-box" style="margin-bottom:16px"><strong>📌 说明：</strong>庞备用金总领取¥90,000，总使用¥86,816.09，余额¥3,183.91。下表为全部6次拨付的总使用明细。</div>
+<div class="table-wrap"><table>
+<thead><tr><th>日期</th><th>明细</th><th>金额(元)</th><th>备注</th></tr></thead>
+<tbody>
+<tr class="sub-header"><td colspan="4">🏨 住宿</td></tr>
+<tr><td>3.4</td><td>西昌附近酒店</td><td class="amount">168</td><td></td></tr>
+<tr><td>3.7</td><td>甘洛维也纳</td><td class="amount">271</td><td>2</td></tr>
+<tr><td>3.8</td><td>甘洛维也纳</td><td class="amount">244</td><td>3</td></tr>
+<tr><td>3.6</td><td>西昌维也纳</td><td class="amount">264</td><td>7</td></tr>
+<tr><td>3.5</td><td>西昌维也纳</td><td class="amount">256</td><td></td></tr>
+<tr><td>1.9</td><td>甘洛维也纳</td><td class="amount">225</td><td>6</td></tr>
+<tr><td>12.13</td><td>甘洛维也纳</td><td class="amount">228</td><td>5</td></tr>
+<tr><td>12.12</td><td>甘洛维也纳</td><td class="amount">230</td><td>4</td></tr>
+<tr><td>3.18</td><td>西昌维也纳</td><td class="amount">604</td><td>38</td></tr>
+<tr><td>3.20</td><td>甘洛维也纳</td><td class="amount">514</td><td>39</td></tr>
+<tr><td>3.23</td><td>租金（住宿）</td><td class="amount">2,000</td><td>付给袁朝国无发票（半年）</td></tr>
+<tr><td>3.26</td><td>维也纳（甘洛庞任）</td><td class="amount">264</td><td>49</td></tr>
+<tr class="sub-header"><td colspan="4">🚄 交通（火车/机票/打车）</td></tr>
+<tr><td>12.12</td><td>崇州-成都西</td><td class="amount">12</td><td>16</td></tr>
+<tr><td>12.12</td><td>成都西-甘洛</td><td class="amount">92.5</td><td>15</td></tr>
+<tr><td>12.14</td><td>甘洛-成都南</td><td class="amount">99</td><td>18</td></tr>
+<tr><td>12.14</td><td>成都南-崇州</td><td class="amount">14</td><td>17</td></tr>
+<tr><td>1.9</td><td>宁波栎社-西昌青山（机票）</td><td class="amount">563</td><td>12</td></tr>
+<tr><td>1.9</td><td>宁波栎社-西昌青山</td><td class="amount">48</td><td>13</td></tr>
+<tr><td>1.9</td><td>宁波栎社-西昌青山</td><td class="amount">40</td><td>14</td></tr>
+<tr><td>1.9</td><td>西昌-甘洛</td><td class="amount">51</td><td>9</td></tr>
+<tr><td>1.10</td><td>甘洛-峨边南</td><td class="amount">25</td><td>11</td></tr>
+<tr><td>1.10</td><td>峨边南-成都南</td><td class="amount">74</td><td>10</td></tr>
+<tr><td>3.7</td><td>火车票 西昌-甘洛</td><td class="amount">51</td><td>21</td></tr>
+<tr><td>3.2</td><td>宁波-西昌</td><td class="amount">623</td><td>23</td></tr>
+<tr><td>3.9</td><td>火车票 甘洛南-成都南</td><td class="amount">99</td><td>20</td></tr>
+<tr><td>3.9</td><td>火车票 成都南-崇州</td><td class="amount">14</td><td>19</td></tr>
+<tr><td>3.15</td><td>去成都看车</td><td class="amount">28.3</td><td>25</td></tr>
+<tr><td>3.18</td><td>崇州住址-火车站打车</td><td class="amount">7</td><td>29</td></tr>
+<tr><td>3.18</td><td>崇州-西昌</td><td class="amount">169</td><td>31（1,2）</td></tr>
+<tr><td>3.18</td><td>西昌西站-酒店打车</td><td class="amount">36</td><td>30</td></tr>
+<tr><td>3.19</td><td>酒店-农行打车</td><td class="amount">9.42</td><td>28</td></tr>
+<tr><td>3.19</td><td>农行-行政服务中心打车</td><td class="amount">47</td><td>27</td></tr>
+<tr><td>3.19</td><td>行政服务中心-农行打车</td><td class="amount">24.25</td><td>26</td></tr>
+<tr><td>3.20</td><td>西昌维也纳-行政服务中心</td><td class="amount">18.44</td><td>35</td></tr>
+<tr><td>3.20</td><td>行政服务中心-西昌西站</td><td class="amount">9.59</td><td>36</td></tr>
+<tr><td>3.27</td><td>甘洛-崇州</td><td class="amount">126</td><td>52/53/54</td></tr>
+<tr><td>3.29</td><td>崇州-西昌</td><td class="amount">169</td><td>50/51</td></tr>
+<tr><td>3.29</td><td>西昌西-你好酒店</td><td class="amount">42</td><td>45</td></tr>
+<tr><td>3.29</td><td>你好酒店-传祺4S店</td><td class="amount">16.59</td><td>46</td></tr>
+<tr><td>3.29</td><td>传奇4S-你好酒店</td><td class="amount">22</td><td>44</td></tr>
+<tr><td>3.30</td><td>你好酒店-传祺4S店</td><td class="amount">15.99</td><td>46</td></tr>
+<tr><td>4.01</td><td>回崇州</td><td class="amount">113</td><td>57/58</td></tr>
+<tr><td>4.04</td><td>回宁海</td><td class="amount">670</td><td>59</td></tr>
+<tr><td>4.23</td><td>两台设备运输费</td><td class="amount">630</td><td>61</td></tr>
+<tr><td>4.27</td><td>宁海到宁波栎社机场（顺风车）</td><td class="amount">100</td><td></td></tr>
+<tr><td>4.27</td><td>宁波-西昌</td><td class="amount">842</td><td>68/69/70</td></tr>
+<tr class="sub-header"><td colspan="4">⛽ 加油</td></tr>
+<tr><td></td><td>中石油加油</td><td class="amount">500</td><td>无发票</td></tr>
+<tr><td>3.16</td><td>去成都看车油费</td><td class="amount">200</td><td>8</td></tr>
+<tr><td>3.17</td><td>去成都看车</td><td class="amount">76.9</td><td>24（52.4+24.5）</td></tr>
+<tr><td>3.20</td><td>加油300（杨总车）</td><td class="amount">300</td><td>37</td></tr>
+<tr><td>3.23</td><td>加油（柴油）</td><td class="amount">200</td><td>41</td></tr>
+<tr><td>3.30</td><td>新车第一次加油</td><td class="amount">396.69</td><td>48</td></tr>
+<tr><td>4.28</td><td>加油</td><td class="amount">230</td><td>67</td></tr>
+<tr class="sub-header"><td colspan="4">🍽️ 餐饮</td></tr>
+<tr><td></td><td>海棠镇午餐</td><td class="amount">248</td><td>无发票</td></tr>
+<tr><td>3.7</td><td>海棠镇午餐</td><td class="amount">120</td><td>无发票</td></tr>
+<tr><td>3.20</td><td>请杨总、蒋总吃饭</td><td class="amount">320</td><td>34</td></tr>
+<tr><td>3.24</td><td>晚餐（庞陈任）海棠镇小杨饭店</td><td class="amount">240</td><td>无发票</td></tr>
+<tr><td>3.24</td><td>方便面等食品</td><td class="amount">121.05</td><td>43</td></tr>
+<tr><td>3.26</td><td>午餐（庞陈任+拖拉机师傅）</td><td class="amount">80</td><td>无发票</td></tr>
+<tr><td>3.26</td><td>晚餐（庞陈任）维也纳隔壁饭店</td><td class="amount">287</td><td>无发票</td></tr>
+<tr><td>3.30</td><td>餐费（老杨三个+任+庞）</td><td class="amount">330</td><td>56</td></tr>
+<tr><td>4.25</td><td>4.25处理雨水冲击2天15工×120=1800</td><td class="amount">1800</td><td>已经支付/庞备用金</td></tr>
+<tr><td>4.28</td><td>4.28晚饭与蒋总甘洛火锅</td><td class="amount">219</td><td>64</td></tr>
+<tr><td>4.27-30</td><td>4.27-4.30午餐含农投小杨/蒋总等</td><td class="amount">547</td><td></td></tr>
+<tr class="sub-header"><td colspan="4">🛒 日用品/办公/其他</td></tr>
+<tr><td>3.12</td><td>扫描打印</td><td class="amount">200</td><td>22</td></tr>
+<tr><td>3.20</td><td>买日用品</td><td class="amount">2,142.9</td><td>33</td></tr>
+<tr><td>3.21</td><td>买日用品</td><td class="amount">1,111.3</td><td>40</td></tr>
+<tr><td>3.21</td><td>买日用品</td><td class="amount">470.34</td><td></td></tr>
+<tr><td>3.21</td><td>买桌子椅子</td><td class="amount">630</td><td>32</td></tr>
+<tr><td>3.22</td><td>打扫卫生</td><td class="amount">200</td><td>无发票</td></tr>
+<tr><td>3.23</td><td>宽带费</td><td class="amount">200</td><td>无发票</td></tr>
+<tr><td>3.23</td><td>买日用</td><td class="amount">367.31</td><td>42</td></tr>
+<tr><td>3.24</td><td>餐桌和凳子（四把）</td><td class="amount">242</td><td>47</td></tr>
+<tr><td>3.30</td><td>超市买菜及增添碗具（为老杨带来甘肃熟练工生活准备）</td><td class="amount">528.66</td><td>60</td></tr>
+<tr><td>4.28</td><td>买菜高压锅</td><td class="amount">310</td><td>62</td></tr>
+<tr><td>4.28</td><td>买文具</td><td class="amount">123.6</td><td>63</td></tr>
+<tr><td>4.28</td><td>塑料布等（盖机械）</td><td class="amount">144</td><td>66</td></tr>
+<tr><td>4.30</td><td>大衣、鞋子</td><td class="amount">395</td><td>65</td></tr>
+<tr class="sub-header"><td colspan="4">🌱 种植相关</td></tr>
+<tr><td>3.22</td><td>金银花、化肥、栽种机卸货工人工资（120×6）</td><td class="amount">720</td><td>无发票</td></tr>
+<tr><td>3.22</td><td>卸货机械费</td><td class="amount">100</td><td>无发票</td></tr>
+<tr><td>3.23</td><td>金银花种植</td><td class="amount">600</td><td>无发票</td></tr>
+<tr><td>3.24</td><td>金银花种植工资（现金）</td><td class="amount">7,080</td><td>无发票</td></tr>
+<tr><td>3.25</td><td>党参种苗卸货5个人（现金）</td><td class="amount">600</td><td>无发票</td></tr>
+<tr><td>3.25</td><td>临时工</td><td class="amount">240</td><td>无发票</td></tr>
+<tr><td>3.25</td><td>党参运输费（现金）</td><td class="amount">6,000</td><td>无发票</td></tr>
+<tr><td>3.24</td><td>施前华3.24拉金银花+人工</td><td class="amount">320</td><td>无发票</td></tr>
+<tr><td>3.25</td><td>施前华3.25拉金银花+人工</td><td class="amount">320</td><td>无发票</td></tr>
+<tr><td>3.25</td><td>租车费叶书记（现金1200）</td><td class="amount">1,300</td><td>无发票【其中100是加油费】</td></tr>
+<tr><td>3.25</td><td>金银花种植工资（现金）</td><td class="amount">2,040</td><td>无发票</td></tr>
+<tr><td>3.26</td><td>农药</td><td class="amount">350</td><td>无发票</td></tr>
+<tr><td>3.26</td><td>金银花种植人工</td><td class="amount">780</td><td>无发票</td></tr>
+<tr><td>3.26</td><td>黄芪种植人工</td><td class="amount">1,140</td><td>无发票</td></tr>
+<tr><td>3.26</td><td>捡石头拖拉机</td><td class="amount">500</td><td>无发票</td></tr>
+<tr><td>3.26</td><td>捡石头人工费</td><td class="amount">480</td><td>无发票</td></tr>
+<tr><td>3.26</td><td>打农药人工费</td><td class="amount">240</td><td>无发票</td></tr>
+<tr><td>3.27</td><td>农民工资</td><td class="amount">4,080</td><td>无发票（庞不在交陈总发）</td></tr>
+<tr><td>3.28</td><td>农民工资</td><td class="amount">4,440</td><td>无发票（庞不在交陈总发）</td></tr>
+<tr><td>3.30</td><td>地膜卸货费</td><td class="amount">100</td><td>无发票给村小金（文书）</td></tr>
+<tr><td>3.30</td><td>地膜运费</td><td class="amount">3,000</td><td>转任总，任总支付对方/无票</td></tr>
+<tr><td>3.31</td><td>临时三轮车运当归和独活种苗</td><td class="amount">150</td><td>无发票</td></tr>
+<tr><td>3.31</td><td>之前独活扫尾3个人半工</td><td class="amount">180</td><td>无发票</td></tr>
+<tr><td>3.31</td><td>拖拉机：人工工资200+油费400+配件220</td><td class="amount">820</td><td>55</td></tr>
+<tr><td>4.14</td><td>施前华：打药3天3人1080+农药520+设备运输300+处理杂草500</td><td class="amount">2,400</td><td>无发票</td></tr>
+<tr><td>4.30</td><td>支付村文书种植期间工资9天×60</td><td class="amount">540</td><td>无发票</td></tr>
+<tr><td>4.30</td><td>支付种植结束后场地整理</td><td class="amount">120</td><td>无发票</td></tr>
+<tr><td>5.01</td><td>支付施前华安排组织的人工等</td><td class="amount">11,490</td><td>5.1支付</td></tr>
+<tr><td>5.01</td><td>支付甘肃老杨住宿差旅费等</td><td class="amount">2,197</td><td>5.1支付</td></tr>
+<tr class="sub-header"><td colspan="4">🚗 车辆相关</td></tr>
+<tr><td>3.30</td><td>车辆购置税</td><td class="amount">9,115.04</td><td>完税凭证</td></tr>
+<tr><td>3.30</td><td>保费（中华联合）</td><td class="amount">3,724.22</td><td>56/57（缺250，车船税没票）</td></tr>
+</tbody></table></div></div>
+
+<div class="card"><div class="card-title">庞备用金使用分布</div><div class="chart-container"><div class="chart-box"><canvas id="chartPang"></canvas></div></div></div>
+</div>
+
+<!-- ===== 固定资产 ===== -->
+<div id="sec-assets" class="section">
+<div class="section-header"><div class="icon">🚜</div><h2>固定资产支出清单</h2></div>
+<div class="card"><div class="card-title">固定资产明细</div><div class="table-wrap"><table>
+<thead><tr><th>日期</th><th>项目</th><th>金额(元)</th><th>备注</th></tr></thead>
+<tbody>
+<tr><td>3.29</td><td>购车定金</td><td class="amount">4,000</td><td><span class="badge badge-account">公司账户支付</span> 4200：1400保险+800上户+2000贷款服务费/23000是首付</td></tr>
+<tr><td>3.3</td><td>购车款</td><td class="amount">23,200</td><td><span class="badge badge-account">公司账户支付</span></td></tr>
+<tr><td>3.3</td><td>车辆购置税</td><td class="amount">9,115.04</td><td><span class="badge badge-petty">庞备用金支付</span></td></tr>
+<tr><td>3.3</td><td>保费（中华联合）</td><td class="amount">3,724.22</td><td><span class="badge badge-petty">庞备用金支付</span></td></tr>
+<tr><td>3.19</td><td>农业机械费（含运费）</td><td class="amount">69,440</td><td><span class="badge badge-account">公司账户支付</span></td></tr>
+<tr><td>4.02</td><td>中发机械山地四驱扣半犁</td><td class="amount">8,383</td><td><span class="badge badge-account">公司账户支付</span></td></tr>
+<tr><td>4.09</td><td>中发机械山地四驱扣半犁卸货运输</td><td class="amount">300</td><td>施前华垫付-庞备用金支付</td></tr>
+<tr class="total-row"><td colspan="2"><strong>合计</strong></td><td class="amount"><strong>118,162.26</strong></td><td></td></tr>
+</tbody></table></div></div>
+<div class="card"><div class="card-title">固定资产分类占比</div><div class="chart-container"><div class="chart-box"><canvas id="chartAsset"></canvas></div></div></div>
+</div>
+
+<div class="footer">凉山州五源兴农业科技有限公司 · 阶段性财务分析报告 · 生成日期：2026年5月</div>
+</div>
+
+<script>
+function showTab(id,btn){document.querySelectorAll('.section').forEach(s=>s.classList.remove('active'));document.querySelectorAll('.nav-tab').forEach(t=>t.classList.remove('active'));document.getElementById('sec-'+id).classList.add('active');btn.classList.add('active')}
+Chart.defaults.font.family='-apple-system,Microsoft YaHei,sans-serif';Chart.defaults.font.size=12;Chart.defaults.plugins.legend.position='bottom';Chart.defaults.plugins.tooltip.backgroundColor='rgba(0,0,0,.8)';
+const C=['#e74c3c','#3498db','#f39c12','#2ecc71','#9b59b6','#1abc9c','#e67e22','#e84393','#00cec9','#6c5ce7','#fd79a8','#00b894','#fdcb6e','#74b9ff'];
+const ANIM={duration:1500,easing:'easeOutBounce',animateRotate:true,animateScale:true};
+const HOVER_ANIM={duration:300};
+
+// 总览-资金来源
+new Chart(document.getElementById('chartSource'),{type:'doughnut',data:{labels:['股本金 ¥990,000','袁种苗款 ¥70,000'],datasets:[{data:[990000,70000],backgroundColor:[C[0],C[1]],borderWidth:2,borderColor:'#fff',hoverOffset:12}]},options:{responsive:true,animation:ANIM,plugins:{tooltip:{callbacks:{label:function(c){var t=c.dataset.data.reduce((a,b)=>a+b,0);return c.label+'（'+((c.parsed/t)*100).toFixed(1)+'%）'}}}}}});
+
+// 总览-基地投入对比
+new Chart(document.getElementById('chartBaseBar'),{type:'bar',data:{labels:['金银花基地','党参育苗基地','元胡试种基地','党参等基地'],datasets:[{label:'投入金额(元)',data:[174288,58300,1470,628769],backgroundColor:[C[0],C[1],C[2],C[3]],borderRadius:6,hoverBackgroundColor:[C[0]+'cc',C[1]+'cc',C[2]+'cc',C[3]+'cc']}]},options:{responsive:true,indexAxis:'y',animation:{duration:1200,easing:'easeOutQuart'},plugins:{legend:{display:false},tooltip:{callbacks:{label:function(c){var t=c.dataset.data.reduce((a,b)=>a+b,0);return'¥'+c.parsed.x.toLocaleString()+'（占比'+((c.parsed.x/t)*100).toFixed(1)+'%）'}}}},scales:{x:{ticks:{callback:v=>'¥'+(v/10000).toFixed(0)+'万'}}}}});
+
+// 总览-基地投入占比
+new Chart(document.getElementById('chartBasePie'),{type:'doughnut',data:{labels:['金银花基地 ¥174,288','党参育苗基地 ¥58,300','元胡试种基地 ¥1,470','党参等基地 ¥628,769'],datasets:[{data:[174288,58300,1470,628769],backgroundColor:[C[0],C[1],C[2],C[3]],borderWidth:2,borderColor:'#fff',hoverOffset:12}]},options:{responsive:true,animation:ANIM,plugins:{tooltip:{callbacks:{label:function(c){var t=c.dataset.data.reduce((a,b)=>a+b,0);return c.label.split('¥')[0]+'¥'+c.parsed.toLocaleString()+'（'+((c.parsed/t)*100).toFixed(1)+'%）'}}}}}});
+
+// 股本金
+new Chart(document.getElementById('chartCapital'),{type:'doughnut',data:{labels:['任海涛 30%','庞尚韬 25%','吴生成 15%','陈洪斌 10%','应红林 10%','朱再标 10%（未缴）'],datasets:[{data:[330000,275000,165000,110000,110000,110000],backgroundColor:[C[0],C[1],C[2],C[3],C[4],C[5]],borderWidth:2,borderColor:'#fff',hoverOffset:12}]},options:{responsive:true,animation:ANIM,plugins:{tooltip:{callbacks:{label:function(c){return c.label+'：¥'+c.parsed.toLocaleString()}}}}}});
+
+// 农户未付款
+new Chart(document.getElementById('chartFarmer'),{type:'doughnut',data:{labels:['施前华 ¥24,375','袁朝国(50亩) ¥47,000','袁朝国(35亩) ¥25,475','李锡兵等5户 ¥2,329×5','孙怀龙 ¥2,638','张全勤 ¥1,872','袁成贵 ¥1,322','胡立勇 ¥1,122','杨文富 ¥940','何福友 ¥420','施福华 ¥420'],datasets:[{data:[24375,47000,25475,11645,2638,1872,1322,1122,940,420,420],backgroundColor:[C[0],C[1],C[2],C[3],C[4],C[5],C[6],C[7],C[8],C[9],C[10]],borderWidth:2,borderColor:'#fff',hoverOffset:14}]},options:{responsive:true,cutout:'35%',animation:ANIM,plugins:{legend:{position:'right',labels:{font:{size:11},boxWidth:12,padding:8}},tooltip:{callbacks:{label:function(c){var t=c.dataset.data.reduce((a,b)=>a+b,0);return c.label+'（'+((c.parsed/t)*100).toFixed(1)+'%）'}}}}}});
+
+// 庞备用金分布（按类别汇总估算）
+new Chart(document.getElementById('chartPang'),{type:'doughnut',data:{labels:['种植相关','住宿','交通','车辆','加油','日用品/办公','餐饮'],datasets:[{data:[47000,5054,3836,12839,1904,7330,4312],backgroundColor:[C[0],C[1],C[2],C[3],C[4],C[5],C[6]],borderWidth:2,borderColor:'#fff',hoverOffset:12}]},options:{responsive:true,animation:ANIM,plugins:{tooltip:{callbacks:{label:function(c){var t=c.dataset.data.reduce((a,b)=>a+b,0);return c.label+'：¥'+c.parsed.toLocaleString()+'（'+((c.parsed/t)*100).toFixed(1)+'%）'}}}}}});
+
+// 固定资产
+new Chart(document.getElementById('chartAsset'),{type:'doughnut',data:{labels:['车辆相关 ¥40,039','农业机械 ¥78,123'],datasets:[{data:[40039.26,78123],backgroundColor:[C[0],C[1]],borderWidth:2,borderColor:'#fff',hoverOffset:12}]},options:{responsive:true,animation:ANIM,plugins:{tooltip:{callbacks:{label:function(c){var t=c.dataset.data.reduce((a,b)=>a+b,0);return c.label+'（'+((c.parsed/t)*100).toFixed(1)+'%）'}}}}}});
+</script>
+</body>
+</html>
