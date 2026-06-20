@@ -1,0 +1,338 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>五源兴农业 · 财务报告</title>
+  <style>
+    * { margin:0; padding:0; box-sizing:border-box; }
+    body { font-family: 'Courier New', 'PingFang SC', 'Microsoft YaHei', monospace; background: #f5f0e8; color: #000; padding: 20px; }
+    .report-container { max-width: 1000px; margin: 0 auto; background: #fff; border: 4px solid #000; box-shadow: 8px 8px 0 rgba(0,0,0,0.15); }
+
+    /* 报告头部 */
+    .report-header { text-align: center; padding: 40px 30px 20px; border-bottom: 4px solid #000; }
+    .report-header h1 { font-size: 1.8rem; font-weight: 900; letter-spacing: 0.05em; text-transform: uppercase; }
+    .report-header .sub { font-size: 0.85rem; color: #555; margin-top: 6px; font-weight: 700; }
+    .report-header .meta { font-size: 0.72rem; color: #888; margin-top: 8px; font-weight: 600; }
+    .report-header .stamp { display: inline-block; border: 3px solid #c0392b; color: #c0392b; padding: 6px 20px; font-size: 1rem; font-weight: 900; margin-top: 12px; transform: rotate(-3deg); opacity: 0.7; letter-spacing: 0.1em; }
+
+    /* 汇总区 */
+    .report-summary { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; padding: 20px; background: #000; }
+    .report-summary .item { text-align: center; padding: 16px 8px; background: #fff; border: 2px solid #000; }
+    .report-summary .num { font-size: 1.3rem; font-weight: 900; font-family: 'Courier New', monospace; }
+    .report-summary .label { font-size: 0.6rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.1em; color: #555; margin-top: 2px; }
+    .green { color: #27ae60; } .red { color: #c0392b; }
+
+    /* 版块 */
+    .section-block { padding: 20px 24px; border-bottom: 3px solid #ddd; }
+    .section-block:last-child { border-bottom: none; }
+    .section-block h2 { font-size: 0.95rem; font-weight: 900; margin-bottom: 12px; display: flex; align-items: center; gap: 8px; }
+    .section-block h2 .count { font-size: 0.7rem; font-weight: 700; color: #888; }
+    .section-block h2 .total { margin-left: auto; font-size: 0.85rem; }
+
+    /* 表格 */
+    table.report-table { width: 100%; border-collapse: collapse; font-size: 0.72rem; }
+    table.report-table th { background: #f5f0e8; padding: 7px 8px; text-align: left; font-weight: 800; border: 1px solid #000; font-size: 0.65rem; letter-spacing: 0.03em; }
+    table.report-table td { padding: 6px 8px; border: 1px solid #ddd; }
+    table.report-table .amt { font-weight: 900; font-family: 'Courier New', monospace; text-align: right; }
+
+    /* 校验状态 */
+    .validation-bar { padding: 12px 24px; background: #fff8f0; border-bottom: 3px solid #ddd; display: flex; gap: 16px; flex-wrap: wrap; }
+    .val-item { font-size: 0.7rem; font-weight: 700; display: flex; align-items: center; gap: 4px; }
+    .val-ok { color: #27ae60; } .val-err { color: #c0392b; } .val-warn { color: #d69e2e; }
+
+    /* 打印按钮 */
+    .print-bar { text-align: center; padding: 20px; }
+    .print-btn { padding: 12px 40px; background: #000; color: #fff; border: 4px solid #000; font-size: 1rem; font-weight: 900; font-family: inherit; cursor: pointer; letter-spacing: 0.05em; }
+    .print-btn:hover { background: #D35400; border-color: #D35400; }
+
+    /* 打印样式 */
+    @media print {
+      body { background: #fff; padding: 0; }
+      .report-container { box-shadow: none; border: 2px solid #000; }
+      .print-bar { display: none; }
+      .section-block { page-break-inside: avoid; }
+      .report-summary { background: #000 !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+      .report-summary .item { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+      table.report-table th { background: #f5f0e8 !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+    }
+
+    @media (max-width: 768px) {
+      .report-summary { grid-template-columns: repeat(2, 1fr); }
+      .report-header h1 { font-size: 1.2rem; }
+    }
+  </style>
+</head>
+<body>
+  <div class="report-container" id="reportContent">
+    <div class="report-header">
+      <h1>🌾 五源兴农业科技</h1>
+      <div class="sub">公司财务数据报告</div>
+      <div class="meta" id="reportMeta">报告生成日期：<span id="reportDate"></span> | 数据截止日期：<span id="reportCutoff"></span></div>
+      <div class="stamp">数据真实有效</div>
+      <div style="margin-top:12px;font-size:0.75rem;font-weight:700;color:#555;letter-spacing:0.02em;">
+        报告起草方：凉山州五源兴农业科技有限公司 / 总经理 庞尚韬
+      </div>
+    </div>
+
+    <!-- 汇总 -->
+    <div class="report-summary" id="reportSummary">
+      <div class="item"><div class="num green" id="rptIncome">¥0</div><div class="label">总收入</div></div>
+      <div class="item"><div class="num red" id="rptExpense">¥0</div><div class="label">总支出</div></div>
+      <div class="item"><div class="num" id="rptCapital">¥0</div><div class="label">股本金</div></div>
+      <div class="item"><div class="num red" id="rptReceivable">¥0</div><div class="label">应收账款</div></div>
+    </div>
+
+    <!-- 校验结果 -->
+    <div class="validation-bar" id="validationBar"></div>
+
+    <div id="reportBody"></div>
+  </div>
+
+  <div class="print-bar">
+    <button class="print-btn" onclick="window.print()">🖨️ 打印 / 导出PDF</button>
+    <p style="margin-top:8px;font-size:0.7rem;color:#888">打印时自动隐藏此按钮，生成整洁的报告</p>
+  </div>
+
+  <script src="/finance/js/data.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+  <script>
+    // === 数据获取（优先从localStorage，其次DataStore） ===
+    function getData(key) {
+      try {
+        var d = localStorage.getItem('wyx_' + key);
+        if (d) return JSON.parse(d);
+      } catch(e) {}
+      // 从DataStore获取示例数据
+      if (key === 'pettyCash' && DataStore.pettyCash) {
+        return (DataStore.pettyCash.ren || []).concat(DataStore.pettyCash.pang || []);
+      }
+      if (key === 'reimburse' && DataStore.reimburse) {
+        return (DataStore.reimburse.ren || []).concat(DataStore.reimburse.pang || []).concat(DataStore.reimburse.ying || []);
+      }
+      if (key === 'baseExpense' && DataStore.baseExpense) {
+        var bases = [];
+        (DataStore.baseExpense.jinyinhua || []).forEach(function(r) { r.base='金银花基地'; bases.push(r); });
+        (DataStore.baseExpense.dangshen || []).forEach(function(r) { r.base='党参基地'; bases.push(r); });
+        (DataStore.baseExpense.seedling || []).forEach(function(r) { r.base='党参育苗基地'; bases.push(r); });
+        return bases;
+      }
+      return DataStore[key] || [];
+    }
+
+    function fmt(n) { return '¥' + Number(n || 0).toLocaleString('zh-CN', {minimumFractionDigits:2}); }
+
+    // === 数据校验 ===
+    function validate(data) {
+      var errors = [];
+      var expenseTotal = data.incomeExpense.reduce(function(s, r) { return s + (r.expense || 0); }, 0);
+      var incomeTotal = data.incomeExpense.reduce(function(s, r) { return s + (r.income || 0); }, 0);
+
+      // 1. 收支平衡
+      if (expenseTotal > incomeTotal) {
+        errors.push({type:'warn', msg:'支出总额(' + fmt(expenseTotal) + ')大于收入总额(' + fmt(incomeTotal) + ')，建议核实'});
+      }
+
+      // 2. 检查每笔支出是否有发票
+      var noInvoiceExpenses = data.incomeExpense.filter(function(r) {
+        return r.expense > 0 && (!r.invoices || r.invoices.length === 0);
+      });
+      if (noInvoiceExpenses.length > 0) {
+        errors.push({type:'err', msg: noInvoiceExpenses.length + ' 笔支出缺少发票链接'});
+      }
+
+      // 3. 备用金核销检查
+      var pettyCash = data.pettyCash || [];
+      var renTotal = 0, renWriteoff = 0;
+      var pangTotal = 0, pangWriteoff = 0;
+      pettyCash.forEach(function(r) {
+        if (r.person === '任海涛') {
+          if (r.type === '领用') renTotal += r.amount || 0;
+          else if (r.type === '核销') renWriteoff += r.amount || 0;
+        } else if (r.person === '庞尚韬') {
+          if (r.type === '领用') pangTotal += r.amount || 0;
+          else if (r.type === '核销') pangWriteoff += r.amount || 0;
+        }
+      });
+      if (renWriteoff > renTotal) errors.push({type:'err', msg:'任海涛核销金额(' + fmt(renWriteoff) + ')超过领用金额(' + fmt(renTotal) + ')'});
+      if (pangWriteoff > pangTotal) errors.push({type:'err', msg:'庞尚韬核销金额(' + fmt(pangWriteoff) + ')超过领用金额(' + fmt(pangTotal) + ')'});
+
+      // 4. 股本金检查
+      if (data.capital.length === 0) {
+        errors.push({type:'warn', msg:'股本金为空，请确认'});
+      }
+
+      return errors;
+    }
+
+    // === 渲染报告 ===
+    function renderReport() {
+      document.getElementById('reportDate').textContent = new Date().toLocaleDateString('zh-CN');
+      document.getElementById('reportCutoff').textContent = new Date().toLocaleDateString('zh-CN');
+
+      var data = {
+        incomeExpense: getData('incomeExpense'),
+        capital: getData('capital'),
+        income: getData('income'),
+        pettyCash: getData('pettyCash'),
+        reimburse: getData('reimburse'),
+        receivable: getData('receivable'),
+        asset: getData('asset'),
+        management: getData('management'),
+        salary: getData('salary'),
+        baseExpense: getData('baseExpense')
+      };
+
+      // 汇总
+      var totalIncome = data.incomeExpense.reduce(function(s, r) { return s + (r.income || 0); }, 0);
+      var totalExpense = data.incomeExpense.reduce(function(s, r) { return s + (r.expense || 0); }, 0);
+      var totalCapital = data.capital.reduce(function(s, r) { return s + (r.amount || 0); }, 0);
+      var totalReceivable = data.receivable.reduce(function(s, r) { return s + (r.amount || 0); }, 0);
+
+      document.getElementById('rptIncome').textContent = fmt(totalIncome);
+      document.getElementById('rptExpense').textContent = fmt(totalExpense);
+      document.getElementById('rptCapital').textContent = fmt(totalCapital);
+      document.getElementById('rptReceivable').textContent = fmt(totalReceivable);
+
+      // 校验
+      var errors = validate(data);
+      var valBar = document.getElementById('validationBar');
+      if (errors.length === 0) {
+        valBar.innerHTML = '<span class="val-item val-ok">✅ 数据校验通过，所有逻辑关系正常</span>';
+      } else {
+        valBar.innerHTML = errors.map(function(e) {
+          var icon = e.type === 'err' ? '❌' : '⚠️';
+          var cls = e.type === 'err' ? 'val-err' : 'val-warn';
+          return '<span class="val-item ' + cls + '">' + icon + ' ' + e.msg + '</span>';
+        }).join('');
+      }
+
+      // 生成各版块HTML
+      var body = document.getElementById('reportBody');
+      var html = '';
+
+      // ① 收支
+      html += sectionHTML('① 基本账户收支', data.incomeExpense, totalExpense,
+        ['日期','类型','摘要','收入','支出','余额','发票'],
+        function(r) {
+          return '<td>' + r.date + '</td><td>' + (r.type||'') + '</td><td>' + (r.summary||'') + '</td>' +
+            '<td class="amt green">' + (r.income ? fmt(r.income) : '') + '</td>' +
+            '<td class="amt red">' + (r.expense ? fmt(r.expense) : '') + '</td>' +
+            '<td class="amt">' + fmt(r.balance) + '</td>' +
+            '<td>' + (r.invoices && r.invoices.length ? r.invoices.length + '张' : '—') + '</td>';
+        },
+        function(r) { return r.income || r.expense; }
+      );
+
+      // ② 股本金
+      html += sectionHTML('② 股本金入账明细', data.capital, totalCapital,
+        ['日期','股东','金额','出资方式'],
+        function(r) {
+          return '<td>' + r.date + '</td><td><strong>' + (r.name||'') + '</strong></td><td class="amt">' + fmt(r.amount) + '</td><td>' + (r.method||'') + '</td>';
+        },
+        function(r) { return r.amount; }
+      );
+
+      // ③ 收入
+      html += sectionHTML('③ 公司收入账目', data.income, totalIncome,
+        ['日期','类别','金额','来源'],
+        function(r) {
+          return '<td>' + r.date + '</td><td>' + (r.category||'') + '</td><td class="amt green">' + fmt(r.amount) + '</td><td>' + (r.source||'') + '</td>';
+        },
+        function(r) { return r.amount; }
+      );
+
+      // ④ 备用金
+      html += sectionHTML('④ 备用金账目', data.pettyCash, null,
+        ['日期','人员','类型','金额','摘要'],
+        function(r) {
+          return '<td>' + r.date + '</td><td>' + (r.person||'') + '</td><td>' + (r.type||'') + '</td><td class="amt">' + fmt(r.amount) + '</td><td>' + (r.summary||'') + '</td>';
+        },
+        function(r) { return r.amount; }
+      );
+
+      // ⑤ 报销
+      html += sectionHTML('⑤ 财务报销记录', data.reimburse, null,
+        ['日期','人员','金额','事由'],
+        function(r) {
+          return '<td>' + r.date + '</td><td>' + (r.person||'') + '</td><td class="amt">' + fmt(r.amount) + '</td><td>' + (r.reason||'') + '</td>';
+        },
+        function(r) { return r.amount; }
+      );
+
+      // ⑥ 应收款
+      html += sectionHTML('⑥ 应收账款', data.receivable, totalReceivable,
+        ['日期','欠款方','金额','事由','状态'],
+        function(r) {
+          return '<td>' + r.date + '</td><td>' + (r.party||'') + '</td><td class="amt">' + fmt(r.amount) + '</td><td>' + (r.reason||'') + '</td><td>' + (r.status||'') + '</td>';
+        },
+        function(r) { return r.amount; }
+      );
+
+      // ⑦ 固定资产
+      var assetTotal = data.asset.reduce(function(s, r) { return s + (r.amount || 0); }, 0);
+      html += sectionHTML('⑦ 固定资产', data.asset, assetTotal,
+        ['日期','资产名称','金额','地点','状态'],
+        function(r) {
+          return '<td>' + r.date + '</td><td><strong>' + (r.name||'') + '</strong></td><td class="amt">' + fmt(r.amount) + '</td><td>' + (r.location||'') + '</td><td>' + (r.status||'') + '</td>';
+        },
+        function(r) { return r.amount; }
+      );
+
+      // ⑧ 管理费
+      var mgmtTotal = data.management.reduce(function(s, r) { return s + (r.amount || 0); }, 0);
+      html += sectionHTML('⑧ 管理费用', data.management, mgmtTotal,
+        ['日期','类别','金额','说明'],
+        function(r) {
+          return '<td>' + r.date + '</td><td>' + (r.category||'') + '</td><td class="amt">' + fmt(r.amount) + '</td><td>' + (r.summary||'') + '</td>';
+        },
+        function(r) { return r.amount; }
+      );
+
+      // ⑨ 工资
+      var salaryTotal = data.salary.reduce(function(s, r) { return s + (r.amount || 0); }, 0);
+      html += sectionHTML('⑨ 工资支出', data.salary, salaryTotal,
+        ['月份','姓名','岗位','金额','发放日'],
+        function(r) {
+          return '<td>' + (r.month||'') + '</td><td>' + (r.name||'') + '</td><td>' + (r.position||'') + '</td><td class="amt">' + fmt(r.amount) + '</td><td>' + (r.payDate||'') + '</td>';
+        },
+        function(r) { return r.amount; }
+      );
+
+      // ⑩ 基地支出
+      var baseTotal = data.baseExpense.reduce(function(s, r) { return s + (r.amount || 0); }, 0);
+      html += sectionHTML('⑩ 基地直接支出（金银花/党参/育苗）', data.baseExpense, baseTotal,
+        ['日期','基地','项目','金额','说明'],
+        function(r) {
+          return '<td>' + r.date + '</td><td>' + (r.base||'') + '</td><td>' + (r.item||'') + '</td><td class="amt">' + fmt(r.amount) + '</td><td>' + (r.note||'') + '</td>';
+        },
+        function(r) { return r.amount; }
+      );
+
+      body.innerHTML = html;
+    }
+
+    function sectionHTML(title, data, total, headers, rowFn, amountFn) {
+      if (!data || data.length === 0) return '';
+      var subtotal = 0;
+      if (total !== null && total !== undefined) subtotal = total;
+      else if (amountFn) subtotal = data.reduce(function(s, r) { return s + (amountFn(r) || 0); }, 0);
+
+      var html = '<div class="section-block">';
+      html += '<h2>' + title + ' <span class="count">(' + data.length + ' 条)</span>';
+      if (subtotal > 0) html += '<span class="total">合计：<strong>' + fmt(subtotal) + '</strong></span>';
+      html += '</h2>';
+      html += '<table class="report-table"><thead><tr>';
+      headers.forEach(function(h) { html += '<th>' + h + '</th>'; });
+      html += '</tr></thead><tbody>';
+      data.forEach(function(r) {
+        html += '<tr>' + rowFn(r) + '</tr>';
+      });
+      html += '</tbody></table></div>';
+      return html;
+    }
+
+    renderReport();
+  </script>
+</body>
+</html>

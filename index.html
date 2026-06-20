@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>五源兴农业 · 财务数据平台</title>
+  <link rel="stylesheet" href="/finance/css/style.css">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
+</head>
+<body>
+  <!-- 顶部导航 -->
+  <header class="top-bar">
+    <div class="top-inner">
+      <div class="logo">
+        <span class="logo-icon">🌾</span>
+        <div>
+          <h1 data-lk="siteTitle">五源兴农业</h1>
+          <p class="logo-sub" data-lk="siteSub">财务数据展示平台</p>
+        </div>
+      </div>
+      <div class="top-info">
+        <span class="top-badge" data-lk="badge">凉山州农投合作专用</span>
+        <span class="top-date" id="topDate"></span>
+        <button class="theme-toggle" id="themeToggle" onclick="toggleTheme()" title="切换日夜模式">🌙</button>
+        <input type="text" id="globalSearch" placeholder="🔍 搜索..." oninput="globalSearch(this.value)" style="padding:4px 10px;border:2px solid rgba(255,255,255,0.3);background:rgba(255,255,255,0.1);color:#fff;font-size:0.72rem;font-weight:600;font-family:inherit;width:120px">
+        <select class="style-select" id="styleSelect" onchange="switchStyle(this.value)">
+          <option value="brutalist">🎨 <span data-lk="styleBrutalist">野兽派</span></option>
+          <option value="magazine">📰 <span data-lk="styleMagazine">杂志风</span></option>
+        </select>
+        <select class="style-select" id="langSelect" onchange="switchLang(this.value)">
+          <option value="zh">中文</option>
+          <option value="en">EN</option>
+        </select>
+        <a href="admin.html" class="top-link" data-lk="admin">⚙️ 管理</a>
+        <a href="report.html" class="top-link" data-lk="report">📄 报告</a>
+      </div>
+    </div>
+  </header>
+
+  <!-- 汇总横幅 -->
+  <section class="summary-bar" id="summaryBar">
+    <div class="summary-inner">
+      <div class="sum-item"><span class="sum-num" id="totalIncome">0</span><span class="sum-label" data-lk="totalIncome">总收入</span></div>
+      <div class="sum-item"><span class="sum-num" id="totalExpense">0</span><span class="sum-label" data-lk="totalExpense">总支出</span></div>
+      <div class="sum-item"><span class="sum-num" id="totalCapital">0</span><span class="sum-label" data-lk="totalCapital">股本金</span></div>
+      <div class="sum-item"><span class="sum-num" id="totalReceivable">0</span><span class="sum-label" data-lk="totalReceivable">应收账款</span></div>
+    </div>
+  </section>
+
+  <!-- 版块导航标签 -->
+  <nav class="tab-nav" id="tabNav">
+    <button class="tab-btn active" data-tab="tab2"><span data-lk="tab2">🏦 股本金</span></button>
+    <button class="tab-btn" data-tab="tab1"><span data-lk="tab1">💳 收支</span></button>
+    <button class="tab-btn" data-tab="tab3"><span data-lk="tab3">📈 收入</span></button>
+    <button class="tab-btn" data-tab="tab4"><span data-lk="tab4">💰 备用金</span></button>
+    <button class="tab-btn" data-tab="tab5"><span data-lk="tab5">🧾 报销</span></button>
+    <button class="tab-btn" data-tab="tab6"><span data-lk="tab6">📤 应收款</span></button>
+    <button class="tab-btn" data-tab="tab7"><span data-lk="tab7">🏗️ 固定资产</span></button>
+    <button class="tab-btn" data-tab="tab8"><span data-lk="tab8">📋 管理费</span></button>
+    <button class="tab-btn" data-tab="tab9"><span data-lk="tab9">👷 工资</span></button>
+    <button class="tab-btn" data-tab="tab10"><span data-lk="tab10">🌿 基地支出</span></button>
+  </nav>
+
+  <main class="main-content">
+    <!-- ===== ① 基本账户收支 ===== -->
+    <section class="tab-panel active" id="tab1">
+      <div class="panel-header">
+        <h2>💳 公司基本账户收支账目</h2>
+        <div class="panel-actions">
+          <button class="btn-print" onclick="window.print()">🖨️ 打印</button>
+        </div>
+      </div>
+      <div class="table-wrap">
+        <table class="data-table" id="incomeExpenseTable">
+          <thead><tr><th>日期</th><th>类别</th><th>摘要</th><th>收入</th><th>支出</th><th>余额</th><th>凭证</th></tr></thead>
+          <tbody id="incomeExpenseBody"></tbody>
+        </table>
+      </div>
+      <p class="table-empty" id="empty1">暂无数据，请点击下方按钮添加</p>
+      <button class="btn-add" onclick="showAddForm('incomeExpense')">＋ 添加收支记录</button>
+    </section>
+
+    <!-- ===== ② 股本金 ===== -->
+    <section class="tab-panel" id="tab2">
+      <div class="panel-header">
+        <h2>🏦 公司股本金入账明细</h2>
+      </div>
+      <div class="table-wrap">
+        <table class="data-table">
+          <thead><tr><th>日期</th><th>股东姓名</th><th>金额</th><th>出资方式</th><th>入账凭据</th></tr></thead>
+          <tbody id="capitalBody"></tbody>
+        </table>
+      </div>
+      <p class="table-empty" id="empty2">暂无数据</p>
+      <button class="btn-add" onclick="showAddForm('capital')">＋ 添加股本金记录</button>
+    </section>
+
+    <!-- ===== ③ 收入 ===== -->
+    <section class="tab-panel" id="tab3">
+      <div class="panel-header">
+        <h2>📈 公司收入账目</h2>
+      </div>
+      <div class="table-wrap">
+        <table class="data-table">
+          <thead><tr><th>日期</th><th>类别</th><th>金额</th><th>来源/归处</th><th>凭证</th></tr></thead>
+          <tbody id="incomeBody"></tbody>
+        </table>
+      </div>
+      <p class="table-empty" id="empty3">暂无数据</p>
+      <button class="btn-add" onclick="showAddForm('income')">＋ 添加收入记录</button>
+    </section>
+
+    <!-- ===== ④ 备用金 ===== -->
+    <section class="tab-panel" id="tab4">
+      <div class="panel-header">
+        <h2>💰 备用金账目明细</h2>
+      </div>
+      <div class="sub-tabs">
+        <button class="sub-tab-btn active" data-sub="sub4a">任海涛</button>
+        <button class="sub-tab-btn" data-sub="sub4b">庞尚韬</button>
+      </div>
+      <div class="sub-panel active" id="sub4a">
+        <h3 style="margin:12px 0 8px;font-size:0.95rem">任海涛 · 备用金</h3>
+        <table class="data-table"><thead><tr><th>日期</th><th>类型</th><th>金额</th><th>摘要</th><th>凭证</th></tr></thead><tbody id="pettyRenBody"></tbody></table>
+        <p class="table-empty" id="empty4a">暂无数据</p>
+      </div>
+      <div class="sub-panel" id="sub4b">
+        <h3 style="margin:12px 0 8px;font-size:0.95rem">庞尚韬 · 备用金</h3>
+        <table class="data-table"><thead><tr><th>日期</th><th>类型</th><th>金额</th><th>摘要</th><th>凭证</th></tr></thead><tbody id="pettyPangBody"></tbody></table>
+        <p class="table-empty" id="empty4b">暂无数据</p>
+      </div>
+      <button class="btn-add" onclick="showAddForm('pettyCash')">＋ 添加备用金记录</button>
+    </section>
+
+    <!-- ===== ⑤ 报销 ===== -->
+    <section class="tab-panel" id="tab5">
+      <div class="panel-header">
+        <h2>🧾 财务报销记录</h2>
+      </div>
+      <div class="sub-tabs">
+        <button class="sub-tab-btn active" data-sub="sub5a">任海涛</button>
+        <button class="sub-tab-btn" data-sub="sub5b">庞尚韬</button>
+        <button class="sub-tab-btn" data-sub="sub5c">应红林</button>
+      </div>
+      <div class="sub-panel active" id="sub5a"><h3 style="margin:12px 0 8px;font-size:0.95rem">任海涛 · 报销</h3>
+        <table class="data-table"><thead><tr><th>日期</th><th>金额</th><th>事由</th><th>单据</th></tr></thead><tbody id="reimburseRenBody"></tbody></table>
+        <p class="table-empty" id="empty5a">暂无数据</p></div>
+      <div class="sub-panel" id="sub5b"><h3 style="margin:12px 0 8px;font-size:0.95rem">庞尚韬 · 报销</h3>
+        <table class="data-table"><thead><tr><th>日期</th><th>金额</th><th>事由</th><th>单据</th></tr></thead><tbody id="reimbursePangBody"></tbody></table>
+        <p class="table-empty" id="empty5b">暂无数据</p></div>
+      <div class="sub-panel" id="sub5c"><h3 style="margin:12px 0 8px;font-size:0.95rem">应红林 · 报销</h3>
+        <table class="data-table"><thead><tr><th>日期</th><th>金额</th><th>事由</th><th>单据</th></tr></thead><tbody id="reimburseYingBody"></tbody></table>
+        <p class="table-empty" id="empty5c">暂无数据</p></div>
+      <button class="btn-add" onclick="showAddForm('reimburse')">＋ 添加报销记录</button>
+    </section>
+
+    <!-- ===== ⑥ 应收账款 ===== -->
+    <section class="tab-panel" id="tab6">
+      <div class="panel-header"><h2>📤 公司应收账款</h2></div>
+      <table class="data-table"><thead><tr><th>日期</th><th>欠款方</th><th>金额</th><th>事由</th><th>状态</th></tr></thead><tbody id="receivableBody"></tbody></table>
+      <p class="table-empty" id="empty6">暂无数据</p>
+      <button class="btn-add" onclick="showAddForm('receivable')">＋ 添加应收记录</button>
+    </section>
+
+    <!-- ===== ⑦ 固定资产 ===== -->
+    <section class="tab-panel" id="tab7">
+      <div class="panel-header"><h2>🏗️ 固定资产账目明细</h2></div>
+      <table class="data-table"><thead><tr><th>日期</th><th>资产名称</th><th>金额</th><th>存放地点</th><th>状态</th></tr></thead><tbody id="assetBody"></tbody></table>
+      <p class="table-empty" id="empty7">暂无数据</p>
+      <button class="btn-add" onclick="showAddForm('asset')">＋ 添加固定资产</button>
+    </section>
+
+    <!-- ===== ⑧ 管理费用 ===== -->
+    <section class="tab-panel" id="tab8">
+      <div class="panel-header"><h2>📋 公司管理费用账目明细</h2></div>
+      <table class="data-table"><thead><tr><th>日期</th><th>费用类别</th><th>金额</th><th>说明</th><th>凭证</th></tr></thead><tbody id="managementBody"></tbody></table>
+      <p class="table-empty" id="empty8">暂无数据</p>
+      <button class="btn-add" onclick="showAddForm('management')">＋ 添加管理费用</button>
+    </section>
+
+    <!-- ===== ⑨ 工资 ===== -->
+    <section class="tab-panel" id="tab9">
+      <div class="panel-header"><h2>👷 公司工资支出账目</h2></div>
+      <table class="data-table"><thead><tr><th>月份</th><th>姓名</th><th>岗位</th><th>金额</th><th>发放日期</th><th>凭证</th></tr></thead><tbody id="salaryBody"></tbody></table>
+      <p class="table-empty" id="empty9">暂无数据</p>
+      <button class="btn-add" onclick="showAddForm('salary')">＋ 添加工资记录</button>
+    </section>
+
+    <!-- ===== ⑩ 基地支出 ===== -->
+    <section class="tab-panel" id="tab10">
+      <div class="panel-header"><h2>🌿 分基地类别直接支出账目</h2></div>
+      <div class="sub-tabs">
+        <button class="sub-tab-btn active" data-sub="sub10a">金银花基地</button>
+        <button class="sub-tab-btn" data-sub="sub10b">党参基地</button>
+        <button class="sub-tab-btn" data-sub="sub10c">党参育苗基地</button>
+      </div>
+      <div class="sub-panel active" id="sub10a"><h3 style="margin:12px 0 8px;font-size:0.95rem">金银花基地</h3>
+        <table class="data-table"><thead><tr><th>日期</th><th>支出项目</th><th>金额</th><th>说明</th><th>凭证</th></tr></thead><tbody id="baseJinyinhuaBody"></tbody></table>
+        <p class="table-empty" id="empty10a">暂无数据</p></div>
+      <div class="sub-panel" id="sub10b"><h3 style="margin:12px 0 8px;font-size:0.95rem">党参基地</h3>
+        <table class="data-table"><thead><tr><th>日期</th><th>支出项目</th><th>金额</th><th>说明</th><th>凭证</th></tr></thead><tbody id="baseDangshenBody"></tbody></table>
+        <p class="table-empty" id="empty10b">暂无数据</p></div>
+      <div class="sub-panel" id="sub10c"><h3 style="margin:12px 0 8px;font-size:0.95rem">党参育苗基地</h3>
+        <table class="data-table"><thead><tr><th>日期</th><th>支出项目</th><th>金额</th><th>说明</th><th>凭证</th></tr></thead><tbody id="baseSeedlingBody"></tbody></table>
+        <p class="table-empty" id="empty10c">暂无数据</p></div>
+      <button class="btn-add" onclick="showAddForm('baseExpense')">＋ 添加基地支出</button>
+    </section>
+  </main>
+
+  <!-- ===== 添加数据弹窗 ===== -->
+  <div class="modal-overlay" id="modalOverlay" onclick="closeModal()"></div>
+  <div class="modal" id="modal">
+    <div class="modal-header">
+      <h3 id="modalTitle">添加记录</h3>
+      <button class="modal-close" onclick="closeModal()">✕</button>
+    </div>
+    <div class="modal-body" id="modalBody"></div>
+  </div>
+
+  <!-- ===== 图片预览弹窗 ===== -->
+  <div class="modal-overlay" id="imgOverlay" onclick="closeImgViewer()"></div>
+  <div class="img-viewer" id="imgViewer">
+    <button class="img-close" onclick="closeImgViewer()">✕</button>
+    <img id="previewImg" src="" alt="凭证预览">
+  </div>
+
+  <script src="/finance/js/lang.js"></script>
+  <script src="/finance/js/main.js"></script>
+  <script>
+  // 风格切换
+  function switchStyle(style) {
+    document.body.setAttribute('data-style', style);
+    localStorage.setItem('wyx_style', style);
+  }
+  // 日夜切换
+  function toggleTheme() {
+    var current = document.body.getAttribute('data-theme') || 'light';
+    var next = current === 'dark' ? 'light' : 'dark';
+    document.body.setAttribute('data-theme', next);
+    localStorage.setItem('wyx_theme', next);
+    document.getElementById('themeToggle').textContent = next === 'dark' ? '☀️' : '🌙';
+  }
+  // 恢复上次选择
+  var savedStyle = localStorage.getItem('wyx_style') || 'brutalist';
+  document.getElementById('styleSelect').value = savedStyle;
+  document.body.setAttribute('data-style', savedStyle);
+  var savedTheme = localStorage.getItem('wyx_theme') || 'light';
+  document.body.setAttribute('data-theme', savedTheme);
+  document.getElementById('themeToggle').textContent = savedTheme === 'dark' ? '☀️' : '🌙';
+  var savedLang = localStorage.getItem('wyx_lang') || 'zh';
+  document.getElementById('langSelect').value = savedLang;
+  if (typeof switchLang === 'function') switchLang(savedLang);
+  </script>
+</body>
+</html>

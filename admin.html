@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <base href="/finance/">
+  <title>五源兴农业 · 后台管理</title>
+  <link rel="stylesheet" href="/finance/css/admin.css">
+  <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+</head>
+<body>
+  <!-- 顶栏 -->
+  <header class="admin-top">
+    <div class="admin-top-inner">
+      <div class="admin-logo">
+        <span class="logo-mark">🌾</span>
+        <div>
+          <h1>五源兴 · 数据管理后台</h1>
+          <p class="admin-sub">公司财务数据录入与维护</p>
+        </div>
+      </div>
+      <div class="admin-top-right">
+        <span class="admin-status" id="saveStatus">✅ 已保存</span>
+        <select class="style-select" id="styleSelect" onchange="switchStyle(this.value)" style="padding:4px 10px;border:2px solid rgba(255,255,255,0.4);background:rgba(255,255,255,0.1);color:#fff;font-size:0.7rem;font-weight:700;font-family:inherit;cursor:pointer;">
+          <option value="brutalist">🎨 野兽派</option>
+          <option value="magazine">📰 杂志风</option>
+        </select>
+        <a href="index.html" class="admin-back-btn">← 返回前台</a>
+      </div>
+    </div>
+  </header>
+
+  <!-- 工具栏 -->
+  <div class="admin-toolbar">
+    <div class="toolbar-inner">
+      <div class="toolbar-tabs" id="adminTabs">
+        <button class="tool-tab active" data-section="capital">① 股本金</button>
+        <button class="tool-tab" data-section="incomeExpense">② 收支</button>
+        <button class="tool-tab" data-section="income">③ 收入</button>
+        <button class="tool-tab" data-section="pettyCash">④ 备用金</button>
+        <button class="tool-tab" data-section="reimburse">⑤ 报销</button>
+        <button class="tool-tab" data-section="receivable">⑥ 应收款</button>
+        <button class="tool-tab" data-section="asset">⑦ 固定资产</button>
+        <button class="tool-tab" data-section="management">⑧ 管理费</button>
+        <button class="tool-tab" data-section="salary">⑨ 工资</button>
+        <button class="tool-tab" data-section="baseExpense">⑩ 基地支出</button>
+      </div>
+      <div class="toolbar-actions">
+        <input type="text" id="searchInput" placeholder="🔍 搜索..." oninput="filterTable(this.value)" style="padding:6px 10px;border:2px solid #000;font-size:0.72rem;font-weight:600;font-family:inherit;width:140px">
+        <button class="tb-btn tb-sync" onclick="syncFromServer()" title="从服务器同步">🔄 同步</button>
+        <button class="tb-btn tb-import" onclick="showImportModal()">📥 导入Excel</button>
+        <button class="tb-btn tb-export" onclick="exportData()">📤 导出</button>
+        <button class="tb-btn tb-clear" onclick="confirmClear()">🗑️ 清空</button>
+      </div>
+    </div>
+  </div>
+
+  <main class="admin-main">
+    <div class="admin-container">
+      <!-- 数据编辑区 -->
+      <div class="data-editor" id="dataEditor">
+        <div class="editor-header">
+          <h2 id="sectionTitle">基本账户收支</h2>
+          <div class="editor-actions">
+            <span class="record-count" id="recordCount">0 条记录</span>
+            <button class="btn-add-row" onclick="addRow()">＋ 新增一行</button>
+          </div>
+        </div>
+        <div class="table-edit-wrap" id="tableEditWrap">
+          <!-- 动态生成可编辑表格 -->
+        </div>
+      </div>
+
+      <!-- 提示信息（可折叠） -->
+      <details class="admin-info" style="margin-top:16px;background:var(--card);border:2px solid var(--border);padding:10px 14px;cursor:pointer">
+        <summary style="font-size:0.78rem;font-weight:800;cursor:pointer">💡 操作帮助 & 导入格式说明</summary>
+        <div style="display:flex;gap:20px;margin-top:10px;flex-wrap:wrap">
+          <div style="flex:1;min-width:200px">
+            <h4 style="font-size:0.75rem;font-weight:900;margin-bottom:6px;border-bottom:2px solid #000;display:inline-block">操作提示</h4>
+            <ul style="padding-left:16px;margin-top:6px">
+              <li style="font-size:0.7rem;margin-bottom:4px">直接在表格中编辑数据，按 Enter 或点击其他单元格保存</li>
+              <li style="font-size:0.7rem;margin-bottom:4px"><strong>📥 导入Excel：</strong>支持 .xlsx / .xls 格式</li>
+              <li style="font-size:0.7rem;margin-bottom:4px"><strong>📤 导出：</strong>导出当前版块为 Excel 文件</li>
+              <li style="font-size:0.7rem;margin-bottom:4px">数据自动保存在本地和服务器</li>
+            </ul>
+          </div>
+          <div style="flex:2;min-width:300px">
+            <h4 style="font-size:0.75rem;font-weight:900;margin-bottom:6px;border-bottom:2px solid #000;display:inline-block">Excel列名对照</h4>
+            <div class="column-guide" id="columnGuide" style="margin-top:6px"></div>
+          </div>
+        </div>
+      </details>
+    </div>
+  </main>
+
+  <!-- 导入弹窗 -->
+  <div class="modal-overlay" id="importOverlay" onclick="closeImportModal()"></div>
+  <div class="admin-modal" id="importModal">
+    <div class="modal-header">
+      <h3>📥 导入Excel数据</h3>
+      <button class="modal-close" onclick="closeImportModal()">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-group">
+        <label>选择导入到哪个版块</label>
+        <select id="importSection" style="width:100%;padding:8px;border:3px solid #000;font-family:inherit;font-weight:700;">
+          <option value="incomeExpense">① 基本账户收支</option>
+          <option value="capital">② 股本金</option>
+          <option value="income">③ 收入</option>
+          <option value="pettyCash">④ 备用金</option>
+          <option value="reimburse">⑤ 报销</option>
+          <option value="receivable">⑥ 应收账款</option>
+          <option value="asset">⑦ 固定资产</option>
+          <option value="management">⑧ 管理费用</option>
+          <option value="salary">⑨ 工资</option>
+          <option value="baseExpense">⑩ 基地支出</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>选择Excel文件（.xlsx / .xls）</label>
+        <input type="file" id="fileInput" accept=".xlsx,.xls" style="width:100%;padding:8px;border:3px solid #000;">
+      </div>
+      <div id="importPreview" style="margin-top:12px;max-height:300px;overflow-y:auto;"></div>
+      <div class="form-actions">
+        <button class="btn-cancel" onclick="closeImportModal()">取消</button>
+        <button class="btn-submit" onclick="confirmImport()">✅ 确认导入</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+  // 登录验证
+  var API_BASE = window.location.pathname.startsWith('/finance/') ? '/finance' : '';
+  var token = localStorage.getItem('wyx_token');
+  if (!token) { window.location.href = API_BASE + '/login.html'; }
+  else {
+    fetch(API_BASE + '/api/verify', { headers: { 'Authorization': 'Bearer ' + token } })
+      .then(function(r) { if (!r.ok) { localStorage.removeItem('wyx_token'); window.location.href = 'login.html'; } })
+      .catch(function() {});
+  }
+  var API_TOKEN = token;
+
+  function switchStyle(style) {
+    document.body.setAttribute('data-style', style);
+    localStorage.setItem('wyx_style', style);
+  }
+  var ss = localStorage.getItem('wyx_style') || 'brutalist';
+  document.getElementById('styleSelect').value = ss;
+  document.body.setAttribute('data-style', ss);
+  </script>
+  <script src="/finance/js/upload.js"></script>
+  <script src="/finance/js/admin.js"></script>
+</body>
+</html>

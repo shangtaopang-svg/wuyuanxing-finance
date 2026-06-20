@@ -1,0 +1,114 @@
+/* ===== 五源兴 · 管理后台 ===== */
+/* 新野兽派风格 */
+* { margin:0; padding:0; box-sizing:border-box; }
+:root {
+  --bg: #f5f0e8;
+  --card: #fff;
+  --border: #000;
+  --text: #000;
+  --text-light: #555;
+  --primary: #D35400;
+  --green: #27ae60;
+  --red: #c0392b;
+  --shadow: 4px 4px 0 #000;
+}
+body { font-family: 'Courier New','PingFang SC','Microsoft YaHei',monospace; background: var(--bg); color: var(--text); }
+
+/* 顶栏 */
+.admin-top { background: #000; color:#fff; border-bottom:4px solid var(--primary); padding:0 20px; position:sticky; top:0; z-index:100; }
+.admin-top-inner { max-width:1400px; margin:0 auto; display:flex; justify-content:space-between; align-items:center; height:60px; }
+.admin-logo { display:flex; align-items:center; gap:10px; }
+.logo-mark { font-size:1.5rem; }
+.admin-logo h1 { font-size:1rem; font-weight:900; letter-spacing:0.03em; }
+.admin-sub { font-size:0.6rem; opacity:0.6; letter-spacing:0.1em; }
+.admin-top-right { display:flex; align-items:center; gap:12px; }
+.admin-status { font-size:0.7rem; font-weight:700; color:var(--green); }
+.admin-back-btn { padding:6px 14px; background:var(--primary); color:#fff; border:2px solid #fff; font-size:0.72rem; font-weight:800; text-decoration:none; font-family:inherit; }
+.admin-back-btn:hover { background:#fff; color:#000; border-color:#fff; }
+
+/* 工具栏 */
+.admin-toolbar { background:var(--card); border-bottom:4px solid var(--border); position:sticky; top:60px; z-index:99; }
+.toolbar-inner { max-width:1400px; margin:0 auto; padding:8px 20px; display:flex; justify-content:space-between; align-items:center; gap:10px; flex-wrap:wrap; }
+.toolbar-tabs { display:flex; gap:2px; flex-wrap:wrap; }
+.tool-tab { padding:6px 12px; font-size:0.7rem; font-weight:800; border:2px solid var(--border); background:var(--card); cursor:pointer; font-family:inherit; }
+.tool-tab.active { background:#000; color:#fff; }
+.tool-tab:hover { transform:translate(-1px,-1px); box-shadow:2px 2px 0 var(--border); }
+.toolbar-actions { display:flex; gap:6px; flex-wrap:wrap; }
+.tb-btn { padding:6px 14px; font-size:0.7rem; font-weight:800; border:2px solid var(--border); cursor:pointer; font-family:inherit; }
+.tb-import { background:var(--card); }
+.tb-export { background:var(--card); }
+.tb-clear { background:var(--card); color:var(--red); border-color:var(--red); }
+.tb-btn:hover { transform:translate(-1px,-1px); box-shadow:2px 2px 0 var(--border); }
+
+/* 主区域 */
+.admin-main { padding:20px; }
+.admin-container { max-width:1400px; margin:0 auto; }
+
+/* 编辑器 */
+.data-editor { background:var(--card); border:3px solid var(--border); box-shadow:var(--shadow); }
+.editor-header { display:flex; justify-content:space-between; align-items:center; padding:14px 16px; border-bottom:3px solid var(--border); background:var(--bg); flex-wrap:wrap; gap:8px; }
+.editor-header h2 { font-size:0.95rem; font-weight:900; }
+.editor-actions { display:flex; align-items:center; gap:10px; }
+.record-count { font-size:0.72rem; font-weight:700; color:var(--text-light); }
+.btn-add-row { padding:6px 14px; background:#000; color:#fff; border:2px solid #000; font-size:0.72rem; font-weight:800; cursor:pointer; font-family:inherit; }
+.btn-add-row:hover { background:var(--primary); border-color:var(--primary); }
+
+/* 可编辑表格 */
+.table-edit-wrap { overflow-x:auto; padding:0; }
+.edit-table { width:100%; border-collapse:collapse; font-size:0.75rem; }
+.edit-table th { background:#000; color:#fff; padding:8px 10px; text-align:left; font-weight:800; font-size:0.68rem; white-space:nowrap; border:1px solid #333; }
+.edit-table td { padding:4px; border:1px solid #ddd; }
+.edit-table input, .edit-table select {
+  width:100%; padding:6px 8px; border:2px solid transparent; font-size:0.75rem;
+  font-family:inherit; font-weight:600; background:transparent; outline:none;
+}
+.edit-table input:focus, .edit-table select:focus { border-color:var(--primary); background:#fff8f0; }
+.edit-table .row-del-btn {
+  width:28px; height:28px; border:2px solid var(--red); background:var(--card);
+  color:var(--red); font-weight:900; cursor:pointer; font-size:0.8rem; display:flex;
+  align-items:center; justify-content:center; margin:auto;
+}
+.edit-table .row-del-btn:hover { background:var(--red); color:#fff; }
+
+/* 信息卡片 */
+.admin-info { display:flex; flex-direction:column; gap:12px; }
+.info-card { background:var(--card); border:3px solid var(--border); padding:16px; box-shadow:var(--shadow); }
+.info-card h4 { font-size:0.82rem; font-weight:900; margin-bottom:10px; padding-bottom:6px; border-bottom:2px solid #000; display:inline-block; }
+.info-card ul { padding-left:0; list-style:none; }
+.info-card li { font-size:0.72rem; margin-bottom:8px; color:#444; font-weight:600; padding-left:16px; position:relative; line-height:1.5; }
+.info-card li:before { content:"→"; position:absolute; left:0; color:var(--primary); font-weight:900; }
+.info-card p { font-size:0.72rem; color:#444; font-weight:600; line-height:1.6; }
+
+/* 列名引导 - 美化 */
+.column-guide { background:#f5f0e8; border:2px solid #000; padding:12px; margin-top:8px; max-height:260px; overflow-y:auto; }
+.column-guide .cg-section { margin-bottom:6px; padding:4px 0; border-bottom:1px dashed #ddd; }
+.column-guide .cg-section:last-child { border-bottom:none; }
+.column-guide .cg-name { font-weight:800; font-size:0.68rem; color:#000; display:inline-block; min-width:70px; }
+.column-guide .cg-cols { font-size:0.64rem; color:#555; font-weight:600; }
+
+/* 弹窗 */
+.modal-overlay { display:none; position:fixed; inset:0; background:rgba(0,0,0,0.5); z-index:200; }
+.modal-overlay.show { display:block; }
+.admin-modal { display:none; position:fixed; top:50%; left:50%; transform:translate(-50%,-50%); background:var(--card); border:4px solid var(--border); width:90%; max-width:600px; max-height:85vh; overflow-y:auto; z-index:201; box-shadow:10px 10px 0 rgba(0,0,0,0.2); }
+.admin-modal.show { display:block; }
+.admin-modal .modal-header { display:flex; justify-content:space-between; align-items:center; padding:16px 20px; border-bottom:3px solid var(--border); background:var(--bg); }
+.admin-modal .modal-header h3 { font-size:0.9rem; font-weight:900; }
+.admin-modal .modal-close { width:32px; height:32px; border:2px solid var(--border); background:var(--card); cursor:pointer; font-weight:900; font-size:1rem; }
+.admin-modal .modal-body { padding:20px; }
+.admin-modal .form-group { margin-bottom:14px; }
+.admin-modal .form-group label { display:block; font-size:0.75rem; font-weight:800; margin-bottom:4px; }
+.admin-modal .form-actions { display:flex; gap:8px; justify-content:flex-end; margin-top:16px; }
+.admin-modal .btn-submit { padding:8px 24px; background:#000; color:#fff; border:3px solid #000; font-size:0.78rem; font-weight:800; font-family:inherit; cursor:pointer; }
+.admin-modal .btn-submit:hover { background:var(--primary); border-color:var(--primary); }
+.admin-modal .btn-cancel { padding:8px 24px; background:var(--card); border:3px solid var(--border); font-size:0.78rem; font-weight:800; font-family:inherit; cursor:pointer; }
+
+/* 预览表格 */
+.preview-table { width:100%; border-collapse:collapse; font-size:0.7rem; margin-top:8px; }
+.preview-table th { background:#f5f0e8; padding:6px 8px; border:1px solid #ddd; font-weight:800; text-align:left; }
+.preview-table td { padding:6px 8px; border:1px solid #ddd; }
+
+/* 响应式 */
+@media (max-width: 900px) {
+  .admin-container { grid-template-columns:1fr; }
+  .toolbar-inner { flex-direction:column; align-items:stretch; }
+}
