@@ -947,9 +947,22 @@ function renderBankAccounts() {
   var body = document.getElementById('bankAccountsBody');
   if (!body) return;
   body.innerHTML = '';
-  if (!data.length) { var e=document.getElementById('empty13'); if(e)e.style.display='block'; return; }
+  // 自动计算余额（从公司基本户收支）
+  var bankFlowData = DataStore.bankFlow || [];
+  var calcBalance = 0;
+  bankFlowData.forEach(function(r){ calcBalance += (r.income||0) - (r.expense||0); });
+  if (!data.length) {
+    if (calcBalance !== 0) {
+      body.innerHTML += '<tr style="background:#ebf8ff"><td>自动汇总</td><td>—</td><td>—</td><td class="amount" style="font-weight:900;font-size:1.1rem;color:#3182ce">'+formatNum(calcBalance)+'</td><td style="color:#888;font-size:0.7rem">由流水自动计算</td></tr>';
+    }
+    var e=document.getElementById('empty13'); if(e)e.style.display='none'; return;
+  }
   var e=document.getElementById('empty13'); if(e)e.style.display='none';
   data.forEach(function(r){ body.innerHTML += '<tr><td>'+(r.bank_name||'')+'</td><td>'+(r.account_name||'')+'</td><td style="font-family:monospace;font-size:0.75rem">'+(r.account_number||'')+'</td><td class="amount">'+formatNum(r.balance||0)+'</td><td>'+(r.note||'')+'</td></tr>'; });
+  // 如果手动输入的余额与自动计算不一致，显示自动计算的参考值
+  if (Math.abs(calcBalance) > 0) {
+    body.innerHTML += '<tr style="background:#f8f8f8;font-size:0.75rem"><td colspan="3" style="text-align:right;color:#888">流水计算余额：</td><td class="amount" style="font-weight:700;color:'+(calcBalance>=0?'#3182ce':'#e53e3e')+'">'+formatNum(calcBalance)+'</td><td style="color:#888">仅供参考</td></tr>';
+  }
 }
 
 // 页面加载
