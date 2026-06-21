@@ -520,6 +520,24 @@ function uploadDocsFile(fileInput) {
   });
 }
 
+// === 删除单据文件 ===
+function clearDocs(rowKey, btn) {
+  var data = DB.get(currentSection);
+  for (var i = 0; i < data.length; i++) {
+    if (data[i]._key === rowKey) {
+      data[i].docs = '';
+      DB.set(currentSection, data);
+      showSaved();
+      break;
+    }
+  }
+  var txt = document.getElementById('docsTxt_' + rowKey);
+  if (txt) txt.value = '';
+  btn.style.display = 'none';
+  var prev = btn.previousElementSibling;
+  if (prev) prev.style.display = 'none';
+}
+
 // === 上传按钮事件绑定（所有版块通用） ===
 function setupUploadEvents(wrap, section) {
   if (!wrap) return;
@@ -684,6 +702,7 @@ window.renderEditTable = function(section) {
               ph += '<input type="text" id="docsTxt_' + rowKey + '" value="' + escHtml(display) + '" data-row="' + realIdx + '" data-col="docs" style="flex:1;min-width:60px;padding:3px 4px;border:1px solid #ccc;font-size:0.7rem;font-family:inherit" readonly>';
               ph += '<button onclick="document.getElementById(\'docsFile_' + rowKey + '\').click()" style="padding:3px 6px;border:1px solid #999;background:#fff;cursor:pointer;font-size:0.75rem" title="上传文件">📎</button>';
               ph += '<button onclick="var v=document.getElementById(\'docsTxt_' + rowKey + '\').value;if(v)window.open(\'/finance/uploads/vouchers/\'+v,\'_blank\')" style="padding:3px 6px;border:1px solid #999;background:#fff;cursor:pointer;font-size:0.75rem' + (display ? '' : ';display:none') + '" title="预览">👁️</button>';
+              ph += '<button onclick="clearDocs(\'' + rowKey + '\',this)" style="padding:3px 6px;border:1px solid #e74c3c;background:#fff;color:#e74c3c;cursor:pointer;font-size:0.75rem' + (display ? '' : ';display:none') + '" title="删除">✖</button>';
               ph += '<input type="file" id="docsFile_' + rowKey + '" accept=".jpg,.jpeg,.png,.gif,.pdf,.ofd,.xls,.xlsx" style="display:none" multiple data-key="' + rowKey + '" onchange="uploadDocsFile(this)">';
               ph += '</div>';
             } else {
