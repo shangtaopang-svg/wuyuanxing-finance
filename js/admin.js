@@ -273,6 +273,8 @@ function addRow() {
     else row[c.key] = '';
   });
   row.date = new Date().toISOString().slice(0,10);
+  row._key = 'k' + Date.now() + Math.random().toString(36).slice(2,6);
+  if (currentSection === 'reimburse') row.reimburse_date = row.date;
 
   var data = DB.get(currentSection);
   data.push(row);
@@ -518,10 +520,10 @@ function saveData() {
 }
 
 // === M-IuM-4vM-^XM-iM-uM-^PM-M-dM-^MM-!M-gM-^LM-^M-fM-^MM-^LM-dM-^MM-^M-dM-^M-^XM-dM-^MM-!M-gM-^LM-^M-dM-^MM-;M-fM-^LM-^IM-iM-^RM-. ===
-function uploadDocsFile(fileInput, realIdx) {
+function uploadDocsFile(fileInput, rowKey) {
   if (!fileInput || !fileInput.files || !fileInput.files.length) return;
   if (!window.API_TOKEN) { alert("请先登录"); return; }
-  var txtInput = document.getElementById("docsTxt_" + realIdx);
+  var txtInput = document.getElementById("docsTxt_" + rowKey);
   var viewBtn = txtInput && txtInput.parentElement ? txtInput.parentElement.querySelector("button:last-of-type") : null;
   if (txtInput) txtInput.value = "上传中...";
   var files = Array.prototype.slice.call(fileInput.files);
@@ -546,7 +548,7 @@ function uploadDocsFile(fileInput, realIdx) {
         if (txtInput) txtInput.value = namesStr;
         var data = DB.get(currentSection);
         for (var i = 0; i < data.length; i++) {
-          if (data[i]._uid === realIdx) {
+          if (data[i]._key === rowKey) {
             data[i].docs = namesStr;
             DB.set(currentSection, data);
             showSaved();
@@ -709,8 +711,8 @@ renderEditTable = function(section) {
         cols.forEach(function(c) { if(c.key!=='person'&&c.key!=='payment_method'&&c.key!=='reimburse_date') ph += '<th>' + c.label + '</th>'; });
         ph += '<th style="width:36px">操作</th></tr></thead><tbody>';
         items.forEach(function(row) {
-          var realIdx = data.indexOf(row);
-          if (!data[realIdx]._uid) data[realIdx]._uid = realIdx;
+          var rowKey = row._key || 'k' + Date.now() + Math.random().toString(36).slice(2,6);
+          if (!row._key) row._key = rowKey;
           ph += '<tr>';
           cols.forEach(function(c) {
             if (c.key==='person'||c.key==='payment_method'||c.key==='reimburse_date') return;
@@ -723,10 +725,10 @@ renderEditTable = function(section) {
             } else if (c.key === 'docs') {
               var display = Array.isArray(val) ? val.join('; ') : val;
               ph += '<div class="upload-inline" style="display:flex;gap:2px;align-items:center">';
-              ph += '<input type="text" id="docsTxt_' + realIdx + '" value="' + escHtml(display) + '" data-row="' + realIdx + '" data-col="docs" style="flex:1;min-width:60px;padding:3px 4px;border:1px solid #ccc;font-size:0.7rem;font-family:inherit" readonly>';
-              ph += '<button onclick="document.getElementById(\'docsFile_' + realIdx + '\').click()" style="padding:3px 6px;border:1px solid #999;background:#fff;cursor:pointer;font-size:0.75rem" title="上传文件">📎</button>';
-              ph += '<button onclick="var v=document.getElementById(\'docsTxt_' + realIdx + '\').value;if(v)window.open(\'/finance/uploads/vouchers/\'+v,\'_blank\')" style="padding:3px 6px;border:1px solid #999;background:#fff;cursor:pointer;font-size:0.75rem' + (display ? '' : ';display:none') + '" title="预览">👁️</button>';
-              ph += '<input type="file" id="docsFile_' + realIdx + '" accept=".jpg,.jpeg,.png,.gif,.pdf,.ofd,.xls,.xlsx" style="display:none" multiple onchange="uploadDocsFile(this, ' + realIdx + ')">';
+              ph += '<input type="text" id="docsTxt_' + rowKey + '" value="' + escHtml(display) + '" data-row="' + realIdx + '" data-col="docs" style="flex:1;min-width:60px;padding:3px 4px;border:1px solid #ccc;font-size:0.7rem;font-family:inherit" readonly>';
+              ph += '<button onclick="document.getElementById(\'docsFile_' + rowKey + '\').click()" style="padding:3px 6px;border:1px solid #999;background:#fff;cursor:pointer;font-size:0.75rem" title="上传文件">📎</button>';
+              ph += '<button onclick="var v=document.getElementById(\'docsTxt_' + rowKey + '\').value;if(v)window.open(\'/finance/uploads/vouchers/\'+v,\'_blank\')" style="padding:3px 6px;border:1px solid #999;background:#fff;cursor:pointer;font-size:0.75rem' + (display ? '' : ';display:none') + '" title="预览">👁️</button>';
+              ph += '<input type="file" id="docsFile_' + rowKey + '" accept=".jpg,.jpeg,.png,.gif,.pdf,.ofd,.xls,.xlsx" style="display:none" multiple onchange="uploadDocsFile(this, rowKey + ')">';
               ph += '</div>';
             } else {
               ph += '<input type="text" value="' + escHtml(val) + '" data-row="' + realIdx + '" data-col="' + c.key + '" onchange="editCell(this)" style="width:100%;padding:2px 4px;border:1px solid #ccc">';

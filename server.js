@@ -196,7 +196,7 @@ app.post('/api/data/:section', authMW, (req, res) => {
 // ===== 公开只读API =====
 app.get('/api/public/reimburse', function(req, res) {
   try {
-    var data = query("SELECT date, person, amount, reason, docs, payment_method FROM reimburse ORDER BY id");
+    var data = query("SELECT date, reimburse_date, person, amount, reason, docs, payment_method FROM reimburse ORDER BY id");
     res.json(data);
   } catch(e) { res.json([]); }
 });
