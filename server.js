@@ -234,7 +234,7 @@ Object.keys(PUBLIC_SECTIONS).forEach(function(key) {
   app.get('/api/public/' + key, function(req, res) {
     try {
       var cfg = PUBLIC_SECTIONS[key];
-      var table = key === 'incomeExpense' ? 'income_expense' : key === 'pettyCash' ? 'petty_cash' : key === 'baseExpense' ? 'base_expense' : key;
+      var table = key === 'incomeExpense' ? 'income_expense' : key === 'pettyCash' ? 'petty_cash' : key === "baseExpense" ? "base_expense" : key === "bankFlow" ? "bank_flow" : key;
       var data = query("SELECT " + cfg.fields.join(',') + " FROM " + table + " ORDER BY id");
       res.json(data);
     } catch(e) { res.json([]); }
