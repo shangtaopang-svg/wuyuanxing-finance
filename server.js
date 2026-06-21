@@ -14,6 +14,37 @@ const JWT_SECRET = process.env.JWT_SECRET || 'wyx-finance-secret-2026';
 const DB_PATH = path.join(__dirname, 'finance.db');
 const UPLOAD_DIR = path.join(__dirname, 'uploads/vouchers');
 
+// ===== 首页直接渲染（服务端注入数据到HTML） =====
+app.get('/', function(req, res) {
+  try {
+    var html = fs.readFileSync(path.join(__dirname, 'index.html'), 'utf8');
+    // 注入报销数据
+    var rd = query("SELECT date, reimburse_date, person, amount, reason, payment_method FROM reimburse ORDER BY id");
+    if (rd && rd.length > 0) {
+      var yingRows = '';
+      var yingTotal = 0;
+      rd.forEach(function(r) {
+        if (r.person === '应红林') {
+          yingTotal += r.amount || 0;
+          yingRows += '<tr><td>' + (r.date||'') + '</td><td class="amount expense">¥' + (r.amount||0).toFixed(2) + '</td><td>' + (r.reason||'') + '</td><td>—</td><td>—</td></tr>';
+        }
+      });
+      if (yingRows) {
+        yingRows += '<tr style="background:#f5f0e8;font-weight:700"><td>合计</td><td>¥' + yingTotal.toFixed(2) + '</td><td colspan="3"></td></tr>';
+        html = html.replace('<tbody id="reimburseYingBody"></tbody>', '<tbody id="reimburseYingBody">' + yingRows + '</tbody>');
+        html = html.replace('id="empty5c"', 'id="empty5c" style="display:none"');
+      }
+    }
+    // 日期
+    var cnDate = new Date().toLocaleDateString('zh-CN', {timeZone:'Asia/Shanghai', year:'numeric', month:'2-digit', day:'2-digit'}).replace(/\//g, '-');
+    html = html.replace('id="topDate">', 'id="topDate">' + cnDate);
+    res.send(html);
+  } catch(e) {
+    console.error('[首页注入错误]', e.message);
+    res.sendFile(path.join(__dirname, 'index.html'));
+  }
+});
+
 // 中间件
 app.use(cors());
 app.use(express.json());
@@ -140,7 +171,7 @@ const TABLE_MAP = {
   capital: { table: 'capital', fields: ['date','name','amount','method','voucher'] },
   income: { table: 'income', fields: ['date','category','amount','source','voucher'] },
   pettyCash: { table: 'petty_cash', fields: ['date','person','type','amount','summary','voucher'] },
-  reimburse: { table: 'reimburse', fields: ['date','person','amount','reason','docs'] },
+  reimburse: { table: 'reimburse', fields: ['date','reimburse_date','person','amount','reason','docs','batch_id','payment_method'] },
   receivable: { table: 'receivable', fields: ['date','party','amount','reason','status'] },
   asset: { table: 'asset', fields: ['date','name','amount','location','status'] },
   management: { table: 'management', fields: ['date','category','amount','summary','invoices'] },
@@ -177,6 +208,14 @@ app.post('/api/data/:section', authMW, (req, res) => {
   });
 
   res.json({ ok: true, count: data.length });
+});
+
+// ===== 公开只读API =====
+app.get('/api/public/reimburse', function(req, res) {
+  try {
+    var data = query("SELECT date, person, amount, reason FROM reimburse ORDER BY id");
+    res.json(data);
+  } catch(e) { res.json([]); }
 });
 
 // ===== 文件上传 =====

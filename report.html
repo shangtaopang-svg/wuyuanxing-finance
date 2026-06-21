@@ -83,6 +83,18 @@
       <div class="item"><div class="num red" id="rptReceivable">¥0</div><div class="label">应收账款</div></div>
     </div>
 
+    <!-- 图表区 -->
+    <div class="report-charts" style="padding:20px 24px;border-bottom:3px solid #ddd;display:grid;grid-template-columns:1fr 1fr;gap:16px;">
+      <div style="border:2px solid #000;padding:12px;">
+        <h4 style="font-size:0.7rem;font-weight:800;text-align:center;margin-bottom:8px;letter-spacing:0.05em">📊 收支月度趋势</h4>
+        <div style="height:200px;"><canvas id="rptChart1"></canvas></div>
+      </div>
+      <div style="border:2px solid #000;padding:12px;">
+        <h4 style="font-size:0.7rem;font-weight:800;text-align:center;margin-bottom:8px;letter-spacing:0.05em">🧩 支出分类占比</h4>
+        <div style="height:200px;"><canvas id="rptChart2"></canvas></div>
+      </div>
+    </div>
+
     <!-- 校验结果 -->
     <div class="validation-bar" id="validationBar"></div>
 
@@ -96,6 +108,7 @@
 
   <script src="/finance/js/data.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
   <script>
     // === 数据获取（优先从localStorage，其次DataStore） ===
     function getData(key) {
@@ -117,6 +130,10 @@
         (DataStore.baseExpense.seedling || []).forEach(function(r) { r.base='党参育苗基地'; bases.push(r); });
         return bases;
       }
+      // 新版块
+      if (key === 'companyInfo') return DataStore.companyInfo || [];
+      if (key === 'contracts') return DataStore.contracts || [];
+      if (key === 'bankAccounts') return DataStore.bankAccounts || [];
       return DataStore[key] || [];
     }
 
@@ -309,7 +326,76 @@
         function(r) { return r.amount; }
       );
 
+      // ⑪ 公司信息
+      html += sectionHTML2('⑪ 公司基本信息', data.companyInfo,
+        ['项目','内容'],
+        function(r) { return '<td><strong>'+(r.field_name||'')+'</strong></td><td>'+(r.field_value||'')+'</td>'; }
+      );
+
+      // ⑫ 合同管理
+      html += sectionHTML('⑫ 合同台账', data.contracts, null,
+        ['日期','合同名称','签约方','金额','状态'],
+        function(r) {
+          return '<td>'+r.date+'</td><td>'+(r.contract_name||'')+'</td><td>'+(r.party||'')+'</td><td class="amt">'+fmt(r.amount)+'</td><td>'+(r.status||'')+'</td>';
+        },
+        function(r) { return r.amount; }
+      );
+
+      // ⑬ 银行账户
+      html += sectionHTML2('⑬ 银行账户', data.bankAccounts,
+        ['银行','户名','账号','余额'],
+        function(r) { return '<td>'+(r.bank_name||'')+'</td><td>'+(r.account_name||'')+'</td><td style="font-family:monospace">'+(r.account_number||'')+'</td><td class="amt">'+fmt(r.balance)+'</td>'; }
+      );
+
       body.innerHTML = html;
+    }
+
+    // 辅助：无合计行的版块
+    function sectionHTML2(title, data, headers, rowFn) {
+      if (!data || data.length === 0) return '';
+      var html = '<div class="section-block"><h2>' + title + ' <span class="count">(' + data.length + ' 条)</span></h2>';
+      html += '<table class="report-table"><thead><tr>';
+      headers.forEach(function(h) { html += '<th>' + h + '</th>'; });
+      html += '</tr></thead><tbody>';
+      data.forEach(function(r) { html += '<tr>' + rowFn(r) + '</tr>'; });
+      html += '</tbody></table></div>';
+      return html;
+    }
+
+    // === 报告图表 ===
+    var rptCharts = {};
+    function renderReportCharts() {
+      var ie = getData('incomeExpense');
+      var ctx1 = document.getElementById('rptChart1');
+      if (ctx1) {
+        var labels = ie.map(function(r){return r.date.slice(5);});
+        var incomes = ie.map(function(r){return r.income||0;});
+        var expenses = ie.map(function(r){return r.expense||0;});
+        if (rptCharts.c1) rptCharts.c1.destroy();
+        rptCharts.c1 = new Chart(ctx1, {
+          type: 'bar',
+          data: { labels: labels, datasets: [
+            { label: '收入', data: incomes, backgroundColor: '#27ae60', borderColor: '#000', borderWidth: 1 },
+            { label: '支出', data: expenses, backgroundColor: '#c0392b', borderColor: '#000', borderWidth: 1 }
+          ]},
+          options: { responsive: true, maintainAspectRatio: false,
+            plugins: { legend: { labels: { font: { size: 11 } } } },
+            scales: { x: { grid: { display: false } }, y: { ticks: { callback: function(v){return '¥'+(v/1000).toFixed(0)+'k';} } } }
+          }
+        });
+      }
+      var ctx2 = document.getElementById('rptChart2');
+      if (ctx2) {
+        var expByType = {};
+        ie.forEach(function(r){if(r.expense>0)expByType[r.summary]=(expByType[r.summary]||0)+r.expense;});
+        var eLabels = Object.keys(expByType);
+        if (rptCharts.c2) rptCharts.c2.destroy();
+        rptCharts.c2 = new Chart(ctx2, {
+          type: 'doughnut',
+          data: { labels: eLabels, datasets: [{ data: eLabels.map(function(k){return expByType[k];}), backgroundColor: ['#D35400','#2b6cb0','#38a169','#d69e2e','#9f7aea','#e53e3e'], borderColor: '#000', borderWidth: 1 }] },
+          options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom', labels: { font: { size: 9 }, boxWidth: 10 } } } }
+        });
+      }
     }
 
     function sectionHTML(title, data, total, headers, rowFn, amountFn) {
@@ -333,6 +419,7 @@
     }
 
     renderReport();
+    renderReportCharts();
   </script>
 </body>
 </html>

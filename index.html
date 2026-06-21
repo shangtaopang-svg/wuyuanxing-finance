@@ -4,7 +4,10 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>五源兴农业 · 财务数据平台</title>
-  <link rel="stylesheet" href="/finance/css/style.css">
+  <link rel="stylesheet" href="/finance/css/style.css?v=20260622.1">
+  <meta http-equiv="pragma" content="no-cache">
+  <meta http-equiv="cache-control" content="no-cache">
+  <meta http-equiv="expires" content="0">
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
 </head>
 <body>
@@ -22,10 +25,10 @@
         <span class="top-badge" data-lk="badge">凉山州农投合作专用</span>
         <span class="top-date" id="topDate"></span>
         <button class="theme-toggle" id="themeToggle" onclick="toggleTheme()" title="切换日夜模式">🌙</button>
-        <input type="text" id="globalSearch" placeholder="🔍 搜索..." oninput="globalSearch(this.value)" style="padding:4px 10px;border:2px solid rgba(255,255,255,0.3);background:rgba(255,255,255,0.1);color:#fff;font-size:0.72rem;font-weight:600;font-family:inherit;width:120px">
+        <button class="top-link" onclick="showGlobalSearch()" title="跨版块搜索" style="font-size:0.85rem">🔍</button>
         <select class="style-select" id="styleSelect" onchange="switchStyle(this.value)">
+          <option value="magazine" selected>📰 <span data-lk="styleMagazine">杂志风</span></option>
           <option value="brutalist">🎨 <span data-lk="styleBrutalist">野兽派</span></option>
-          <option value="magazine">📰 <span data-lk="styleMagazine">杂志风</span></option>
         </select>
         <select class="style-select" id="langSelect" onchange="switchLang(this.value)">
           <option value="zh">中文</option>
@@ -33,24 +36,35 @@
         </select>
         <a href="admin.html" class="top-link" data-lk="admin">⚙️ 管理</a>
         <a href="report.html" class="top-link" data-lk="report">📄 报告</a>
+        <a href="statements.html" class="top-link">📊 报表</a>
+        <span style="font-size:0.55rem;opacity:0.3;letter-spacing:0.1em">v2.1</span>
+        <button id="musicBtn" onclick="toggleMusic()" style="background:none;border:1px solid rgba(255,255,255,0.3);color:#fff;cursor:pointer;padding:2px 6px;font-size:0.72rem;border-radius:3px" title="背景音乐">🎵</button>
+        <audio id="bgMusic" loop preload="auto"><source src="/uploads/回家.mp3" type="audio/mpeg"></audio>
       </div>
     </div>
   </header>
 
+  <!-- 数据校验警告 -->
+  <div class="val-bar" id="valBar" style="display:none;background:#fff3cd;border:2px solid #ffc107;padding:8px 16px;margin:0 20px;cursor:pointer" onclick="this.style.display='none'">
+    <span style="font-size:1rem">⚠️</span>
+    <span id="valText" style="font-size:0.78rem;font-weight:600;color:#856404;margin-left:8px"></span>
+    <span style="float:right;font-size:0.7rem;color:#856404">点击关闭</span>
+  </div>
+
   <!-- 汇总横幅 -->
-  <section class="summary-bar" id="summaryBar">
+  <section class="summary-bar">
     <div class="summary-inner">
-      <div class="sum-item"><span class="sum-num" id="totalIncome">0</span><span class="sum-label" data-lk="totalIncome">总收入</span></div>
-      <div class="sum-item"><span class="sum-num" id="totalExpense">0</span><span class="sum-label" data-lk="totalExpense">总支出</span></div>
-      <div class="sum-item"><span class="sum-num" id="totalCapital">0</span><span class="sum-label" data-lk="totalCapital">股本金</span></div>
-      <div class="sum-item"><span class="sum-num" id="totalReceivable">0</span><span class="sum-label" data-lk="totalReceivable">应收账款</span></div>
+      <div class="sum-item" style="border-left:4px solid #27ae60;background:#f0faf4"><span class="sum-num" id="sIncome" style="color:#27ae60">0</span><span class="sum-label" data-lk="totalIncome">总收入</span></div>
+      <div class="sum-item" style="border-left:4px solid #e53e3e;background:#fef2f2"><span class="sum-num" id="sExpense" style="color:#e53e3e">0</span><span class="sum-label" data-lk="totalExpense">总支出</span></div>
+      <div class="sum-item" style="border-left:4px solid #3182ce;background:#ebf8ff"><span class="sum-num" id="sCapital" style="color:#3182ce">0</span><span class="sum-label" data-lk="totalCapital">股本金</span></div>
+      <div class="sum-item" style="border-left:4px solid #805ad5;background:#faf5ff"><span class="sum-num" id="sReceivable" style="color:#805ad5">0</span><span class="sum-label" data-lk="totalReceivable">应收账款</span></div>
     </div>
   </section>
 
   <!-- 版块导航标签 -->
   <nav class="tab-nav" id="tabNav">
     <button class="tab-btn active" data-tab="tab2"><span data-lk="tab2">🏦 股本金</span></button>
-    <button class="tab-btn" data-tab="tab1"><span data-lk="tab1">💳 收支</span></button>
+    <button class="tab-btn" data-tab="tab1"><span data-lk="tab1">💳 支出</span></button>
     <button class="tab-btn" data-tab="tab3"><span data-lk="tab3">📈 收入</span></button>
     <button class="tab-btn" data-tab="tab4"><span data-lk="tab4">💰 备用金</span></button>
     <button class="tab-btn" data-tab="tab5"><span data-lk="tab5">🧾 报销</span></button>
@@ -59,16 +73,23 @@
     <button class="tab-btn" data-tab="tab8"><span data-lk="tab8">📋 管理费</span></button>
     <button class="tab-btn" data-tab="tab9"><span data-lk="tab9">👷 工资</span></button>
     <button class="tab-btn" data-tab="tab10"><span data-lk="tab10">🌿 基地支出</span></button>
+    <button class="tab-btn" data-tab="tab11"><span>🏢 公司信息</span></button>
+    <button class="tab-btn" data-tab="tab12"><span>📄 合同管理</span></button>
+    <button class="tab-btn" data-tab="tab13"><span>🏦 银行账户</span></button>
   </nav>
 
   <main class="main-content">
-    <!-- ===== ① 基本账户收支 ===== -->
+    <!-- ===== ① 基本账户支出 ===== -->
     <section class="tab-panel active" id="tab1">
       <div class="panel-header">
-        <h2>💳 公司基本账户收支账目</h2>
+        <h2>💳 公司基本账户支出账目</h2>
         <div class="panel-actions">
           <button class="btn-print" onclick="window.print()">🖨️ 打印</button>
         </div>
+      </div>
+      <div class="chart-row">
+        <div class="chart-card"><h4>📊 月度支出趋势</h4><div class="chart-box"><canvas id="chart1a"></canvas></div></div>
+        <div class="chart-card"><h4>🧩 支出分类占比</h4><div class="chart-box"><canvas id="chart1b"></canvas></div></div>
       </div>
       <div class="table-wrap">
         <table class="data-table" id="incomeExpenseTable">
@@ -76,8 +97,7 @@
           <tbody id="incomeExpenseBody"></tbody>
         </table>
       </div>
-      <p class="table-empty" id="empty1">暂无数据，请点击下方按钮添加</p>
-      <button class="btn-add" onclick="showAddForm('incomeExpense')">＋ 添加收支记录</button>
+      <div class="table-empty" id="empty1"><span class="empty-icon">📋</span><span class="empty-text">暂无数据</span><span class="empty-hint">请点击下方按钮添加记录</span></div>
     </section>
 
     <!-- ===== ② 股本金 ===== -->
@@ -85,14 +105,17 @@
       <div class="panel-header">
         <h2>🏦 公司股本金入账明细</h2>
       </div>
+      <div class="chart-row">
+        <div class="chart-card"><h4>🏦 股东出资占比</h4><div class="chart-box"><canvas id="chart2a"></canvas></div></div>
+        <div class="chart-card"><h4>📊 出资方式分布</h4><div class="chart-box"><canvas id="chart2b"></canvas></div></div>
+      </div>
       <div class="table-wrap">
         <table class="data-table">
           <thead><tr><th>日期</th><th>股东姓名</th><th>金额</th><th>出资方式</th><th>入账凭据</th></tr></thead>
           <tbody id="capitalBody"></tbody>
         </table>
       </div>
-      <p class="table-empty" id="empty2">暂无数据</p>
-      <button class="btn-add" onclick="showAddForm('capital')">＋ 添加股本金记录</button>
+      <div class="table-empty" id="empty2"><span class="empty-icon">📭</span><span class="empty-text">暂无数据</span><span class="empty-hint">数据录入后将在次显示</span></div>
     </section>
 
     <!-- ===== ③ 收入 ===== -->
@@ -100,20 +123,27 @@
       <div class="panel-header">
         <h2>📈 公司收入账目</h2>
       </div>
+      <div class="chart-row">
+        <div class="chart-card"><h4>📊 收入月度趋势</h4><div class="chart-box"><canvas id="chart3a"></canvas></div></div>
+        <div class="chart-card"><h4>🧩 收入类别分布</h4><div class="chart-box"><canvas id="chart3b"></canvas></div></div>
+      </div>
       <div class="table-wrap">
         <table class="data-table">
           <thead><tr><th>日期</th><th>类别</th><th>金额</th><th>来源/归处</th><th>凭证</th></tr></thead>
           <tbody id="incomeBody"></tbody>
         </table>
       </div>
-      <p class="table-empty" id="empty3">暂无数据</p>
-      <button class="btn-add" onclick="showAddForm('income')">＋ 添加收入记录</button>
+      <div class="table-empty" id="empty3"><span class="empty-icon">📭</span><span class="empty-text">暂无数据</span><span class="empty-hint">数据录入后将在次显示</span></div>
     </section>
 
     <!-- ===== ④ 备用金 ===== -->
     <section class="tab-panel" id="tab4">
       <div class="panel-header">
         <h2>💰 备用金账目明细</h2>
+      </div>
+      <div class="chart-row">
+        <div class="chart-card"><h4>📊 领用 vs 核销</h4><div class="chart-box"><canvas id="chart4a"></canvas></div></div>
+        <div class="chart-card"><h4>👤 人员占比</h4><div class="chart-box"><canvas id="chart4b"></canvas></div></div>
       </div>
       <div class="sub-tabs">
         <button class="sub-tab-btn active" data-sub="sub4a">任海涛</button>
@@ -129,7 +159,6 @@
         <table class="data-table"><thead><tr><th>日期</th><th>类型</th><th>金额</th><th>摘要</th><th>凭证</th></tr></thead><tbody id="pettyPangBody"></tbody></table>
         <p class="table-empty" id="empty4b">暂无数据</p>
       </div>
-      <button class="btn-add" onclick="showAddForm('pettyCash')">＋ 添加备用金记录</button>
     </section>
 
     <!-- ===== ⑤ 报销 ===== -->
@@ -137,58 +166,77 @@
       <div class="panel-header">
         <h2>🧾 财务报销记录</h2>
       </div>
+      <div class="chart-row">
+        <div class="chart-card"><h4>📊 报销金额对比</h4><div class="chart-box"><canvas id="chart5a"></canvas></div></div>
+        <div class="chart-card"><h4>🧩 报销人次占比</h4><div class="chart-box"><canvas id="chart5b"></canvas></div></div>
+      </div>
       <div class="sub-tabs">
         <button class="sub-tab-btn active" data-sub="sub5a">任海涛</button>
         <button class="sub-tab-btn" data-sub="sub5b">庞尚韬</button>
         <button class="sub-tab-btn" data-sub="sub5c">应红林</button>
       </div>
       <div class="sub-panel active" id="sub5a"><h3 style="margin:12px 0 8px;font-size:0.95rem">任海涛 · 报销</h3>
-        <table class="data-table"><thead><tr><th>日期</th><th>金额</th><th>事由</th><th>单据</th></tr></thead><tbody id="reimburseRenBody"></tbody></table>
+        <table class="data-table"><thead><tr><th>日期</th><th>金额</th><th>事由</th><th>关联</th><th>单据</th></tr></thead><tbody id="reimburseRenBody"></tbody></table>
         <p class="table-empty" id="empty5a">暂无数据</p></div>
       <div class="sub-panel" id="sub5b"><h3 style="margin:12px 0 8px;font-size:0.95rem">庞尚韬 · 报销</h3>
-        <table class="data-table"><thead><tr><th>日期</th><th>金额</th><th>事由</th><th>单据</th></tr></thead><tbody id="reimbursePangBody"></tbody></table>
+        <table class="data-table"><thead><tr><th>日期</th><th>金额</th><th>事由</th><th>关联</th><th>单据</th></tr></thead><tbody id="reimbursePangBody"></tbody></table>
         <p class="table-empty" id="empty5b">暂无数据</p></div>
       <div class="sub-panel" id="sub5c"><h3 style="margin:12px 0 8px;font-size:0.95rem">应红林 · 报销</h3>
-        <table class="data-table"><thead><tr><th>日期</th><th>金额</th><th>事由</th><th>单据</th></tr></thead><tbody id="reimburseYingBody"></tbody></table>
+        <table class="data-table"><thead><tr><th>日期</th><th>金额</th><th>事由</th><th>关联</th><th>单据</th></tr></thead><tbody id="reimburseYingBody"></tbody></table>
         <p class="table-empty" id="empty5c">暂无数据</p></div>
-      <button class="btn-add" onclick="showAddForm('reimburse')">＋ 添加报销记录</button>
     </section>
 
     <!-- ===== ⑥ 应收账款 ===== -->
     <section class="tab-panel" id="tab6">
       <div class="panel-header"><h2>📤 公司应收账款</h2></div>
+      <div class="chart-row">
+        <div class="chart-card"><h4>📊 应收状态分布</h4><div class="chart-box"><canvas id="chart6a"></canvas></div></div>
+        <div class="chart-card"><h4>📈 应收趋势</h4><div class="chart-box"><canvas id="chart6b"></canvas></div></div>
+      </div>
       <table class="data-table"><thead><tr><th>日期</th><th>欠款方</th><th>金额</th><th>事由</th><th>状态</th></tr></thead><tbody id="receivableBody"></tbody></table>
-      <p class="table-empty" id="empty6">暂无数据</p>
-      <button class="btn-add" onclick="showAddForm('receivable')">＋ 添加应收记录</button>
+      <div class="table-empty" id="empty6"><span class="empty-icon">📭</span><span class="empty-text">暂无数据</span><span class="empty-hint">数据录入后将在次显示</span></div>
     </section>
 
     <!-- ===== ⑦ 固定资产 ===== -->
     <section class="tab-panel" id="tab7">
       <div class="panel-header"><h2>🏗️ 固定资产账目明细</h2></div>
+      <div class="chart-row">
+        <div class="chart-card"><h4>🏗️ 资产金额占比</h4><div class="chart-box"><canvas id="chart7a"></canvas></div></div>
+        <div class="chart-card"><h4>📊 资产状态分布</h4><div class="chart-box"><canvas id="chart7b"></canvas></div></div>
+      </div>
       <table class="data-table"><thead><tr><th>日期</th><th>资产名称</th><th>金额</th><th>存放地点</th><th>状态</th></tr></thead><tbody id="assetBody"></tbody></table>
-      <p class="table-empty" id="empty7">暂无数据</p>
-      <button class="btn-add" onclick="showAddForm('asset')">＋ 添加固定资产</button>
+      <div class="table-empty" id="empty7"><span class="empty-icon">📭</span><span class="empty-text">暂无数据</span><span class="empty-hint">数据录入后将在次显示</span></div>
     </section>
 
     <!-- ===== ⑧ 管理费用 ===== -->
     <section class="tab-panel" id="tab8">
       <div class="panel-header"><h2>📋 公司管理费用账目明细</h2></div>
+      <div class="chart-row">
+        <div class="chart-card"><h4>📊 费用类别分布</h4><div class="chart-box"><canvas id="chart8a"></canvas></div></div>
+        <div class="chart-card"><h4>📈 月度趋势</h4><div class="chart-box"><canvas id="chart8b"></canvas></div></div>
+      </div>
       <table class="data-table"><thead><tr><th>日期</th><th>费用类别</th><th>金额</th><th>说明</th><th>凭证</th></tr></thead><tbody id="managementBody"></tbody></table>
-      <p class="table-empty" id="empty8">暂无数据</p>
-      <button class="btn-add" onclick="showAddForm('management')">＋ 添加管理费用</button>
+      <div class="table-empty" id="empty8"><span class="empty-icon">📭</span><span class="empty-text">暂无数据</span><span class="empty-hint">数据录入后将在次显示</span></div>
     </section>
 
     <!-- ===== ⑨ 工资 ===== -->
     <section class="tab-panel" id="tab9">
       <div class="panel-header"><h2>👷 公司工资支出账目</h2></div>
+      <div class="chart-row">
+        <div class="chart-card"><h4>📊 月度工资对比</h4><div class="chart-box"><canvas id="chart9a"></canvas></div></div>
+        <div class="chart-card"><h4>👤 岗位占比</h4><div class="chart-box"><canvas id="chart9b"></canvas></div></div>
+      </div>
       <table class="data-table"><thead><tr><th>月份</th><th>姓名</th><th>岗位</th><th>金额</th><th>发放日期</th><th>凭证</th></tr></thead><tbody id="salaryBody"></tbody></table>
-      <p class="table-empty" id="empty9">暂无数据</p>
-      <button class="btn-add" onclick="showAddForm('salary')">＋ 添加工资记录</button>
+      <div class="table-empty" id="empty9"><span class="empty-icon">📭</span><span class="empty-text">暂无数据</span><span class="empty-hint">数据录入后将在次显示</span></div>
     </section>
 
     <!-- ===== ⑩ 基地支出 ===== -->
     <section class="tab-panel" id="tab10">
       <div class="panel-header"><h2>🌿 分基地类别直接支出账目</h2></div>
+      <div class="chart-row">
+        <div class="chart-card"><h4>🌿 各基地支出对比</h4><div class="chart-box"><canvas id="chart10a"></canvas></div></div>
+        <div class="chart-card"><h4>📊 支出项目分布</h4><div class="chart-box"><canvas id="chart10b"></canvas></div></div>
+      </div>
       <div class="sub-tabs">
         <button class="sub-tab-btn active" data-sub="sub10a">金银花基地</button>
         <button class="sub-tab-btn" data-sub="sub10b">党参基地</button>
@@ -203,7 +251,38 @@
       <div class="sub-panel" id="sub10c"><h3 style="margin:12px 0 8px;font-size:0.95rem">党参育苗基地</h3>
         <table class="data-table"><thead><tr><th>日期</th><th>支出项目</th><th>金额</th><th>说明</th><th>凭证</th></tr></thead><tbody id="baseSeedlingBody"></tbody></table>
         <p class="table-empty" id="empty10c">暂无数据</p></div>
-      <button class="btn-add" onclick="showAddForm('baseExpense')">＋ 添加基地支出</button>
+    </section>
+
+    <!-- ===== ⑪ 公司信息 ===== -->
+    <section class="tab-panel" id="tab11">
+      <div class="panel-header"><h2>🏢 公司基本信息</h2></div>
+      <div class="table-wrap">
+        <table class="data-table">
+          <thead><tr><th style="width:120px">项目</th><th>内容</th></tr></thead>
+          <tbody id="companyInfoBody"></tbody>
+        </table>
+      </div>
+      <div class="table-empty" id="empty11"><span class="empty-icon">📭</span><span class="empty-text">暂无数据</span><span class="empty-hint">数据录入后将在次显示</span></div>
+    </section>
+
+    <!-- ===== ⑫ 合同管理 ===== -->
+    <section class="tab-panel" id="tab12">
+      <div class="panel-header"><h2>📄 合同台账</h2></div>
+      <table class="data-table">
+        <thead><tr><th>日期</th><th>合同名称</th><th>签约方</th><th>金额</th><th>状态</th><th>备注</th></tr></thead>
+        <tbody id="contractsBody"></tbody>
+      </table>
+      <div class="table-empty" id="empty12"><span class="empty-icon">📭</span><span class="empty-text">暂无数据</span><span class="empty-hint">数据录入后将在次显示</span></div>
+    </section>
+
+    <!-- ===== ⑬ 银行账户 ===== -->
+    <section class="tab-panel" id="tab13">
+      <div class="panel-header"><h2>🏦 银行账户</h2></div>
+      <table class="data-table">
+        <thead><tr><th>银行</th><th>户名</th><th>账号</th><th>余额</th><th>备注</th></tr></thead>
+        <tbody id="bankAccountsBody"></tbody>
+      </table>
+      <div class="table-empty" id="empty13"><span class="empty-icon">📭</span><span class="empty-text">暂无数据</span><span class="empty-hint">数据录入后将在次显示</span></div>
     </section>
   </main>
 
@@ -224,10 +303,41 @@
     <img id="previewImg" src="" alt="凭证预览">
   </div>
 
-  <script src="/finance/js/lang.js"></script>
-  <script src="/finance/js/main.js"></script>
+  <!-- 品牌开场动画 -->
+  <div class="splash-screen" id="splashScreen">
+    <script>setTimeout(function(){var e=document.getElementById('splashScreen');if(e)e.style.display='none'},2800)</script>
+    <div class="splash-inner">
+      <div class="splash-icon">🌾</div>
+      <div class="splash-line"></div>
+      <h1 class="splash-title">五源兴农业科技</h1>
+      <p class="splash-sub">财务数据展示平台</p>
+      <p class="splash-partner">凉山州农投合作专用</p>
+      <div class="splash-loader"><div class="splash-bar"></div></div>
+    </div>
+  </div>
+
+  <!-- 加载动画 -->
+  <div class="loading-spinner" id="globalLoading">
+    <div class="spinner"></div>
+    
+  </div>
+  <!-- 错误提示 -->
+  <div class="error-toast" id="errorToast"></div>
+  <script src="/finance/js/data.js?v=20260621"></script>
+  <script src="/finance/js/lang.js?v=20260621"></script>
+  <script>document.addEventListener("click",function(e){var b=e.target.closest(".tab-btn");if(b){document.querySelectorAll(".tab-btn,.tab-panel").forEach(function(x){x.classList.remove("active")});b.classList.add("active");var p=document.getElementById(b.dataset.tab);if(p)p.classList.add("active")}});document.querySelectorAll(".sum-item").forEach(function(e){e.addEventListener("click",function(){this.classList.remove("pop");void this.offsetWidth;this.classList.add("pop")})});</script><script src="/finance/js/main.js?v=20260622.1"></script>
   <script>
   // 风格切换
+  // 背景音乐
+  var musicPlaying = false;
+  function toggleMusic() {
+    var m = document.getElementById('bgMusic');
+    var btn = document.getElementById('musicBtn');
+    if (!m || !btn) return;
+    if (musicPlaying) { m.pause(); btn.textContent = '🎵'; musicPlaying = false; }
+    else { m.play().then(function(){ btn.textContent = '🔊'; musicPlaying = true; }).catch(function(){ btn.textContent = '🚫'; }); }
+  }
+
   function switchStyle(style) {
     document.body.setAttribute('data-style', style);
     localStorage.setItem('wyx_style', style);
@@ -251,5 +361,36 @@
   document.getElementById('langSelect').value = savedLang;
   if (typeof switchLang === 'function') switchLang(savedLang);
   </script>
+
+<script>
+// 加载公开数据（无需登录）
+(function(){
+  var apiBase = window.location.pathname.startsWith("/finance/") ? "/finance" : "";
+  var xhr = new XMLHttpRequest();
+  xhr.open("GET", apiBase + "/api/public/reimburse", true);
+  xhr.onload = function() {
+    try {
+      var data = JSON.parse(xhr.responseText);
+      if (!data || !data.length) return;
+      // 应红林
+      var items = data.filter(function(r){ return r.person === "应红林"; });
+      var body = document.getElementById("reimburseYingBody");
+      if (body) {
+        body.innerHTML = "";
+        var total = 0;
+        items.forEach(function(r) {
+          total += r.amount || 0;
+          body.innerHTML += "<tr><td>" + (r.date||"") + '</td><td class="amount expense">¥' + (r.amount||0).toFixed(2) + "</td><td>" + (r.reason||"") + "</td><td>—</td><td>—</td></tr>";
+        });
+        body.innerHTML += "<tr style='background:#f5f0e8;font-weight:700'><td>合计</td><td>¥" + total.toFixed(2) + "</td><td colspan='3'></td></tr>";
+      }
+      var e = document.getElementById("empty5c");
+      if (e) e.style.display = "none";
+    } catch(e) {}
+  };
+  xhr.send();
+})();
+</script>
 </body>
+
 </html>
