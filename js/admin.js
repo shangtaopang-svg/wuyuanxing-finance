@@ -517,6 +517,43 @@ function saveData() {
   });
 }
 
+// === M-IuM-4vM-^XM-iM-uM-^PM-M-dM-^MM-!M-gM-^LM-^M-fM-^MM-^LM-dM-^MM-^M-dM-^M-^XM-dM-^MM-!M-gM-^LM-^M-dM-^MM-;M-fM-^LM-^IM-iM-^RM-. ===
+function uploadDocsFile(fileInput, realIdx) {
+  if (!fileInput || !fileInput.files || !fileInput.files.length) return;
+  var file = fileInput.files[0];
+  var txtInput = document.getElementById("docsTxt_" + realIdx);
+  var viewBtn = txtInput && txtInput.parentElement ? txtInput.parentElement.querySelector("button:last-of-type") : null;
+  if (txtInput) txtInput.value = "M-dM-8M-^JM- M-fM-^LM-^IM-M-gM-^NM-M-iM-^].M-^V...";
+  var fd = new FormData();
+  fd.append("file", file);
+  var xhr = new XMLHttpRequest();
+  var apiBase = (typeof API_BASE !== "undefined") ? API_BASE : "";
+  xhr.open("POST", apiBase + "/api/upload", true);
+  xhr.setRequestHeader("Authorization", "Bearer " + (window.API_TOKEN || ""));
+  xhr.onload = function() {
+    var filename = file.name;
+    if (xhr.status === 200) {
+      try { var resp = JSON.parse(xhr.responseText); filename = resp.filename || resp.path || file.name; } catch(e) {}
+    }
+    if (txtInput) {
+      txtInput.value = filename;
+      var data = DB.get(currentSection);
+      if (data[realIdx]) {
+        data[realIdx].docs = filename;
+        DB.set(currentSection, data);
+        showSaved();
+      }
+    }
+    if (viewBtn) viewBtn.style.display = "";
+    fileInput.value = "";
+  };
+  xhr.onerror = function() {
+    if (txtInput) txtInput.value = file.name;
+    if (viewBtn) viewBtn.style.display = "";
+    fileInput.value = "";
+  };
+  xhr.send(fd);
+}
 // === 上传按钮事件绑定（所有版块通用） ===
 function setupUploadEvents(wrap, section) {
   if (!wrap) return;
@@ -676,16 +713,12 @@ renderEditTable = function(section) {
               ph += '<input type="date" value="' + (val||'') + '" data-row="' + realIdx + '" data-col="' + c.key + '" onchange="editCell(this)" style="width:120px;padding:2px 4px;border:1px solid #ccc">';
             } else if (c.key === 'docs') {
               var display = Array.isArray(val) ? val.join('; ') : val;
-              // 先关闭外层td，再输出完整上传单元格
-              ph += '</td><td class="td-upload-cell" data-row="' + realIdx + '" data-col="' + c.key + '" data-multi="true" data-val="' + escHtml(display) + '" style="padding:2px">';
               ph += '<div class="upload-inline" style="display:flex;gap:2px;align-items:center">';
-              ph += '<input type="text" value="' + escHtml(display) + '" style="flex:1;min-width:60px;padding:3px 4px;border:1px solid #ccc;font-size:0.7rem;font-family:inherit" readonly>';
-              ph += '<button class="up-btn" title="上传文件" style="padding:3px 6px;border:1px solid #999;background:#fff;cursor:pointer;font-size:0.75rem">📎</button>';
-              ph += '<button class="up-view" title="预览" style="padding:3px 6px;border:1px solid #999;background:#fff;cursor:pointer;font-size:0.75rem;' + (display ? '' : 'display:none') + '">👁️</button>';
-              ph += '<input type="file" accept=".jpg,.jpeg,.png,.gif,.pdf,.ofd,.xls,.xlsx" style="display:none" multiple>';
-              ph += '</div></td>';
-              // 跳过后续的关闭td
-              return;
+              ph += '<input type="text" id="docsTxt_' + realIdx + '" value="' + escHtml(display) + '" data-row="' + realIdx + '" data-col="docs" style="flex:1;min-width:60px;padding:3px 4px;border:1px solid #ccc;font-size:0.7rem;font-family:inherit" readonly>';
+              ph += '<button onclick="document.getElementById(\'docsFile_' + realIdx + '\').click()" style="padding:3px 6px;border:1px solid #999;background:#fff;cursor:pointer;font-size:0.75rem" title="上传文件">📎</button>';
+              ph += '<button onclick="var v=document.getElementById(\'docsTxt_' + realIdx + '\').value;if(v)window.open(\'/uploads/vouchers/\'+v,\'_blank\')" style="padding:3px 6px;border:1px solid #999;background:#fff;cursor:pointer;font-size:0.75rem' + (display ? '' : ';display:none') + '" title="预览">👁️</button>';
+              ph += '<input type="file" id="docsFile_' + realIdx + '" accept=".jpg,.jpeg,.png,.gif,.pdf,.ofd,.xls,.xlsx" style="display:none" multiple onchange="uploadDocsFile(this, ' + realIdx + ')">';
+              ph += '</div>';
             } else {
               ph += '<input type="text" value="' + escHtml(val) + '" data-row="' + realIdx + '" data-col="' + c.key + '" onchange="editCell(this)" style="width:100%;padding:2px 4px;border:1px solid #ccc">';
             }
