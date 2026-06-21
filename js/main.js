@@ -323,6 +323,7 @@ function updateSummary() {
 
 // === 图表 ===
 var charts = {};
+if (typeof Chart !== "undefined" && typeof ChartDataLabels !== "undefined") { try { Chart.register(ChartDataLabels); } catch(e) {} }
 
 function renderCharts() {
   var active = document.querySelector('.tab-panel.active');
@@ -354,7 +355,13 @@ function makeChart(id, type, labels, datasets, opts) {
     } : undefined
   };
   var config = JSON.parse(JSON.stringify(defaults));
-  if (opts) Object.assign(config, opts);
+  if (opts) {
+    if (opts.plugins && config.plugins) {
+      Object.assign(config.plugins, opts.plugins);
+      delete opts.plugins;
+    }
+    Object.assign(config, opts);
+  }
   charts[id] = new Chart(ctx, { type: type, data: { labels: labels, datasets: datasets }, options: config });
   return charts[id];
 }
@@ -427,10 +434,18 @@ function renderChart2a() {
   data.forEach(function(r) { persons[r.name] = (persons[r.name]||0) + (r.amount||0); });
   var names = Object.keys(persons);
   var amounts = names.map(function(n){return persons[n];});
+  var total = amounts.reduce(function(s,v){return s+v;},0);
   var colors = ['#3498db','#e74c3c','#2ecc71','#f39c12','#9b59b6','#1abc9c','#e67e22','#34495e','#16a085','#c0392b','#2980b9','#8e44ad','#d35400','#2c3e50','#27ae60','#7f8c8d'];
+  var opts = {};
+  if (typeof ChartDataLabels !== 'undefined') {
+    opts.plugins = { datalabels: {
+      color: '#fff', font: { weight: 'bold', size: 11 },
+      formatter: function(v) { return (v/total*100).toFixed(1) + '%'; }
+    }};
+  }
   makeChart('chart2a', 'doughnut', names, [
     { data: amounts, backgroundColor: colors.slice(0, names.length), borderColor: '#000', borderWidth: 2 }
-  ]);
+  ], opts);
 }
 function renderChart2b() {
   var data = DataStore.capital || [];
