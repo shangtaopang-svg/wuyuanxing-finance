@@ -481,12 +481,12 @@ function uploadDocsFile(fileInput) {
   // 通过文本输入框的 data-row 定位行
   var txtInput = fileInput.parentElement.querySelector('input[type="text"]');
   if (!txtInput) return;
-  var realIdx = parseInt(txtInput.dataset.row);
+  var realIdx = parseInt(txtInput.dataset.row); alert("realIdx="+realIdx+" dataLen="+DB.get(currentSection).length+" row="+txtInput.dataset.row);
   if (isNaN(realIdx) || realIdx < 0) return;
   var viewBtn = txtInput.parentElement.querySelector('button:last-of-type');
-  if (txtInput) txtInput.value = "上传中...";
   var files = Array.prototype.slice.call(fileInput.files);
   var existingNames = txtInput && txtInput.value && txtInput.value.indexOf("上传") === -1 ? txtInput.value.split(";").map(function(s){return s.trim();}).filter(Boolean) : [];
+  if (txtInput) txtInput.value = "上传中...";
   var done = 0;
   files.forEach(function(file, fi) {
     var fd = new FormData();
@@ -719,7 +719,7 @@ window.renderEditTable = function(section) {
             } else if (c.key === 'docs') {
               var display = Array.isArray(val) ? val.join('; ') : val;
               ph += '<div class="upload-inline" style="display:flex;gap:2px;align-items:center">';
-              ph += '<input type="text" id="docsTxt_' + rowKey + '" value="' + escHtml(display) + '" data-row="' + realIdx + '" data-col="docs" style="flex:1;min-width:60px;padding:3px 4px;border:1px solid #ccc;font-size:0.7rem;font-family:inherit" readonly>';
+              ph += '<input type="text" id="docsTxt_' + rowKey + '" value="' + escHtml(display) + '" data-row="' + realIdx + '" data-col="docs" data-date="' + (row.date||'') + '" data-person="' + (row.person||'') + '" data-amount="' + (row.amount||0) + '" style="flex:1;min-width:60px;padding:3px 4px;border:1px solid #ccc;font-size:0.7rem;font-family:inherit" readonly>';
               ph += '<button onclick="document.getElementById(\'docsFile_' + rowKey + '\').click()" style="padding:3px 6px;border:1px solid #999;background:#fff;cursor:pointer;font-size:0.75rem" title="上传文件">📎</button>';
               ph += '<button onclick="var v=document.getElementById(\'docsTxt_' + rowKey + '\').value;if(v)window.open(\'/finance/uploads/vouchers/\'+v,\'_blank\')" style="padding:3px 6px;border:1px solid #999;background:#fff;cursor:pointer;font-size:0.75rem' + (display ? '' : ';display:none') + '" title="预览">👁️</button>';
               ph += '<button onclick="clearDocs(\'' + rowKey + '\',this)" style="padding:3px 6px;border:1px solid #e74c3c;background:#fff;color:#e74c3c;cursor:pointer;font-size:0.75rem' + (display ? '' : ';display:none') + '" title="删除">✖</button>';
