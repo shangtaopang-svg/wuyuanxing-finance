@@ -757,13 +757,14 @@ function renderBankFlow() {
   if (data.length === 0) { var e = $('empty14'); if(e) e.style.display = 'block'; return; }
   var e = $('empty14'); if(e) e.style.display = 'none';
   data.forEach(function(r) {
-    body.innerHTML += '<tr><td>' + (r.date||'') + '</td>' +
-      '<td class="amount">' + (r.income > 0 ? formatNum(r.income) : '') + '</td>' +
-      '<td class="amount">' + (r.expense > 0 ? formatNum(r.expense) : '') + '</td>' +
-      '<td>' + (r.counterparty_account||'') + '</td>' +
-      '<td>' + (r.counterparty_name||'') + '</td>' +
-      '<td>' + (r.purpose||'') + '</td>' +
-      '<td>' + (r.summary||'') + '</td></tr>';
+    var bg = r.income > 0 ? "#f0faf4" : (r.expense > 0 ? "#fef2f2" : "");
+    body.innerHTML += '<tr style="background:' + bg + '"><td>' + (r.date||"") + '</td>' +
+      '<td class="amount" style="color:#27ae60;font-weight:700">' + (r.income > 0 ? formatNum(r.income) : "") + '</td>' +
+      '<td class="amount" style="color:#e53e3e;font-weight:700">' + (r.expense > 0 ? formatNum(r.expense) : "") + '</td>' +
+      '<td>' + (r.counterparty_account||"") + '</td>' +
+      '<td>' + (r.counterparty_name||"") + '</td>' +
+      '<td>' + (r.purpose||"") + '</td>' +
+      '<td>' + (r.summary||"") + '</td></tr>';
   });
 }
 
