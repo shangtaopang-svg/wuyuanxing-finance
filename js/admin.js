@@ -192,52 +192,6 @@ function switchSection(section) {
 }
 
 // === 渲染可编辑表格 ===
-function renderEditTable(section) {
-  var data = DB.get(section);
-  var cols = COLUMNS[section];
-  var wrap = $id('tableEditWrap');
-  $id('recordCount').textContent = data.length + ' 条记录';
-
-  if (!cols) { wrap.innerHTML = '<p style="padding:20px;color:#999">暂未定义此版块</p>'; return; }
-
-  var html = '<table class="edit-table"><thead><tr>';
-  cols.forEach(function(c) { html += '<th>' + c.label + '</th>'; });
-  html += '<th style="width:36px">操作</th></tr></thead><tbody>';
-
-  if (data.length === 0) {
-    html += '<tr><td colspan="' + (cols.length + 1) + '" style="text-align:center;padding:30px;color:#999">暂无数据，点击"＋ 新增一行"添加</td></tr>';
-  } else {
-    data.forEach(function(row, idx) {
-      html += '<tr>';
-      cols.forEach(function(c) {
-        var val = row[c.key] !== undefined && row[c.key] !== null ? row[c.key] : '';
-        if (c.key === 'invoices' || c.key === 'voucher' || c.key === 'docs') {
-          // 数组转字符串显示
-          var display = Array.isArray(val) ? val.join('; ') : val;
-          html += '<td><input type="text" value="' + escHtml(display) + '" data-row="' + idx + '" data-col="' + c.key + '" onchange="editCell(this)" placeholder="多个文件用;分隔"></td>';
-        } else if (c.type === 'select') {
-          html += '<td><select data-row="' + idx + '" data-col="' + c.key + '" onchange="editCell(this)">';
-          c.options.forEach(function(o) {
-            html += '<option value="' + o + '"' + (val === o ? ' selected' : '') + '>' + o + '</option>';
-          });
-          html += '</select></td>';
-        } else if (c.type === 'number') {
-          html += '<td><input type="number" step="0.01" value="' + (val || 0) + '" data-row="' + idx + '" data-col="' + c.key + '" onchange="editCell(this)"></td>';
-        } else if (c.type === 'date') {
-          html += '<td><input type="date" value="' + (val || '') + '" data-row="' + idx + '" data-col="' + c.key + '" onchange="editCell(this)"></td>';
-        } else if (c.type === 'month') {
-          html += '<td><input type="month" value="' + (val || '') + '" data-row="' + idx + '" data-col="' + c.key + '" onchange="editCell(this)"></td>';
-        } else {
-          html += '<td><input type="text" value="' + escHtml(val) + '" data-row="' + idx + '" data-col="' + c.key + '" onchange="editCell(this)"></td>';
-        }
-      });
-      html += '<td><button class="row-del-btn" onclick="deleteRow(' + idx + ')" title="删除此行">✕</button></td></tr>';
-    });
-  }
-  html += '</tbody></table>';
-  wrap.innerHTML = html;
-}
-
 function escHtml(s) {
   return String(s).replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/\n/g,'\\n');
 }
