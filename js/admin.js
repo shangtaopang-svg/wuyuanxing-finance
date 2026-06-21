@@ -72,14 +72,13 @@ var COLUMNS = {
     {key:'voucher', label:'入账凭据', type:'text'}
   ],
   bankFlow: [
-    {key:'date', label:'日期', type:'date'},
-    {key:'type', label:'类型', type:'select', options:['收入','支出']},
-    {key:'summary', label:'摘要/说明', type:'text'},
-    {key:'income', label:'收入', type:'number'},
-    {key:'expense', label:'支出', type:'number'},
-    {key:'balance', label:'余额', type:'number'},
-    {key:'counterparty', label:'打款/收款方', type:'text'},
-    {key:'invoices', label:'凭证', type:'text'}
+    {key:'date', label:'交易时间', type:'text'},
+    {key:'income', label:'收入金额', type:'number'},
+    {key:'expense', label:'支出金额', type:'number'},
+    {key:'counterparty_account', label:'对方账号', type:'text'},
+    {key:'counterparty_name', label:'对方户名', type:'text'},
+    {key:'purpose', label:'交易用途', type:'text'},
+    {key:'summary', label:'摘要', type:'text'}
   ],
   income: [
     {key:'date', label:'日期', type:'date'},

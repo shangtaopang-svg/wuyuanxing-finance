@@ -92,8 +92,9 @@ async function initDB() {
     id INTEGER PRIMARY KEY, date TEXT, base TEXT, item TEXT, amount REAL, note TEXT, invoices TEXT DEFAULT '[]'
   )`);
   db.run(`CREATE TABLE IF NOT EXISTS bank_flow (
-    id INTEGER PRIMARY KEY, date TEXT, type TEXT, summary TEXT, income REAL DEFAULT 0,
-    expense REAL DEFAULT 0, balance REAL DEFAULT 0, counterparty TEXT DEFAULT '', invoices TEXT DEFAULT '[]'
+    id INTEGER PRIMARY KEY, date TEXT, income REAL DEFAULT 0,
+    expense REAL DEFAULT 0, counterparty_account TEXT DEFAULT '', counterparty_name TEXT DEFAULT '',
+    purpose TEXT DEFAULT '', summary TEXT DEFAULT ''
   )`);
 
   // 插入默认管理员
@@ -164,7 +165,7 @@ const TABLE_MAP = {
   management: { table: 'management', fields: ['date','category','amount','summary','invoices'] },
   salary: { table: 'salary', fields: ['month','name','position','amount','pay_date','voucher'] },
   baseExpense: { table: 'base_expense', fields: ['date','base','item','amount','note','invoices'] },
-  bankFlow: { table: 'bank_flow', fields: ['date','type','summary','income','expense','balance','counterparty','invoices'] }
+  bankFlow: { table: 'bank_flow', fields: ['date','income','expense','counterparty_account','counterparty_name','purpose','summary'] }
 };
 
 // 获取数据
@@ -226,7 +227,7 @@ const PUBLIC_SECTIONS = {
   asset: { fields: ['date','name','amount','location','status'] },
   management: { fields: ['date','category','amount','summary','invoices'] },
   salary: { fields: ['month','name','position','amount','pay_date','voucher'] },
-  bankFlow: { fields: ['date','type','summary','income','expense','balance','counterparty','invoices'] },
+  bankFlow: { fields: ['date','income','expense','counterparty_account','counterparty_name','purpose','summary'] },
   baseExpense: { fields: ['date','base','item','amount','note','invoices'] }
 };
 Object.keys(PUBLIC_SECTIONS).forEach(function(key) {
