@@ -607,7 +607,7 @@ function setupUploadEvents(wrap, section) {
     if (viewBtn) {
       viewBtn.onclick = function() {
         if (txtInput && txtInput.value) {
-          window.open('/uploads/vouchers/' + txtInput.value, '_blank');
+          window.open('/finance/uploads/vouchers/' + txtInput.value, '_blank');
         }
       };
     }
@@ -716,7 +716,7 @@ renderEditTable = function(section) {
               ph += '<div class="upload-inline" style="display:flex;gap:2px;align-items:center">';
               ph += '<input type="text" id="docsTxt_' + realIdx + '" value="' + escHtml(display) + '" data-row="' + realIdx + '" data-col="docs" style="flex:1;min-width:60px;padding:3px 4px;border:1px solid #ccc;font-size:0.7rem;font-family:inherit" readonly>';
               ph += '<button onclick="document.getElementById(\'docsFile_' + realIdx + '\').click()" style="padding:3px 6px;border:1px solid #999;background:#fff;cursor:pointer;font-size:0.75rem" title="上传文件">📎</button>';
-              ph += '<button onclick="var v=document.getElementById(\'docsTxt_' + realIdx + '\').value;if(v)window.open(\'/uploads/vouchers/\'+v,\'_blank\')" style="padding:3px 6px;border:1px solid #999;background:#fff;cursor:pointer;font-size:0.75rem' + (display ? '' : ';display:none') + '" title="预览">👁️</button>';
+              ph += '<button onclick="var v=document.getElementById(\'docsTxt_' + realIdx + '\').value;if(v)window.open(\'/finance/uploads/vouchers/\'+v,\'_blank\')" style="padding:3px 6px;border:1px solid #999;background:#fff;cursor:pointer;font-size:0.75rem' + (display ? '' : ';display:none') + '" title="预览">👁️</button>';
               ph += '<input type="file" id="docsFile_' + realIdx + '" accept=".jpg,.jpeg,.png,.gif,.pdf,.ofd,.xls,.xlsx" style="display:none" multiple onchange="uploadDocsFile(this, ' + realIdx + ')">';
               ph += '</div>';
             } else {

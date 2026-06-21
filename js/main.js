@@ -962,7 +962,7 @@ function addChartCanvases() {
 
             grp.forEach(function(r) {
               var hasDoc = r.docs && (typeof r.docs === "string" || r.docs.length > 0);
-              var docLink = hasDoc ? '<a href="/uploads/vouchers/' + r.docs + '" target="_blank" style="color:#D35400;font-weight:700;text-decoration:none;border-bottom:1px dashed #D35400">📎 单据</a>' : '—';
+              var docLink = hasDoc ? '<a href="/finance/uploads/vouchers/' + r.docs + '" target="_blank" style="color:#D35400;font-weight:700;text-decoration:none;border-bottom:1px dashed #D35400">📎 单据</a>' : '—';
               body.innerHTML += '<tr><td>' + (r.date||'') + '</td><td class="amount expense">¥' + (r.amount||0).toFixed(2) + '</td><td>' + (r.reason||'') + '</td><td>—</td><td>' + docLink + '</td></tr>';
             });
           });

@@ -116,5 +116,5 @@ function updateFiles(listDiv) {
 
 // 预览文件
 function previewFile(path) {
-  window.open('/uploads/vouchers/' + path, '_blank');
+  window.open('/finance/uploads/vouchers/' + path, '_blank');
 }
