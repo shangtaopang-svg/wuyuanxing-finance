@@ -35,7 +35,7 @@ var DB = {
     fetch(API_BASE + '/api/data/' + section, { headers: { 'Authorization': 'Bearer ' + window.API_TOKEN } })
       .then(function(r) { if (r.ok) return r.json(); throw 'err'; })
       .then(function(data) {
-        localStorage.setItem('wyx_' + section, JSON.stringify(data));
+        if (data.length > 0) localStorage.setItem('wyx_' + section, JSON.stringify(data));
         if (callback) callback(data);
       })
       .catch(function() { if (callback) callback(DB.get(section)); });
