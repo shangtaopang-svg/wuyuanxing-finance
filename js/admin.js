@@ -520,7 +520,8 @@ function saveData() {
 }
 
 // === M-IuM-4vM-^XM-iM-uM-^PM-M-dM-^MM-!M-gM-^LM-^M-fM-^MM-^LM-dM-^MM-^M-dM-^M-^XM-dM-^MM-!M-gM-^LM-^M-dM-^MM-;M-fM-^LM-^IM-iM-^RM-. ===
-function uploadDocsFile(fileInput, rowKey) {
+function uploadDocsFile(fileInput) {
+  var rowKey = fileInput.dataset.key;
   if (!fileInput || !fileInput.files || !fileInput.files.length) return;
   if (!window.API_TOKEN) { alert("请先登录"); return; }
   var txtInput = document.getElementById("docsTxt_" + rowKey);
@@ -728,7 +729,7 @@ renderEditTable = function(section) {
               ph += '<input type="text" id="docsTxt_' + rowKey + '" value="' + escHtml(display) + '" data-row="' + realIdx + '" data-col="docs" style="flex:1;min-width:60px;padding:3px 4px;border:1px solid #ccc;font-size:0.7rem;font-family:inherit" readonly>';
               ph += '<button onclick="document.getElementById(\'docsFile_' + rowKey + '\').click()" style="padding:3px 6px;border:1px solid #999;background:#fff;cursor:pointer;font-size:0.75rem" title="上传文件">📎</button>';
               ph += '<button onclick="var v=document.getElementById(\'docsTxt_' + rowKey + '\').value;if(v)window.open(\'/finance/uploads/vouchers/\'+v,\'_blank\')" style="padding:3px 6px;border:1px solid #999;background:#fff;cursor:pointer;font-size:0.75rem' + (display ? '' : ';display:none') + '" title="预览">👁️</button>';
-              ph += '<input type="file" id="docsFile_' + rowKey + '" accept=".jpg,.jpeg,.png,.gif,.pdf,.ofd,.xls,.xlsx" style="display:none" multiple onchange="uploadDocsFile(this, rowKey + ')">';
+              ph += '<input type="file" id="docsFile_' + rowKey + '" accept=".jpg,.jpeg,.png,.gif,.pdf,.ofd,.xls,.xlsx" style="display:none" multiple data-key="' + rowKey + '" onchange="uploadDocsFile(this)">';
               ph += '</div>';
             } else {
               ph += '<input type="text" value="' + escHtml(val) + '" data-row="' + realIdx + '" data-col="' + c.key + '" onchange="editCell(this)" style="width:100%;padding:2px 4px;border:1px solid #ccc">';
