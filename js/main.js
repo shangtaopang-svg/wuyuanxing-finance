@@ -852,7 +852,7 @@ function renderBankAccounts() {
 // 页面加载
 document.addEventListener('DOMContentLoaded', function() {
   addChartCanvases();
-  renderAll();
+  try { renderAll(); } catch(e) { console.error(e); }
   // 品牌开场动画 2.5秒后自动消失
   setTimeout(hideSplash, 2500);
   showLoading(true);
@@ -877,15 +877,16 @@ document.addEventListener('DOMContentLoaded', function() {
         }
       } catch(e) {}
       pubLoaded++;
-      if (pubLoaded === pubSections.length) { renderAll(); updateSummary(); showLoading(false); setTimeout(animateSummaryNumbers, 400); }
+      if (pubLoaded === pubSections.length) { try { renderAll(); } catch(e) { console.error(e); } updateSummary(); showLoading(false); setTimeout(animateSummaryNumbers, 400); }
     };
-    xhr.onerror = function() { pubLoaded++; if (pubLoaded === pubSections.length) { renderAll(); updateSummary(); showLoading(false); } };
+    xhr.onerror = function() { pubLoaded++; if (pubLoaded === pubSections.length) { try { renderAll(); } catch(e) { console.error(e); } updateSummary(); showLoading(false); } };
     xhr.send();
   });    // 加载完成后校验数据
-    if (token && typeof API_BASE !== 'undefined') {
+    var _token = localStorage.getItem('wyx_token');
+    if (_token && typeof API_BASE !== 'undefined') {
       var vxhr = new XMLHttpRequest();
       vxhr.open('GET', API_BASE + '/api/validate', true);
-      vxhr.setRequestHeader('Authorization', 'Bearer ' + token);
+      vxhr.setRequestHeader("Authorization", "Bearer " + _token);
       vxhr.onload = function() {
         try {
           var vd = JSON.parse(vxhr.responseText);
