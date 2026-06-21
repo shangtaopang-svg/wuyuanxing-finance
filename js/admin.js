@@ -520,40 +520,48 @@ function saveData() {
 // === M-IuM-4vM-^XM-iM-uM-^PM-M-dM-^MM-!M-gM-^LM-^M-fM-^MM-^LM-dM-^MM-^M-dM-^M-^XM-dM-^MM-!M-gM-^LM-^M-dM-^MM-;M-fM-^LM-^IM-iM-^RM-. ===
 function uploadDocsFile(fileInput, realIdx) {
   if (!fileInput || !fileInput.files || !fileInput.files.length) return;
-  var file = fileInput.files[0];
+  if (!window.API_TOKEN) { alert("请先登录"); return; }
   var txtInput = document.getElementById("docsTxt_" + realIdx);
   var viewBtn = txtInput && txtInput.parentElement ? txtInput.parentElement.querySelector("button:last-of-type") : null;
-  if (txtInput) txtInput.value = "M-dM-8M-^JM- M-fM-^LM-^IM-M-gM-^NM-M-iM-^].M-^V...";
-  var fd = new FormData();
-  fd.append("file", file);
-  var xhr = new XMLHttpRequest();
-  var apiBase = (typeof API_BASE !== "undefined") ? API_BASE : "";
-  xhr.open("POST", apiBase + "/api/upload", true);
-  xhr.setRequestHeader("Authorization", "Bearer " + (window.API_TOKEN || ""));
-  xhr.onload = function() {
-    var filename = file.name;
-    if (xhr.status === 200) {
-      try { var resp = JSON.parse(xhr.responseText); filename = resp.filename || resp.path || file.name; } catch(e) {}
-    }
-    if (txtInput) {
-      txtInput.value = filename;
-      var data = DB.get(currentSection);
-      if (data[realIdx]) {
-        data[realIdx].docs = filename;
-        DB.set(currentSection, data);
-        showSaved();
+  if (txtInput) txtInput.value = "上传中...";
+  var files = Array.prototype.slice.call(fileInput.files);
+  var existingNames = txtInput && txtInput.value && txtInput.value !== "上传中..." ? txtInput.value.split(";").map(function(s){return s.trim();}).filter(Boolean) : [];
+  var done = 0;
+  files.forEach(function(file, fi) {
+    var fd = new FormData();
+    fd.append("file", file);
+    var xhr = new XMLHttpRequest();
+    var apiBase = (typeof API_BASE !== "undefined") ? API_BASE : "";
+    xhr.open("POST", apiBase + "/api/upload", true);
+    xhr.setRequestHeader("Authorization", "Bearer " + (window.API_TOKEN || ""));
+    xhr.onload = function() {
+      done++;
+      var filename = file.name;
+      if (xhr.status === 200) {
+        try { var resp = JSON.parse(xhr.responseText); filename = resp.filename || resp.path || file.name; } catch(e) {}
       }
-    }
-    if (viewBtn) viewBtn.style.display = "";
-    fileInput.value = "";
-  };
-  xhr.onerror = function() {
-    if (txtInput) txtInput.value = file.name;
-    if (viewBtn) viewBtn.style.display = "";
-    fileInput.value = "";
-  };
-  xhr.send(fd);
+      existingNames.push(filename);
+      if (done === files.length) {
+        var namesStr = existingNames.join("; ");
+        if (txtInput) txtInput.value = namesStr;
+        var data = DB.get(currentSection);
+        for (var i = 0; i < data.length; i++) {
+          if (data[i]._uid === realIdx) {
+            data[i].docs = namesStr;
+            DB.set(currentSection, data);
+            showSaved();
+            break;
+          }
+        }
+        if (viewBtn) viewBtn.style.display = "";
+        fileInput.value = "";
+      }
+    };
+    xhr.onerror = function() { done++; if (done === files.length) fileInput.value = ""; };
+    xhr.send(fd);
+  });
 }
+
 // === 上传按钮事件绑定（所有版块通用） ===
 function setupUploadEvents(wrap, section) {
   if (!wrap) return;
@@ -702,6 +710,7 @@ renderEditTable = function(section) {
         ph += '<th style="width:36px">操作</th></tr></thead><tbody>';
         items.forEach(function(row) {
           var realIdx = data.indexOf(row);
+          if (!data[realIdx]._uid) data[realIdx]._uid = realIdx;
           ph += '<tr>';
           cols.forEach(function(c) {
             if (c.key==='person'||c.key==='payment_method'||c.key==='reimburse_date') return;
