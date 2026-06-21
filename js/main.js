@@ -723,7 +723,14 @@ function renderBankFlow() {
     if (r.expense > 0) { expCount++; expTotal += r.expense; }
   });
   var balance = incTotal - expTotal;
-  var summaryHtml = '<div class="summary-bar" style="display:flex;gap:6px;margin-bottom:12px;flex-wrap:wrap">' +
+  // 截至日期（取最新交易日期或今天）
+  var cutoffDate = '—';
+  if (data.length > 0) {
+    var dates = data.map(function(r){return r.date;}).filter(Boolean).sort();
+    cutoffDate = dates[dates.length-1] || new Date().toISOString().slice(0,10);
+  }
+  var summaryHtml = '<div style="text-align:right;font-size:0.75rem;font-weight:700;color:#888;margin-bottom:8px">📅 数据截至：' + cutoffDate + '</div>' +
+    '<div class="summary-bar" style="display:flex;gap:6px;margin-bottom:12px;flex-wrap:wrap">' +
     '<div class="sum-item" style="flex:1;text-align:center;padding:8px 6px;border:1px solid #000;background:#f0faf4;border-left:4px solid #27ae60;border-radius:4px">' +
       '<span class="sum-num" style="display:block;font-size:1.1rem;font-weight:900;color:#27ae60">' + incCount + '</span>' +
       '<span style="font-size:0.7rem;font-weight:700">总收入笔数</span></div>' +
