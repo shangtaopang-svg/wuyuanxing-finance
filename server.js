@@ -201,6 +201,29 @@ app.get('/api/public/reimburse', function(req, res) {
   } catch(e) { res.json([]); }
 });
 
+// ===== 公开只读API - 所有版块 =====
+const PUBLIC_SECTIONS = {
+  capital: { fields: ['date','name','amount','method','voucher'] },
+  incomeExpense: { fields: ['date','type','summary','income','expense','balance','invoices'] },
+  income: { fields: ['date','category','amount','source','voucher'] },
+  pettyCash: { fields: ['date','person','type','amount','summary','voucher'] },
+  receivable: { fields: ['date','party','amount','reason','status'] },
+  asset: { fields: ['date','name','amount','location','status'] },
+  management: { fields: ['date','category','amount','summary','invoices'] },
+  salary: { fields: ['month','name','position','amount','pay_date','voucher'] },
+  baseExpense: { fields: ['date','base','item','amount','note','invoices'] }
+};
+Object.keys(PUBLIC_SECTIONS).forEach(function(key) {
+  app.get('/api/public/' + key, function(req, res) {
+    try {
+      var cfg = PUBLIC_SECTIONS[key];
+      var table = key === 'incomeExpense' ? 'income_expense' : key === 'pettyCash' ? 'petty_cash' : key === 'baseExpense' ? 'base_expense' : key;
+      var data = query("SELECT " + cfg.fields.join(',') + " FROM " + table + " ORDER BY id");
+      res.json(data);
+    } catch(e) { res.json([]); }
+  });
+});
+
 // ===== 文件上传 =====
 app.post('/api/upload', authMW, upload.single('file'), (req, res) => {
   if (!req.file) return res.status(400).json({ error: '请选择文件' });

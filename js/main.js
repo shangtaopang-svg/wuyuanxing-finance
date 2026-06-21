@@ -893,7 +893,33 @@ document.addEventListener('DOMContentLoaded', function() {
       xhr.onerror = function() { loaded++; showError('网络连接异常'); if (loaded === sections.length) { renderAll(); updateSummary(); showLoading(false); } };
       xhr.send();
     });
-  } else { showLoading(false); setTimeout(animateSummaryNumbers, 400); }
+  } else {
+    // 未登录时从公共API加载数据
+    showLoading(true);
+    var pubSections = ['capital','incomeExpense','income','pettyCash','receivable','asset','management','salary','baseExpense'];
+    var pubLoaded = 0;
+    pubSections.forEach(function(s) {
+      var xhr = new XMLHttpRequest();
+      xhr.open('GET', (typeof API_BASE !== 'undefined' ? API_BASE : '') + '/api/public/' + s, true);
+      xhr.onload = function() {
+        try {
+          var d = JSON.parse(xhr.responseText) || [];
+          if (typeof DataStore !== 'undefined') {
+            if (s === 'pettyCash') {
+              DataStore.pettyCash = { ren: d.filter(function(x){return x.person==='任海涛';}), pang: d.filter(function(x){return x.person==='庞尚韬';}) };
+              DataStore._pettyCashFlat = d;
+            } else {
+              DataStore[s] = d;
+            }
+          }
+        } catch(e) {}
+        pubLoaded++;
+        if (pubLoaded === pubSections.length) { renderAll(); updateSummary(); showLoading(false); setTimeout(animateSummaryNumbers, 400); }
+      };
+      xhr.onerror = function() { pubLoaded++; if (pubLoaded === pubSections.length) { renderAll(); updateSummary(); showLoading(false); } };
+      xhr.send();
+    });
+  }
 
     // 加载完成后校验数据
     if (token && typeof API_BASE !== 'undefined') {

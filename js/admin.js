@@ -186,6 +186,7 @@ document.querySelectorAll('.tool-tab').forEach(function(btn) {
 });
 
 function switchSection(section) {
+  // diagnostic removed
   currentSection = section;
   $title('sectionTitle').textContent = SECTION_NAMES[section] || section;
   renderEditTable(section);
@@ -615,6 +616,7 @@ function syncFromServer() {
 // === 初始化 - 从服务器加载 ===
 // 修改 renderEditTable 以支持搜索过滤
 window.renderEditTable = function(section) {
+  // diagnostic removed
   var data = DB.get(section);
   var cols = COLUMNS[section];
   var wrap = $id('tableEditWrap');
@@ -665,7 +667,7 @@ window.renderEditTable = function(section) {
         cols.forEach(function(c) { if(c.key!=='person'&&c.key!=='payment_method'&&c.key!=='reimburse_date') ph += '<th>' + c.label + '</th>'; });
         ph += '<th style="width:36px">操作</th></tr></thead><tbody>';
         items.forEach(function(row) {
-          var rowKey = row._key || 'k' + Date.now() + Math.random().toString(36).slice(2,6);
+          var realIdx = data.indexOf(row); var rowKey = row._key || 'k' + Date.now() + Math.random().toString(36).slice(2,6);
           if (!row._key) row._key = rowKey;
           ph += '<tr>';
           cols.forEach(function(c) {
