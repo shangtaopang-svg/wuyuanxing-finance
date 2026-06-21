@@ -13,7 +13,7 @@ var DB = {
     DB.syncToServer(key, data);
   },
   getAll: function() {
-    var sections = ['incomeExpense','capital','income','pettyCash','reimburse','receivable','asset','management','salary','baseExpense'];
+    var sections = ['incomeExpense','capital','bankFlow','income','pettyCash','reimburse','receivable','asset','management','salary','baseExpense'];
     var all = {};
     sections.forEach(function(s) { all[s] = DB.get(s); });
     return all;
@@ -42,7 +42,7 @@ var DB = {
   },
   // 批量从服务器加载全部
   loadAllFromServer: function(callback) {
-    var sections = ['incomeExpense','capital','income','pettyCash','reimburse','receivable','asset','management','salary','baseExpense'];
+    var sections = ['incomeExpense','capital','bankFlow','income','pettyCash','reimburse','receivable','asset','management','salary','baseExpense'];
     var loaded = 0;
     sections.forEach(function(s) {
       DB.loadFromServer(s, function() {
@@ -70,6 +70,16 @@ var COLUMNS = {
     {key:'amount', label:'金额', type:'number'},
     {key:'method', label:'出资方式', type:'select', options:['银行转账','现金','实物','其他']},
     {key:'voucher', label:'入账凭据', type:'text'}
+  ],
+  bankFlow: [
+    {key:'date', label:'日期', type:'date'},
+    {key:'type', label:'类型', type:'select', options:['收入','支出']},
+    {key:'summary', label:'摘要/说明', type:'text'},
+    {key:'income', label:'收入', type:'number'},
+    {key:'expense', label:'支出', type:'number'},
+    {key:'balance', label:'余额', type:'number'},
+    {key:'counterparty', label:'打款/收款方', type:'text'},
+    {key:'invoices', label:'凭证', type:'text'}
   ],
   income: [
     {key:'date', label:'日期', type:'date'},
@@ -136,7 +146,7 @@ var COLUMNS = {
 var SECTION_NAMES = {
   incomeExpense:'基本账户收支', capital:'股本金', income:'收入',
   pettyCash:'备用金', reimburse:'报销', receivable:'应收账款',
-  asset:'固定资产', management:'管理费用', salary:'工资', baseExpense:'基地支出'
+  asset:'固定资产', management:'管理费用', salary:'工资', baseExpense:'基地支出', bankFlow:'公司基本户收支'
 };
 
 var currentSection = 'incomeExpense';
@@ -481,7 +491,7 @@ function uploadDocsFile(fileInput) {
   // 通过文本输入框的 data-row 定位行
   var txtInput = fileInput.parentElement.querySelector('input[type="text"]');
   if (!txtInput) return;
-  var realIdx = parseInt(txtInput.dataset.row); alert("realIdx="+realIdx+" dataLen="+DB.get(currentSection).length+" row="+txtInput.dataset.row);
+  var realIdx = parseInt(txtInput.dataset.row);
   if (isNaN(realIdx) || realIdx < 0) return;
   var viewBtn = txtInput.parentElement.querySelector('button:last-of-type');
   var files = Array.prototype.slice.call(fileInput.files);

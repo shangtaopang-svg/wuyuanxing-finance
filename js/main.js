@@ -348,7 +348,7 @@ function makeChart(id, type, labels, datasets, opts) {
   if (charts[id]) charts[id].destroy();
   var defaults = {
     responsive: true, maintainAspectRatio: false,
-    plugins: { legend: { labels: { font: { size: 10, weight: 'bold' }, boxWidth: 12, padding: 8 }, position: 'bottom' } },
+    plugins: { legend: { labels: { font: { size: 13, weight: 'bold' }, boxWidth: 16, padding: 12, usePointStyle: true }, position: 'bottom' } },
     scales: type !== 'doughnut' && type !== 'pie' ? {
       x: { grid: { display: false }, ticks: { font: { size: 9 } } },
       y: { ticks: { callback: function(v) { return '¥' + (v/1000).toFixed(0) + 'k'; }, font: { size: 9 } } }

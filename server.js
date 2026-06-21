@@ -91,6 +91,10 @@ async function initDB() {
   db.run(`CREATE TABLE IF NOT EXISTS base_expense (
     id INTEGER PRIMARY KEY, date TEXT, base TEXT, item TEXT, amount REAL, note TEXT, invoices TEXT DEFAULT '[]'
   )`);
+  db.run(`CREATE TABLE IF NOT EXISTS bank_flow (
+    id INTEGER PRIMARY KEY, date TEXT, type TEXT, summary TEXT, income REAL DEFAULT 0,
+    expense REAL DEFAULT 0, balance REAL DEFAULT 0, counterparty TEXT DEFAULT '', invoices TEXT DEFAULT '[]'
+  )`);
 
   // 插入默认管理员
   const users = db.exec("SELECT COUNT(*) as c FROM users");
@@ -159,7 +163,8 @@ const TABLE_MAP = {
   asset: { table: 'asset', fields: ['date','name','amount','location','status'] },
   management: { table: 'management', fields: ['date','category','amount','summary','invoices'] },
   salary: { table: 'salary', fields: ['month','name','position','amount','pay_date','voucher'] },
-  baseExpense: { table: 'base_expense', fields: ['date','base','item','amount','note','invoices'] }
+  baseExpense: { table: 'base_expense', fields: ['date','base','item','amount','note','invoices'] },
+  bankFlow: { table: 'bank_flow', fields: ['date','type','summary','income','expense','balance','counterparty','invoices'] }
 };
 
 // 获取数据
@@ -201,6 +206,16 @@ app.get('/api/public/reimburse', function(req, res) {
   } catch(e) { res.json([]); }
 });
 
+// ===== 直接保存报销单据文件（按 date+person+amount 匹配） =====
+app.post('/api/save-doc', authMW, (req, res) => {
+  try {
+    const { date, person, amount, docs } = req.body;
+    if (!date || !person || !amount) return res.status(400).json({ error: '缺少参数' });
+    run("UPDATE reimburse SET docs=? WHERE date=? AND person=? AND amount=?", [docs, date, person, amount]);
+    res.json({ ok: true });
+  } catch(e) { res.status(500).json({ error: e.message }); }
+});
+
 // ===== 公开只读API - 所有版块 =====
 const PUBLIC_SECTIONS = {
   capital: { fields: ['date','name','amount','method','voucher'] },
@@ -211,6 +226,7 @@ const PUBLIC_SECTIONS = {
   asset: { fields: ['date','name','amount','location','status'] },
   management: { fields: ['date','category','amount','summary','invoices'] },
   salary: { fields: ['month','name','position','amount','pay_date','voucher'] },
+  bankFlow: { fields: ['date','type','summary','income','expense','balance','counterparty','invoices'] },
   baseExpense: { fields: ['date','base','item','amount','note','invoices'] }
 };
 Object.keys(PUBLIC_SECTIONS).forEach(function(key) {

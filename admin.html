@@ -40,18 +40,19 @@
     <div class="toolbar-inner">
       <div class="toolbar-tabs" id="adminTabs">
         <button class="tool-tab active" data-section="capital">① 股本金</button>
-        <button class="tool-tab" data-section="incomeExpense">② 支出</button>
-        <button class="tool-tab" data-section="income">③ 收入</button>
-        <button class="tool-tab" data-section="pettyCash">④ 备用金</button>
-        <button class="tool-tab" data-section="reimburse" onclick="switchSection(this.dataset.section)">⑤ 报销</button>
-        <button class="tool-tab" data-section="receivable">⑥ 应收款</button>
-        <button class="tool-tab" data-section="asset">⑦ 固定资产</button>
-        <button class="tool-tab" data-section="management">⑧ 管理费</button>
-        <button class="tool-tab" data-section="salary">⑨ 工资</button>
-        <button class="tool-tab" data-section="baseExpense">⑩ 基地支出</button>
-        <button class="tool-tab" data-section="companyInfo">⑪ 公司信息</button>
-        <button class="tool-tab" data-section="contracts">⑫ 合同</button>
-        <button class="tool-tab" data-section="bankAccounts">⑬ 银行账户</button>
+        <button class="tool-tab" data-section="bankFlow">② 公司基本户收支</button>
+        <button class="tool-tab" data-section="incomeExpense">③ 支出</button>
+        <button class="tool-tab" data-section="income">④ 收入</button>
+        <button class="tool-tab" data-section="pettyCash">⑤ 备用金</button>
+        <button class="tool-tab" data-section="reimburse" onclick="switchSection(this.dataset.section)">⑥ 报销</button>
+        <button class="tool-tab" data-section="receivable">⑦ 应收款</button>
+        <button class="tool-tab" data-section="asset">⑧ 固定资产</button>
+        <button class="tool-tab" data-section="management">⑨ 管理费</button>
+        <button class="tool-tab" data-section="salary">⑩ 工资</button>
+        <button class="tool-tab" data-section="baseExpense">⑪ 基地支出</button>
+        <button class="tool-tab" data-section="companyInfo">⑫ 公司信息</button>
+        <button class="tool-tab" data-section="contracts">⑬ 合同</button>
+        <button class="tool-tab" data-section="bankAccounts">⑭ 银行账户</button>
       </div>
       <div class="toolbar-actions">
         <input type="text" id="searchInput" placeholder="🔍 搜索..." oninput="filterTable(this.value)" style="padding:6px 10px;border:2px solid #000;font-size:0.72rem;font-weight:600;font-family:inherit;width:140px">
@@ -123,9 +124,10 @@
           <option value="management">⑧ 管理费用</option>
           <option value="salary">⑨ 工资</option>
           <option value="baseExpense">⑩ 基地支出</option>
-          <option value="companyInfo">⑪ 公司信息</option>
-          <option value="contracts">⑫ 合同管理</option>
-          <option value="bankAccounts">⑬ 银行账户</option>
+          <option value="bankFlow">⑪ 公司基本户收支</option>
+          <option value="companyInfo">⑫ 公司信息</option>
+          <option value="contracts">⑬ 合同管理</option>
+          <option value="bankAccounts">⑭ 银行账户</option>
         </select>
       </div>
       <div class="form-group">
