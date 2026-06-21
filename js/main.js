@@ -857,71 +857,31 @@ document.addEventListener('DOMContentLoaded', function() {
   setTimeout(hideSplash, 2500);
   showLoading(true);
 
-  // 从服务器加载数据
-  var sections = ['incomeExpense','capital','income','pettyCash','reimburse','receivable','asset','management','salary','baseExpense','companyInfo','contracts','bankAccounts'];
-  var token = localStorage.getItem('wyx_token');
-  var loaded = 0;
-  if (token) {
-    sections.forEach(function(s) {
-      var xhr = new XMLHttpRequest();
-      xhr.open('GET', (typeof API_BASE !== 'undefined' ? API_BASE : '') + '/api/data/' + s, true);
-      xhr.setRequestHeader('Authorization', 'Bearer ' + token);
-      xhr.onload = function() {
-        try {
-          if (xhr.status === 401) { localStorage.removeItem("wyx_token"); showError("登录已过期"); setTimeout(function(){ location.reload(); }, 1500); return; }
-          if (xhr.status !== 200) { showError('数据加载失败，请刷新重试'); return; }
-          var d = JSON.parse(xhr.responseText) || [];
-          if (typeof SERVER_DATA !== 'undefined') {
-            SERVER_DATA[s] = d;
-            // 同步到DataStore（渲染函数读取DataStore）
-            if (typeof DataStore !== 'undefined') {
-              if (s === 'pettyCash') {
-                DataStore.pettyCash = { ren: d.filter(function(x){return x.person==='任海涛';}), pang: d.filter(function(x){return x.person==='庞尚韬';}) };
-                DataStore._pettyCashFlat = d;
-              } else if (s === 'reimburse') {
-                DataStore.reimburse = { ren: d.filter(function(x){return x.person==='任海涛';}), pang: d.filter(function(x){return x.person==='庞尚韬';}), ying: d.filter(function(x){return x.person==='应红林';}) };
-                DataStore._reimburseFlat = d;
-              } else {
-                DataStore[s] = d;
-              }
-            }
+  // 从公共API加载数据（无需登录，确保数据最新）
+  showLoading(true);
+  var pubSections = ['capital','incomeExpense','income','pettyCash','receivable','asset','management','salary','baseExpense'];
+  var pubLoaded = 0;
+  pubSections.forEach(function(s) {
+    var xhr = new XMLHttpRequest();
+    xhr.open('GET', (typeof API_BASE !== 'undefined' ? API_BASE : '') + '/api/public/' + s, true);
+    xhr.onload = function() {
+      try {
+        var d = JSON.parse(xhr.responseText) || [];
+        if (typeof DataStore !== 'undefined') {
+          if (s === 'pettyCash') {
+            DataStore.pettyCash = { ren: d.filter(function(x){return x.person==='任海涛';}), pang: d.filter(function(x){return x.person==='庞尚韬';}) };
+            DataStore._pettyCashFlat = d;
+          } else {
+            DataStore[s] = d;
           }
-        } catch(e) { showError('数据解析错误'); }
-        loaded++;
-        if (loaded === sections.length) { renderAll(); updateSummary(); showLoading(false); setTimeout(animateSummaryNumbers, 400); }
-      };
-      xhr.onerror = function() { loaded++; showError('网络连接异常'); if (loaded === sections.length) { renderAll(); updateSummary(); showLoading(false); } };
-      xhr.send();
-    });
-  } else {
-    // 未登录时从公共API加载数据
-    showLoading(true);
-    var pubSections = ['capital','incomeExpense','income','pettyCash','receivable','asset','management','salary','baseExpense'];
-    var pubLoaded = 0;
-    pubSections.forEach(function(s) {
-      var xhr = new XMLHttpRequest();
-      xhr.open('GET', (typeof API_BASE !== 'undefined' ? API_BASE : '') + '/api/public/' + s, true);
-      xhr.onload = function() {
-        try {
-          var d = JSON.parse(xhr.responseText) || [];
-          if (typeof DataStore !== 'undefined') {
-            if (s === 'pettyCash') {
-              DataStore.pettyCash = { ren: d.filter(function(x){return x.person==='任海涛';}), pang: d.filter(function(x){return x.person==='庞尚韬';}) };
-              DataStore._pettyCashFlat = d;
-            } else {
-              DataStore[s] = d;
-            }
-          }
-        } catch(e) {}
-        pubLoaded++;
-        if (pubLoaded === pubSections.length) { renderAll(); updateSummary(); showLoading(false); setTimeout(animateSummaryNumbers, 400); }
-      };
-      xhr.onerror = function() { pubLoaded++; if (pubLoaded === pubSections.length) { renderAll(); updateSummary(); showLoading(false); } };
-      xhr.send();
-    });
-  }
-
-    // 加载完成后校验数据
+        }
+      } catch(e) {}
+      pubLoaded++;
+      if (pubLoaded === pubSections.length) { renderAll(); updateSummary(); showLoading(false); setTimeout(animateSummaryNumbers, 400); }
+    };
+    xhr.onerror = function() { pubLoaded++; if (pubLoaded === pubSections.length) { renderAll(); updateSummary(); showLoading(false); } };
+    xhr.send();
+  });    // 加载完成后校验数据
     if (token && typeof API_BASE !== 'undefined') {
       var vxhr = new XMLHttpRequest();
       vxhr.open('GET', API_BASE + '/api/validate', true);
