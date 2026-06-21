@@ -829,7 +829,14 @@ window.renderEditTable = function(section) {
           });
           html += '</select></td>';
         } else if (c.type === 'number') {
-          html += '<td><input type="number" step="0.01" value="' + (val || 0) + '" data-row="' + idx + '" data-col="' + c.key + '" onchange="editCell(this)"></td>';
+          if (section === 'bankAccounts' && c.key === 'balance') {
+            var bfData = DB.get('bankFlow') || [];
+            var calcBal = 0;
+            bfData.forEach(function(br){ calcBal += (br.income||0) - (br.expense||0); });
+            html += '<td><strong style="font-size:1rem;color:#D35400">¥' + calcBal.toFixed(2) + '</strong><input type="hidden" value="' + calcBal + '" data-row="' + idx + '" data-col="balance"></td>';
+          } else {
+            html += '<td><input type="number" step="0.01" value="' + (val || 0) + '" data-row="' + idx + '" data-col="' + c.key + '" onchange="editCell(this)"></td>';
+          }
         } else if (c.type === 'date') {
           html += '<td><input type="date" value="' + ((val||'').split(' ')[0]||'') + '" data-row="' + idx + '" data-col="' + c.key + '" onchange="editCell(this)"></td>';
         } else if (c.type === 'month') {
