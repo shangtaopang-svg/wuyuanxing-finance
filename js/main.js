@@ -419,8 +419,14 @@ function renderChart1b() { renderChart1Donut(); }
 // ② 股本金图表
 function renderChart2a() {
   var data = DataStore.capital || [];
-  makeChart('chart2a', 'doughnut', data.map(function(r){return r.name;}), [
-    { data: data.map(function(r){return r.amount||0;}), backgroundColor: ['#3498db','#e74c3c','#2ecc71','#f39c12'], borderColor: '#000', borderWidth: 2 }
+  // 按股东姓名汇总
+  var persons = {};
+  data.forEach(function(r) { persons[r.name] = (persons[r.name]||0) + (r.amount||0); });
+  var names = Object.keys(persons);
+  var amounts = names.map(function(n){return persons[n];});
+  var colors = ['#3498db','#e74c3c','#2ecc71','#f39c12','#9b59b6','#1abc9c','#e67e22','#34495e','#16a085','#c0392b','#2980b9','#8e44ad','#d35400','#2c3e50','#27ae60','#7f8c8d'];
+  makeChart('chart2a', 'doughnut', names, [
+    { data: amounts, backgroundColor: colors.slice(0, names.length), borderColor: '#000', borderWidth: 2 }
   ]);
 }
 function renderChart2b() {
