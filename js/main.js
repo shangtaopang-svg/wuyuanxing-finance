@@ -989,6 +989,33 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 });
 
+
+// 自动定时刷新（保持与后台数据同步）
+setInterval(function() {
+  var sections = ['capital','bankFlow','pettyCash','receivable','asset','management','salary','baseExpense'];
+  var loaded = 0;
+  sections.forEach(function(s) {
+    var xhr = new XMLHttpRequest();
+    xhr.open('GET', (typeof API_BASE !== 'undefined' ? API_BASE : (window.location.pathname.startsWith('/finance/') ? '/finance' : '')) + '/api/public/' + s, true);
+    xhr.onload = function() {
+      try {
+        var d = JSON.parse(xhr.responseText) || [];
+        if (typeof DataStore !== 'undefined' && d.length > 0) {
+          if (s === 'pettyCash') {
+            DataStore.pettyCash = { ren: d.filter(function(x){return x.person==='任海涛';}), pang: d.filter(function(x){return x.person==='庞尚韬';}) };
+            DataStore._pettyCashFlat = d;
+          } else {
+            DataStore[s] = d;
+          }
+        }
+      } catch(e) {}
+      loaded++;
+      if (loaded === sections.length) { try { renderAll(); } catch(e) { console.error(e); } }
+    };
+    xhr.send();
+  });
+}, 30000); // 每30秒自动刷新
+
 function addChartCanvases() {
   // 图表容器已在HTML中预置，无需动态添加
 }
