@@ -148,6 +148,7 @@ function renderIncomeExpense() {
   body.innerHTML = '';
   if (data.length === 0) { $('empty1').style.display = 'block'; return; }
   $('empty1').style.display = 'none';
+  var capColors = {"任海涛":"#e8f4fd","庞尚韬":"#fef2f2","吴生成":"#f0faf4","应红林":"#fdf6e3","陈洪斌":"#f5e6f0"};
   data.forEach(function(r) {
     body.innerHTML += '<tr><td>' + r.date + '</td><td><strong>' + r.type + '</strong></td><td>' + r.summary + '</td>' +
       '<td class="amount income">' + (r.income ? formatNum(r.income) : '') + '</td>' +
@@ -165,6 +166,7 @@ function renderCapital() {
   if (data.length === 0) { $('empty2').style.display = 'block'; return; }
   $('empty2').style.display = 'none';
   var total = 0;
+  var capColors = {"任海涛":"#e8f4fd","庞尚韬":"#fef2f2","吴生成":"#f0faf4","应红林":"#fdf6e3","陈洪斌":"#f5e6f0"};
   data.forEach(function(r) {
     total += r.amount || 0;
     body.innerHTML += '<tr><td>' + r.date + '</td><td><strong>' + r.name + '</strong></td>' +
@@ -181,6 +183,7 @@ function renderIncome() {
   body.innerHTML = '';
   if (data.length === 0) { $('empty3').style.display = 'block'; return; }
   $('empty3').style.display = 'none';
+  var capColors = {"任海涛":"#e8f4fd","庞尚韬":"#fef2f2","吴生成":"#f0faf4","应红林":"#fdf6e3","陈洪斌":"#f5e6f0"};
   data.forEach(function(r) {
     body.innerHTML += '<tr><td>' + r.date + '</td><td>' + r.category + '</td><td class="amount green">' + formatNum(r.amount) + '</td>' +
       '<td>' + (r.source || '—') + '</td><td>' + (r.voucher ? '<span class="invoice-link">📎 凭证</span>' : '—') + '</td></tr>';
@@ -199,7 +202,8 @@ function renderPettyCash() {
     body.innerHTML = '';
     if (data.length === 0) { $(emptyId).style.display = 'block'; return; }
     $(emptyId).style.display = 'none';
-    data.forEach(function(r) {
+    var capColors = {"任海涛":"#e8f4fd","庞尚韬":"#fef2f2","吴生成":"#f0faf4","应红林":"#fdf6e3","陈洪斌":"#f5e6f0"};
+  data.forEach(function(r) {
       // 查找关联报销
       var relatedReimburse = allReimburse.filter(function(rm) {
         return rm.person === personName && Math.abs((new Date(rm.date)) - (new Date(r.date))) < 7*24*60*60*1000;
@@ -228,7 +232,8 @@ function renderReimburse() {
     body.innerHTML = '';
     if (!data || data.length === 0) { var e = $(emptyId); if(e) e.style.display = 'block'; return; }
     var e = $(emptyId); if(e) e.style.display = 'none';
-    data.forEach(function(r) {
+    var capColors = {"任海涛":"#e8f4fd","庞尚韬":"#fef2f2","吴生成":"#f0faf4","应红林":"#fdf6e3","陈洪斌":"#f5e6f0"};
+  data.forEach(function(r) {
       var relatedPetty = Array.isArray(allPetty) ? allPetty.filter(function(p) {
         return p.person === personName && Math.abs((new Date(p.date)) - (new Date(r.date))) < 7*24*60*60*1000;
       }) : [];
@@ -248,6 +253,7 @@ function renderReceivable() {
   body.innerHTML = '';
   if (data.length === 0) { $('empty6').style.display = 'block'; return; }
   $('empty6').style.display = 'none';
+  var capColors = {"任海涛":"#e8f4fd","庞尚韬":"#fef2f2","吴生成":"#f0faf4","应红林":"#fdf6e3","陈洪斌":"#f5e6f0"};
   data.forEach(function(r) {
     body.innerHTML += '<tr><td>' + r.date + '</td><td>' + r.party + '</td><td class="amount expense">' + formatNum(r.amount) + '</td><td>' + r.reason + '</td><td>' + r.status + '</td></tr>';
   });
@@ -260,8 +266,9 @@ function renderAsset() {
   body.innerHTML = '';
   if (data.length === 0) { $('empty7').style.display = 'block'; return; }
   $('empty7').style.display = 'none';
-  data.forEach(function(r) {
-    body.innerHTML += '<tr><td>' + r.date + '</td><td><strong>' + r.name + '</strong></td><td class="amount expense">' + formatNum(r.amount) + '</td><td>' + r.location + '</td><td>' + r.status + '</td></tr>';
+    data.forEach(function(r) {
+    var capBg = capColors[r.name] || "";
+    body.innerHTML += '<tr style="background:' + capBg + '"><td>' + r.date + '</td><td><strong>' + r.name + '</strong></td><td class="amount expense">' + formatNum(r.amount) + '</td><td>' + r.location + '</td><td>' + r.status + '</td></tr>';
   });
 }
 
@@ -272,6 +279,7 @@ function renderManagement() {
   body.innerHTML = '';
   if (data.length === 0) { $('empty8').style.display = 'block'; return; }
   $('empty8').style.display = 'none';
+  var capColors = {"任海涛":"#e8f4fd","庞尚韬":"#fef2f2","吴生成":"#f0faf4","应红林":"#fdf6e3","陈洪斌":"#f5e6f0"};
   data.forEach(function(r) {
     body.innerHTML += '<tr><td>' + r.date + '</td><td>' + r.category + '</td><td class="amount expense">' + formatNum(r.amount) + '</td><td>' + r.summary + '</td><td>' +
       (r.invoices && r.invoices.length ? r.invoices.map(function(f) { return '<span class="invoice-link">📎 ' + f + '</span>'; }).join('') : '—') + '</td></tr>';
@@ -285,6 +293,7 @@ function renderSalary() {
   body.innerHTML = '';
   if (data.length === 0) { $('empty9').style.display = 'block'; return; }
   $('empty9').style.display = 'none';
+  var capColors = {"任海涛":"#e8f4fd","庞尚韬":"#fef2f2","吴生成":"#f0faf4","应红林":"#fdf6e3","陈洪斌":"#f5e6f0"};
   data.forEach(function(r) {
     body.innerHTML += '<tr><td>' + r.month + '</td><td>' + r.name + '</td><td>' + r.position + '</td><td class="amount expense">' + formatNum(r.amount) + '</td><td>' + r.payDate + '</td><td>' +
       (r.voucher ? '<span class="invoice-link">📎</span>' : '—') + '</td></tr>';
@@ -301,7 +310,8 @@ function renderBaseExpense() {
     body.innerHTML = '';
     if (!data || data.length === 0) { $(emptyIds[base]).style.display = 'block'; return; }
     $(emptyIds[base]).style.display = 'none';
-    data.forEach(function(r) {
+    var capColors = {"任海涛":"#e8f4fd","庞尚韬":"#fef2f2","吴生成":"#f0faf4","应红林":"#fdf6e3","陈洪斌":"#f5e6f0"};
+  data.forEach(function(r) {
       body.innerHTML += '<tr><td>' + r.date + '</td><td>' + r.item + '</td><td class="amount expense">' + formatNum(r.amount) + '</td><td>' + (r.note || '') + '</td><td>' +
         (r.invoices && r.invoices.length ? r.invoices.map(function(f) { return '<a href="#" class="invoice-link" onclick="previewFile(\'' + encodeURIComponent(f) + '\')">📎 ' + f + '</a>'; }).join('') : '—') + '</td></tr>';
     });
@@ -428,6 +438,7 @@ function renderChart2a() {
   var data = DataStore.capital || [];
   // 按股东姓名汇总
   var persons = {};
+  var capColors = {"任海涛":"#e8f4fd","庞尚韬":"#fef2f2","吴生成":"#f0faf4","应红林":"#fdf6e3","陈洪斌":"#f5e6f0"};
   data.forEach(function(r) { persons[r.name] = (persons[r.name]||0) + (r.amount||0); });
   var names = Object.keys(persons);
   var amounts = names.map(function(n){return persons[n];});
@@ -447,6 +458,7 @@ function renderChart2a() {
 function renderChart2b() {
   var data = DataStore.capital || [];
   var methods = {};
+  var capColors = {"任海涛":"#e8f4fd","庞尚韬":"#fef2f2","吴生成":"#f0faf4","应红林":"#fdf6e3","陈洪斌":"#f5e6f0"};
   data.forEach(function(r) { methods[r.method] = (methods[r.method]||0) + (r.amount||0); });
   makeChart('chart2b', 'pie', Object.keys(methods), [
     { data: Object.keys(methods).map(function(k){return methods[k];}), backgroundColor: ['#3498db','#e74c3c','#2ecc71'], borderColor: '#000', borderWidth: 2 }
@@ -463,6 +475,7 @@ function renderChart3a() {
 function renderChart3b() {
   var data = DataStore.income || [];
   var cats = {};
+  var capColors = {"任海涛":"#e8f4fd","庞尚韬":"#fef2f2","吴生成":"#f0faf4","应红林":"#fdf6e3","陈洪斌":"#f5e6f0"};
   data.forEach(function(r) { cats[r.category] = (cats[r.category]||0) + (r.amount||0); });
   makeChart('chart3b', 'doughnut', Object.keys(cats), [
     { data: Object.keys(cats).map(function(k){return cats[k];}), backgroundColor: ['#2ecc71','#3498db','#f39c12','#e74c3c'], borderColor: '#000', borderWidth: 2 }
@@ -481,6 +494,7 @@ function renderChart4a() {
 function renderChart4b() {
   var data = DataStore.pettyCash || DataStore._pettyCashFlat || [];
   var persons = {};
+  var capColors = {"任海涛":"#e8f4fd","庞尚韬":"#fef2f2","吴生成":"#f0faf4","应红林":"#fdf6e3","陈洪斌":"#f5e6f0"};
   data.forEach(function(r) { persons[r.person] = (persons[r.person]||0) + (r.amount||0); });
   makeChart('chart4b', 'doughnut', Object.keys(persons), [
     { data: Object.keys(persons).map(function(k){return persons[k];}), backgroundColor: ['#3498db','#e74c3c'], borderColor: '#000', borderWidth: 2 }
@@ -491,6 +505,7 @@ function renderChart4b() {
 function renderChart5a() {
   var data = DataStore.reimburse || DataStore._reimburseFlat || [];
   var persons = {};
+  var capColors = {"任海涛":"#e8f4fd","庞尚韬":"#fef2f2","吴生成":"#f0faf4","应红林":"#fdf6e3","陈洪斌":"#f5e6f0"};
   data.forEach(function(r) { persons[r.person] = (persons[r.person]||0) + (r.amount||0); });
   makeChart('chart5a', 'bar', Object.keys(persons), [
     { data: Object.keys(persons).map(function(k){return persons[k];}), backgroundColor: ['#3498db','#e74c3c','#2ecc71'], borderColor: '#000', borderWidth: 2 }
@@ -499,6 +514,7 @@ function renderChart5a() {
 function renderChart5b() {
   var data = DataStore.reimburse || DataStore._reimburseFlat || [];
   var persons = {};
+  var capColors = {"任海涛":"#e8f4fd","庞尚韬":"#fef2f2","吴生成":"#f0faf4","应红林":"#fdf6e3","陈洪斌":"#f5e6f0"};
   data.forEach(function(r) { persons[r.person] = (persons[r.person]||0) + 1; });
   makeChart('chart5b', 'doughnut', Object.keys(persons), [
     { data: Object.keys(persons).map(function(k){return persons[k];}), backgroundColor: ['#3498db','#e74c3c','#2ecc71'], borderColor: '#000', borderWidth: 2 }
@@ -509,6 +525,7 @@ function renderChart5b() {
 function renderChart6a() {
   var data = DataStore.receivable || [];
   var statuses = {};
+  var capColors = {"任海涛":"#e8f4fd","庞尚韬":"#fef2f2","吴生成":"#f0faf4","应红林":"#fdf6e3","陈洪斌":"#f5e6f0"};
   data.forEach(function(r) { statuses[r.status] = (statuses[r.status]||0) + (r.amount||0); });
   makeChart('chart6a', 'doughnut', Object.keys(statuses), [
     { data: Object.keys(statuses).map(function(k){return statuses[k];}), backgroundColor: ['#e74c3c','#f39c12','#27ae60'], borderColor: '#000', borderWidth: 2 }
@@ -531,6 +548,7 @@ function renderChart7a() {
 function renderChart7b() {
   var data = DataStore.asset || [];
   var statuses = {};
+  var capColors = {"任海涛":"#e8f4fd","庞尚韬":"#fef2f2","吴生成":"#f0faf4","应红林":"#fdf6e3","陈洪斌":"#f5e6f0"};
   data.forEach(function(r) { statuses[r.status] = (statuses[r.status]||0) + 1; });
   makeChart('chart7b', 'pie', Object.keys(statuses), [
     { data: Object.keys(statuses).map(function(k){return statuses[k];}), backgroundColor: ['#27ae60','#f39c12','#e74c3c'], borderColor: '#000', borderWidth: 2 }
@@ -541,6 +559,7 @@ function renderChart7b() {
 function renderChart8a() {
   var data = DataStore.management || [];
   var cats = {};
+  var capColors = {"任海涛":"#e8f4fd","庞尚韬":"#fef2f2","吴生成":"#f0faf4","应红林":"#fdf6e3","陈洪斌":"#f5e6f0"};
   data.forEach(function(r) { cats[r.category] = (cats[r.category]||0) + (r.amount||0); });
   makeChart('chart8a', 'doughnut', Object.keys(cats), [
     { data: Object.keys(cats).map(function(k){return cats[k];}), backgroundColor: ['#3498db','#e74c3c','#2ecc71','#f39c12'], borderColor: '#000', borderWidth: 2 }
@@ -557,6 +576,7 @@ function renderChart8b() {
 function renderChart9a() {
   var data = DataStore.salary || [];
   var months = {};
+  var capColors = {"任海涛":"#e8f4fd","庞尚韬":"#fef2f2","吴生成":"#f0faf4","应红林":"#fdf6e3","陈洪斌":"#f5e6f0"};
   data.forEach(function(r) { months[r.month] = (months[r.month]||0) + (r.amount||0); });
   makeChart('chart9a', 'bar', Object.keys(months), [
     { data: Object.keys(months).map(function(k){return months[k];}), backgroundColor: '#e74c3c', borderColor: '#000', borderWidth: 2 }
@@ -565,6 +585,7 @@ function renderChart9a() {
 function renderChart9b() {
   var data = DataStore.salary || [];
   var pos = {};
+  var capColors = {"任海涛":"#e8f4fd","庞尚韬":"#fef2f2","吴生成":"#f0faf4","应红林":"#fdf6e3","陈洪斌":"#f5e6f0"};
   data.forEach(function(r) { pos[r.position] = (pos[r.position]||0) + (r.amount||0); });
   makeChart('chart9b', 'doughnut', Object.keys(pos), [
     { data: Object.keys(pos).map(function(k){return pos[k];}), backgroundColor: ['#3498db','#e74c3c','#2ecc71'], borderColor: '#000', borderWidth: 2 }
@@ -575,6 +596,7 @@ function renderChart9b() {
 function renderChart10a() {
   var data = DataStore.baseExpense || [];
   var bases = {};
+  var capColors = {"任海涛":"#e8f4fd","庞尚韬":"#fef2f2","吴生成":"#f0faf4","应红林":"#fdf6e3","陈洪斌":"#f5e6f0"};
   data.forEach(function(r) { bases[r.base] = (bases[r.base]||0) + (r.amount||0); });
   makeChart('chart10a', 'bar', Object.keys(bases), [
     { data: Object.keys(bases).map(function(k){return bases[k];}), backgroundColor: '#27ae60', borderColor: '#000', borderWidth: 2 }
@@ -583,6 +605,7 @@ function renderChart10a() {
 function renderChart10b() {
   var data = DataStore.baseExpense || [];
   var items = {};
+  var capColors = {"任海涛":"#e8f4fd","庞尚韬":"#fef2f2","吴生成":"#f0faf4","应红林":"#fdf6e3","陈洪斌":"#f5e6f0"};
   data.forEach(function(r) { items[r.item] = (items[r.item]||0) + (r.amount||0); });
   var sorted = Object.keys(items).sort(function(a,b){return items[b]-items[a];}).slice(0,8);
   makeChart('chart10b', 'doughnut', sorted, [
@@ -601,6 +624,7 @@ function renderChart1() {
 function renderChart1Donut() {
   var data = DataStore.incomeExpense || [];
   var expByType = {};
+  var capColors = {"任海涛":"#e8f4fd","庞尚韬":"#fef2f2","吴生成":"#f0faf4","应红林":"#fdf6e3","陈洪斌":"#f5e6f0"};
   data.forEach(function(r) { if (r.expense > 0) { expByType[r.summary] = (expByType[r.summary]||0) + r.expense; } });
   var labels = Object.keys(expByType);
   var values = labels.map(function(k) { return expByType[k]; });
@@ -718,6 +742,7 @@ function renderBankFlow() {
   body.innerHTML = '';
   // 汇总统计
   var incCount = 0, incTotal = 0, expCount = 0, expTotal = 0;
+  var capColors = {"任海涛":"#e8f4fd","庞尚韬":"#fef2f2","吴生成":"#f0faf4","应红林":"#fdf6e3","陈洪斌":"#f5e6f0"};
   data.forEach(function(r) {
     if (r.income > 0) { incCount++; incTotal += r.income; }
     if (r.expense > 0) { expCount++; expTotal += r.expense; }
@@ -756,6 +781,7 @@ function renderBankFlow() {
   // 数据行
   if (data.length === 0) { var e = $('empty14'); if(e) e.style.display = 'block'; return; }
   var e = $('empty14'); if(e) e.style.display = 'none';
+  var capColors = {"任海涛":"#e8f4fd","庞尚韬":"#fef2f2","吴生成":"#f0faf4","应红林":"#fdf6e3","陈洪斌":"#f5e6f0"};
   data.forEach(function(r) {
     var bg = r.income > 0 ? "#f0faf4" : (r.expense > 0 ? "#fef2f2" : "");
     body.innerHTML += '<tr style="background:' + bg + '"><td>' + (r.date||"") + '</td>' +

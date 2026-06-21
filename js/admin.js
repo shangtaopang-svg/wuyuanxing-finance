@@ -808,7 +808,7 @@ window.renderEditTable = function(section) {
       (_filterKeyword ? '未找到匹配 "' + _filterKeyword + '"' : '暂无数据，点击"＋ 新增一行"添加') + '</td></tr>';
   } else {
     data.forEach(function(row, idx) {
-      var rowBg = section === 'bankFlow' ? (row.income > 0 ? '#f0faf4' : (row.expense > 0 ? '#fef2f2' : '')) : '';
+      var rowBg = section === 'bankFlow' ? (row.income > 0 ? '#f0faf4' : (row.expense > 0 ? '#fef2f2' : '')) : (section === 'capital' && row.name ? {'任海涛':'#e8f4fd','庞尚韬':'#fef2f2','吴生成':'#f0faf4','应红林':'#fdf6e3','陈洪斌':'#f5e6f0'}[row.name] || '' : '');
       html += '<tr style="background:' + rowBg + '">';
       cols.forEach(function(c) {
         var val = row[c.key] !== undefined && row[c.key] !== null ? row[c.key] : '';
