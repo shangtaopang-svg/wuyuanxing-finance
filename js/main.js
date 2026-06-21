@@ -716,12 +716,43 @@ function renderBankFlow() {
   var body = $('bankFlowBody');
   if (!body) return;
   body.innerHTML = '';
+  // 汇总统计
+  var incCount = 0, incTotal = 0, expCount = 0, expTotal = 0;
+  data.forEach(function(r) {
+    if (r.income > 0) { incCount++; incTotal += r.income; }
+    if (r.expense > 0) { expCount++; expTotal += r.expense; }
+  });
+  var balance = incTotal - expTotal;
+  var summaryHtml = '<div class="summary-bar" style="display:flex;gap:6px;margin-bottom:12px;flex-wrap:wrap">' +
+    '<div class="sum-item" style="flex:1;text-align:center;padding:8px 6px;border:1px solid #000;background:#f0faf4;border-left:4px solid #27ae60;border-radius:4px">' +
+      '<span class="sum-num" style="display:block;font-size:1.1rem;font-weight:900;color:#27ae60">' + incCount + '</span>' +
+      '<span style="font-size:0.7rem;font-weight:700">总收入笔数</span></div>' +
+    '<div class="sum-item" style="flex:1;text-align:center;padding:8px 6px;border:1px solid #000;background:#f0faf4;border-left:4px solid #27ae60;border-radius:4px">' +
+      '<span class="sum-num" style="display:block;font-size:1.1rem;font-weight:900;color:#27ae60">' + formatNum(incTotal) + '</span>' +
+      '<span style="font-size:0.7rem;font-weight:700">总收入金额</span></div>' +
+    '<div class="sum-item" style="flex:1;text-align:center;padding:8px 6px;border:1px solid #000;background:#fef2f2;border-left:4px solid #e53e3e;border-radius:4px">' +
+      '<span class="sum-num" style="display:block;font-size:1.1rem;font-weight:900;color:#e53e3e">' + expCount + '</span>' +
+      '<span style="font-size:0.7rem;font-weight:700">总支出笔数</span></div>' +
+    '<div class="sum-item" style="flex:1;text-align:center;padding:8px 6px;border:1px solid #000;background:#fef2f2;border-left:4px solid #e53e3e;border-radius:4px">' +
+      '<span class="sum-num" style="display:block;font-size:1.1rem;font-weight:900;color:#e53e3e">' + formatNum(expTotal) + '</span>' +
+      '<span style="font-size:0.7rem;font-weight:700">总支出金额</span></div>' +
+    '<div class="sum-item" style="flex:1;text-align:center;padding:8px 6px;border:1px solid #000;background:#ebf8ff;border-left:4px solid #3182ce;border-radius:4px">' +
+      '<span class="sum-num" style="display:block;font-size:1.1rem;font-weight:900;color:' + (balance >= 0 ? '#3182ce' : '#e53e3e') + '">' + formatNum(balance) + '</span>' +
+      '<span style="font-size:0.7rem;font-weight:700">余额</span></div></div>';
+  var panel = body.closest('section') || body.parentElement;
+  var existingSummary = panel.querySelector('.bankflow-summary');
+  if (existingSummary) existingSummary.remove();
+  var summaryDiv = document.createElement('div');
+  summaryDiv.className = 'bankflow-summary';
+  summaryDiv.innerHTML = summaryHtml;
+  panel.insertBefore(summaryDiv, panel.querySelector('.table-wrap') || body.parentElement);
+  // 数据行
   if (data.length === 0) { var e = $('empty14'); if(e) e.style.display = 'block'; return; }
   var e = $('empty14'); if(e) e.style.display = 'none';
   data.forEach(function(r) {
     body.innerHTML += '<tr><td>' + (r.date||'') + '</td>' +
-      '<td class="amount">' + (r.income ? formatNum(r.income) : '') + '</td>' +
-      '<td class="amount">' + (r.expense ? formatNum(r.expense) : '') + '</td>' +
+      '<td class="amount">' + (r.income > 0 ? formatNum(r.income) : '') + '</td>' +
+      '<td class="amount">' + (r.expense > 0 ? formatNum(r.expense) : '') + '</td>' +
       '<td>' + (r.counterparty_account||'') + '</td>' +
       '<td>' + (r.counterparty_name||'') + '</td>' +
       '<td>' + (r.purpose||'') + '</td>' +
