@@ -525,9 +525,9 @@ function uploadDocsFile(fileInput, rowKey) {
   if (!window.API_TOKEN) { alert("请先登录"); return; }
   var txtInput = document.getElementById("docsTxt_" + rowKey);
   var viewBtn = txtInput && txtInput.parentElement ? txtInput.parentElement.querySelector("button:last-of-type") : null;
-  if (txtInput) txtInput.value = "上传中...";
   var files = Array.prototype.slice.call(fileInput.files);
-  var existingNames = txtInput && txtInput.value && txtInput.value !== "上传中..." ? txtInput.value.split(";").map(function(s){return s.trim();}).filter(Boolean) : [];
+  var existingNames = txtInput && txtInput.value && txtInput.value.indexOf("上传") === -1 ? txtInput.value.split(";").map(function(s){return s.trim();}).filter(Boolean) : [];
+  if (txtInput) txtInput.value = "上传中...";
   var done = 0;
   files.forEach(function(file, fi) {
     var fd = new FormData();
