@@ -463,6 +463,16 @@ function $id(id) { return document.getElementById(id); }
 function $title(id) { return document.getElementById(id); }
 
 var saveTimer = null;
+function showToast(msg, type) {
+  var container = document.getElementById('toastContainer');
+  if (!container) return;
+  var t = document.createElement('div');
+  t.className = 'toast-msg ' + (type || 'success');
+  t.textContent = msg;
+  container.appendChild(t);
+  setTimeout(function(){ if(t.parentNode) t.parentNode.removeChild(t); }, 3000);
+}
+
 function showSaved(msg) {
   var el = $id('saveStatus');
   if (!el) return;

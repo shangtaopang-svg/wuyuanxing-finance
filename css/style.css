@@ -38,9 +38,13 @@ body { font-family:var(--font); background:var(--bg); color:var(--text); line-he
 /* 汇总横幅 */
 .summary-bar { background:var(--card); border-bottom:2px solid var(--border); padding:12px 20px; }
 .summary-inner { max-width:1400px; margin:0 auto; display:grid; grid-template-columns:repeat(4,1fr); gap:8px; }
-.sum-item { text-align:center; padding:10px 8px; border:1px solid var(--border); background:var(--card); cursor:pointer; transition:transform 0.2s, box-shadow 0.2s; border-radius:4px; }
-.sum-item:hover { transform:translateY(-2px); box-shadow:0 4px 16px rgba(0,0,0,0.08); }
+.sum-item { text-align:center; padding:12px 10px; border:1px solid var(--border); background:var(--card); cursor:pointer; transition:transform 0.25s, box-shadow 0.25s; border-radius:6px; position:relative; }
+.sum-item:hover { transform:translateY(-3px); box-shadow:0 6px 20px rgba(0,0,0,0.1); }
+.sum-item:active { transform:translateY(-1px); }
 .sum-item.pop { animation:sumPop 0.35s ease; }
+.sum-trend { font-size:0.65rem; font-weight:700; margin-left:4px; display:inline-block; }
+.sum-trend.up { color:var(--green); }
+.sum-trend.down { color:var(--red); }
 @keyframes sumPop {
   0%{transform:scale(1)}
   30%{transform:scale(1.06);box-shadow:0 8px 25px rgba(0,0,0,0.1)}
@@ -59,7 +63,9 @@ body { font-family:var(--font); background:var(--bg); color:var(--text); line-he
 /* 主内容 */
 .main-content { max-width:1400px; margin:0 auto; padding:20px; }
 .tab-panel { display:none; }
-.tab-panel.active { display:block; animation:fadeIn 0.25s ease; }
+.tab-panel.active { display:block; animation:fadeSlideIn 0.3s ease; }
+@keyframes fadeSlideIn { from { opacity:0; transform:translateY(8px); } to { opacity:1; transform:translateY(0); } }
+@keyframes fadeIn { from { opacity:0; } to { opacity:1; } }
 @keyframes fadeIn { from{opacity:0;transform:translateY(6px)} to{opacity:1;transform:translateY(0)} }
 
 /* 面板头部 */
@@ -84,14 +90,17 @@ body { font-family:var(--font); background:var(--bg); color:var(--text); line-he
 
 /* 表格 */
 .table-wrap { overflow-x:auto; margin-bottom:4px; }
-.data-table { width:100%; border-collapse:collapse; font-size:0.78rem; background:var(--card); border-radius:6px; overflow:hidden; box-shadow:var(--shadow); }
-.data-table th { background:#faf8f5; padding:9px 12px; text-align:left; font-weight:600; color:var(--text-light); font-size:0.68rem; letter-spacing:0.03em; border-bottom:2px solid var(--border); }
-.data-table td { padding:8px 12px; border-bottom:1px solid #f0ede8; }
-.data-table tr:last-child td { border-bottom:none; }
-.data-table tr:hover td { background:#fdfaf7; }
-.data-table .amount { font-weight:700; font-family:var(--font-mono); font-size:0.8rem; }
+.data-table { width:100%; border-collapse:collapse; font-size:0.78rem; background:var(--card); border-radius:8px; overflow:hidden; box-shadow:0 1px 6px rgba(0,0,0,0.06); }
+.data-table th { background:#faf8f5; padding:11px 14px; text-align:left; font-weight:700; color:var(--text-light); font-size:0.68rem; letter-spacing:0.04em; border-bottom:2px solid var(--border); }
+.data-table td { padding:10px 14px; border-bottom:1px solid #f0ede8; transition:background 0.15s; }
+.data-table tbody tr:nth-child(even) td { background:#fcfbf9; }
+.data-table tbody tr:last-child td { border-bottom:none; }
+.data-table tbody tr:hover td { background:#f5f0e8 !important; }
+.data-table .amount { font-weight:700; font-family:var(--font-mono); font-size:0.85rem; }
 .data-table .income { color:var(--green); }
 .data-table .expense { color:var(--red); }
+/* 表格容器滚动支持 */
+.table-wrap { overflow-x:auto; -webkit-overflow-scrolling:touch; }
 
 /* 发票链接 */
 .invoice-link { color:var(--primary); text-decoration:none; font-size:0.68rem; font-weight:600; border:1px solid var(--primary); border-radius:3px; padding:2px 8px; display:inline-block; margin:1px; transition:all 0.15s; }
