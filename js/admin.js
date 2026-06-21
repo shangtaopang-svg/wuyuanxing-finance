@@ -476,14 +476,17 @@ function saveData() {
 
 // === M-IuM-4vM-^XM-iM-uM-^PM-M-dM-^MM-!M-gM-^LM-^M-fM-^MM-^LM-dM-^MM-^M-dM-^M-^XM-dM-^MM-!M-gM-^LM-^M-dM-^MM-;M-fM-^LM-^IM-iM-^RM-. ===
 function uploadDocsFile(fileInput) {
-  var rowKey = fileInput.dataset.key;
   if (!fileInput || !fileInput.files || !fileInput.files.length) return;
   if (!window.API_TOKEN) { alert("请先登录"); return; }
-  var txtInput = document.getElementById("docsTxt_" + rowKey);
-  var viewBtn = txtInput && txtInput.parentElement ? txtInput.parentElement.querySelector("button:last-of-type") : null;
+  // 通过文本输入框的 data-row 定位行
+  var txtInput = fileInput.parentElement.querySelector('input[type="text"]');
+  if (!txtInput) return;
+  var realIdx = parseInt(txtInput.dataset.row);
+  if (isNaN(realIdx) || realIdx < 0) return;
+  var viewBtn = txtInput.parentElement.querySelector('button:last-of-type');
+  if (txtInput) txtInput.value = "上传中...";
   var files = Array.prototype.slice.call(fileInput.files);
   var existingNames = txtInput && txtInput.value && txtInput.value.indexOf("上传") === -1 ? txtInput.value.split(";").map(function(s){return s.trim();}).filter(Boolean) : [];
-  if (txtInput) txtInput.value = "上传中...";
   var done = 0;
   files.forEach(function(file, fi) {
     var fd = new FormData();
@@ -502,59 +505,53 @@ function uploadDocsFile(fileInput) {
       if (done === files.length) {
         var namesStr = existingNames.join("; ");
         if (txtInput) txtInput.value = namesStr;
+        // 通过 data-row 索引直接存
         var data = DB.get(currentSection);
-        var realIdx = parseInt(fileInput.dataset.row || "-1");
-        var found = false;
-        for (var i = 0; i < data.length; i++) {
-          if (data[i]._key === rowKey || i === realIdx) {
-            data[i].docs = namesStr;
-            if (!data[i]._key) data[i]._key = rowKey;
-            DB.set(currentSection, data);
-            showSaved();
-            found = true;
-            break;
-          }
-        }
-        if (!found && data[realIdx] && realIdx >= 0) {
+        var rowFound = false;
+        if (data[realIdx]) {
           data[realIdx].docs = namesStr;
-          data[realIdx]._key = rowKey;
           DB.set(currentSection, data);
           showSaved();
+          rowFound = true;
         }
-        if (viewBtn) viewBtn.style.display = "";
+        if (!rowFound) {
+          // 按内容匹配行
+          var rAmt = parseFloat(txtInput.dataset.ramt || "-1");
+          var rPerson = txtInput.dataset.rperson || "";
+          for (var di = 0; di < data.length; di++) {
+            if (data[di].person === rPerson && Math.abs((data[di].amount||0) - rAmt) < 0.01) {
+              data[di].docs = namesStr;
+              DB.set(currentSection, data);
+              showSaved();
+              break;
+            }
+          }
+        }
+        if (viewBtn) {
+          viewBtn.style.display = "";
+          // 找到删除按钮并显示
+          var delBtn = viewBtn.nextElementSibling;
+          if (delBtn && delBtn.tagName === 'BUTTON') delBtn.style.display = '';
+        }
         fileInput.value = "";
       }
     };
     xhr.onerror = function() { done++; if (done === files.length) fileInput.value = ""; };
     xhr.send(fd);
   });
-}
-
-// === 删除单据文件 ===
+}// === 删除单据文件 ===
 function clearDocs(rowKey, btn) {
-  var data = DB.get(currentSection);
-  var realIdx = -1;
-  if (btn && btn.parentElement) {
-    var fi = btn.parentElement.querySelector('input[type="file"]');
-    if (fi) realIdx = parseInt(fi.dataset.row || '-1');
-  }
-  var found = false;
-  for (var i = 0; i < data.length; i++) {
-    if (data[i]._key === rowKey || i === realIdx) {
-      data[i].docs = '';
+  var txt = document.getElementById('docsTxt_' + rowKey);
+  if (!txt) return;
+  var realIdx = parseInt(txt.dataset.row);
+  if (!isNaN(realIdx) && realIdx >= 0) {
+    var data = DB.get(currentSection);
+    if (data[realIdx]) {
+      data[realIdx].docs = '';
       DB.set(currentSection, data);
       showSaved();
-      found = true;
-      break;
     }
   }
-  if (!found && data[realIdx] && realIdx >= 0) {
-    data[realIdx].docs = '';
-    data[realIdx]._key = rowKey;
-    DB.set(currentSection, data);
-    showSaved();
-  }
-  var txt = document.getElementById('docsTxt_' + rowKey);
   if (txt) txt.value = '';
   btn.style.display = 'none';
   var prev = btn.previousElementSibling;
