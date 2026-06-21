@@ -503,13 +503,23 @@ function uploadDocsFile(fileInput) {
         var namesStr = existingNames.join("; ");
         if (txtInput) txtInput.value = namesStr;
         var data = DB.get(currentSection);
+        var realIdx = parseInt(fileInput.dataset.row || "-1");
+        var found = false;
         for (var i = 0; i < data.length; i++) {
-          if (data[i]._key === rowKey) {
+          if (data[i]._key === rowKey || i === realIdx) {
             data[i].docs = namesStr;
+            if (!data[i]._key) data[i]._key = rowKey;
             DB.set(currentSection, data);
             showSaved();
+            found = true;
             break;
           }
+        }
+        if (!found && data[realIdx] && realIdx >= 0) {
+          data[realIdx].docs = namesStr;
+          data[realIdx]._key = rowKey;
+          DB.set(currentSection, data);
+          showSaved();
         }
         if (viewBtn) viewBtn.style.display = "";
         fileInput.value = "";
@@ -523,13 +533,26 @@ function uploadDocsFile(fileInput) {
 // === 删除单据文件 ===
 function clearDocs(rowKey, btn) {
   var data = DB.get(currentSection);
+  var realIdx = -1;
+  if (btn && btn.parentElement) {
+    var fi = btn.parentElement.querySelector('input[type="file"]');
+    if (fi) realIdx = parseInt(fi.dataset.row || '-1');
+  }
+  var found = false;
   for (var i = 0; i < data.length; i++) {
-    if (data[i]._key === rowKey) {
+    if (data[i]._key === rowKey || i === realIdx) {
       data[i].docs = '';
       DB.set(currentSection, data);
       showSaved();
+      found = true;
       break;
     }
+  }
+  if (!found && data[realIdx] && realIdx >= 0) {
+    data[realIdx].docs = '';
+    data[realIdx]._key = rowKey;
+    DB.set(currentSection, data);
+    showSaved();
   }
   var txt = document.getElementById('docsTxt_' + rowKey);
   if (txt) txt.value = '';
@@ -703,7 +726,7 @@ window.renderEditTable = function(section) {
               ph += '<button onclick="document.getElementById(\'docsFile_' + rowKey + '\').click()" style="padding:3px 6px;border:1px solid #999;background:#fff;cursor:pointer;font-size:0.75rem" title="上传文件">📎</button>';
               ph += '<button onclick="var v=document.getElementById(\'docsTxt_' + rowKey + '\').value;if(v)window.open(\'/finance/uploads/vouchers/\'+v,\'_blank\')" style="padding:3px 6px;border:1px solid #999;background:#fff;cursor:pointer;font-size:0.75rem' + (display ? '' : ';display:none') + '" title="预览">👁️</button>';
               ph += '<button onclick="clearDocs(\'' + rowKey + '\',this)" style="padding:3px 6px;border:1px solid #e74c3c;background:#fff;color:#e74c3c;cursor:pointer;font-size:0.75rem' + (display ? '' : ';display:none') + '" title="删除">✖</button>';
-              ph += '<input type="file" id="docsFile_' + rowKey + '" accept=".jpg,.jpeg,.png,.gif,.pdf,.ofd,.xls,.xlsx" style="display:none" multiple data-key="' + rowKey + '" onchange="uploadDocsFile(this)">';
+              ph += '<input type="file" id="docsFile_' + rowKey + '" accept=".jpg,.jpeg,.png,.gif,.pdf,.ofd,.xls,.xlsx" style="display:none" multiple data-key="' + rowKey + '" data-row="' + realIdx + '" onchange="uploadDocsFile(this)">';
               ph += '</div>';
             } else {
               ph += '<input type="text" value="' + escHtml(val) + '" data-row="' + realIdx + '" data-col="' + c.key + '" onchange="editCell(this)" style="width:100%;padding:2px 4px;border:1px solid #ccc">';
