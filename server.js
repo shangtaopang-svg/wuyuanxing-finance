@@ -91,6 +91,15 @@ async function initDB() {
   db.run(`CREATE TABLE IF NOT EXISTS base_expense (
     id INTEGER PRIMARY KEY, date TEXT, base TEXT, item TEXT, amount REAL, note TEXT, invoices TEXT DEFAULT '[]'
   )`);
+  db.run(`CREATE TABLE IF NOT EXISTS company_info (
+    id INTEGER PRIMARY KEY, field_name TEXT, field_value TEXT
+  )`);
+  db.run(`CREATE TABLE IF NOT EXISTS contracts (
+    id INTEGER PRIMARY KEY, date TEXT, contract_name TEXT, party TEXT, amount REAL, status TEXT, note TEXT
+  )`);
+  db.run(`CREATE TABLE IF NOT EXISTS bank_accounts (
+    id INTEGER PRIMARY KEY, bank_name TEXT, account_name TEXT, account_number TEXT, balance REAL, note TEXT
+  )`);
   db.run(`CREATE TABLE IF NOT EXISTS bank_flow (
     id INTEGER PRIMARY KEY, date TEXT, income REAL DEFAULT 0,
     expense REAL DEFAULT 0, counterparty_account TEXT DEFAULT '', counterparty_name TEXT DEFAULT '',
@@ -165,6 +174,9 @@ const TABLE_MAP = {
   management: { table: 'management', fields: ['date','category','amount','summary','invoices'] },
   salary: { table: 'salary', fields: ['month','name','position','amount','pay_date','voucher'] },
   baseExpense: { table: 'base_expense', fields: ['date','base','item','amount','note','invoices'] },
+  companyInfo: { table: 'company_info', fields: ['field_name','field_value'] },
+  contracts: { table: 'contracts', fields: ['date','contract_name','party','amount','status','note'] },
+  bankAccounts: { table: 'bank_accounts', fields: ['bank_name','account_name','account_number','balance','note'] },
   bankFlow: { table: 'bank_flow', fields: ['date','income','expense','counterparty_account','counterparty_name','purpose','summary'] }
 };
 
@@ -227,6 +239,9 @@ const PUBLIC_SECTIONS = {
   asset: { fields: ['date','name','amount','location','status'] },
   management: { fields: ['date','category','amount','summary','invoices'] },
   salary: { fields: ['month','name','position','amount','pay_date','voucher'] },
+  companyInfo: { fields: ['field_name','field_value'] },
+  contracts: { fields: ['date','contract_name','party','amount','status','note'] },
+  bankAccounts: { fields: ['bank_name','account_name','account_number','balance','note'] },
   bankFlow: { fields: ['date','income','expense','counterparty_account','counterparty_name','purpose','summary'] },
   baseExpense: { fields: ['date','base','item','amount','note','invoices'] }
 };
@@ -234,7 +249,7 @@ Object.keys(PUBLIC_SECTIONS).forEach(function(key) {
   app.get('/api/public/' + key, function(req, res) {
     try {
       var cfg = PUBLIC_SECTIONS[key];
-      var table = key === 'incomeExpense' ? 'income_expense' : key === 'pettyCash' ? 'petty_cash' : key === "baseExpense" ? "base_expense" : key === "bankFlow" ? "bank_flow" : key;
+      var table = key === 'incomeExpense' ? 'income_expense' : key === 'pettyCash' ? 'petty_cash' : key === "baseExpense" ? "base_expense" : key === "bankFlow" ? "bank_flow" : key === "companyInfo" ? "company_info" : key === "bankAccounts" ? "bank_accounts" : key;
       var data = query("SELECT " + cfg.fields.join(',') + " FROM " + table + " ORDER BY id");
       res.json(data);
     } catch(e) { res.json([]); }
