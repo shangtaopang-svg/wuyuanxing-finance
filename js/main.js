@@ -306,10 +306,10 @@ function renderBaseExpense() {
     var data = DataStore.baseExpense[base];
     var names = {jinyinhua:'JinyinhuaBody', dangshen:'DangshenBody', seedling:'SeedlingBody'};
     var emptyIds = {jinyinhua:'empty10a', dangshen:'empty10b', seedling:'empty10c'};
-    var body = $(names[base]);
-    body.innerHTML = '';
-    if (!data || data.length === 0) { $(emptyIds[base]).style.display = 'block'; return; }
-    $(emptyIds[base]).style.display = 'none';
+      var body = $(names[base]);
+      if (!body) return;
+      body.innerHTML = '';
+    var e=$(emptyIds[base]);if(e)e.style.display = 'none';
     var capColors = {"任海涛":"#e8f4fd","庞尚韬":"#fef2f2","吴生成":"#f0faf4","应红林":"#fdf6e3","陈洪斌":"#f5e6f0"};
   data.forEach(function(r) {
       body.innerHTML += '<tr><td>' + r.date + '</td><td>' + r.item + '</td><td class="amount expense">' + formatNum(r.amount) + '</td><td>' + (r.note || '') + '</td><td>' +
@@ -325,10 +325,10 @@ function updateSummary() {
   var totalCapital = DataStore.capital.reduce(function(s, r) { return s + (r.amount || 0); }, 0);
   var totalReceivable = DataStore.receivable.reduce(function(s, r) { return s + (r.amount || 0); }, 0);
 
-  $('totalIncome').textContent = formatNum(totalIncome);
-  $('totalExpense').textContent = formatNum(totalExpense);
-  $('totalCapital').textContent = formatNum(totalCapital);
-  $('totalReceivable').textContent = formatNum(totalReceivable);
+  var ei=$('totalIncome');if(ei)ei.textContent = formatNum(totalIncome);
+  var ee=$('totalExpense');if(ee)ee.textContent = formatNum(totalExpense);
+  var ec=$('totalCapital');if(ec)ec.textContent = formatNum(totalCapital);
+  var er=$('totalReceivable');if(er)er.textContent = formatNum(totalReceivable);
 }
 
 // === 图表 ===
