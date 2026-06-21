@@ -931,7 +931,7 @@ function addChartCanvases() {
 
 // === 公开数据加载器（按批次显示） ===
 (function() {
-  var apiBase = typeof API_BASE !== 'undefined' ? API_BASE : '';
+  var apiBase = typeof API_BASE !== "undefined" ? API_BASE : (window.location.pathname.startsWith("/finance/") ? "/finance" : "");
   function loadPublicData() {
     var xhr = new XMLHttpRequest();
     xhr.open('GET', apiBase + '/api/public/reimburse', true);
@@ -961,7 +961,8 @@ function addChartCanvases() {
             body.innerHTML += '<tr style="background:#e8f4fd;font-weight:700"><td colspan="5" style="padding:8px 10px;font-size:0.85rem;border-bottom:2px solid #3498db">📅 报销日期 ' + bid + ' · ' + grp.length + '笔 · 合计 ¥' + batchTotal.toFixed(2) + '  [' + (grp[0].payment_method || '未指定') + ']' + '</td></tr>';
 
             grp.forEach(function(r) {
-              var docLink = r.docs ? '<a href="/uploads/vouchers/' + r.docs + '" target="_blank" style="color:#D35400;font-weight:700;text-decoration:none;border-bottom:1px dashed #D35400">📎 单据</a>' : '—';
+              var hasDoc = r.docs && (typeof r.docs === "string" || r.docs.length > 0);
+              var docLink = hasDoc ? '<a href="/uploads/vouchers/' + r.docs + '" target="_blank" style="color:#D35400;font-weight:700;text-decoration:none;border-bottom:1px dashed #D35400">📎 单据</a>' : '—';
               body.innerHTML += '<tr><td>' + (r.date||'') + '</td><td class="amount expense">¥' + (r.amount||0).toFixed(2) + '</td><td>' + (r.reason||'') + '</td><td>—</td><td>' + docLink + '</td></tr>';
             });
           });
@@ -969,11 +970,12 @@ function addChartCanvases() {
           body.innerHTML += '<tr style="background:#f5f0e8;font-weight:700"><td>总计</td><td>¥' + allTotal.toFixed(2) + '</td><td colspan="3"></td></tr>';
           var e = document.getElementById(emptyId);
           if (e) e.style.display = 'none';
+          if (typeof renderCharts === "function") setTimeout(renderCharts, 300);
         });
       } catch(e) { setTimeout(loadPublicData, 2000); }
     };
     xhr.onerror = function() { setTimeout(loadPublicData, 2000); };
     xhr.send();
   }
-  setTimeout(function(){ loadPublicData(); if(typeof renderCharts === 'function') setTimeout(renderCharts, 300); }, 600);
+  loadPublicData();
 })();

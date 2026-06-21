@@ -323,9 +323,10 @@
   </div>
   <!-- 错误提示 -->
   <div class="error-toast" id="errorToast"></div>
-  <script src="/finance/js/data.js?v=20260621"></script>
-  <script src="/finance/js/lang.js?v=20260621"></script>
-  <script>document.addEventListener("click",function(e){var b=e.target.closest(".tab-btn");if(b){document.querySelectorAll(".tab-btn,.tab-panel").forEach(function(x){x.classList.remove("active")});b.classList.add("active");var p=document.getElementById(b.dataset.tab);if(p)p.classList.add("active")}});document.querySelectorAll(".sum-item").forEach(function(e){e.addEventListener("click",function(){this.classList.remove("pop");void this.offsetWidth;this.classList.add("pop")})});</script><script src="/finance/js/main.js?v=20260622.1"></script>
+  <script>var API_BASE = window.location.pathname.startsWith('/finance/') ? '/finance' : '';</script>
+  <script src="/finance/js/data.js?v=20260623"></script>
+  <script src="/finance/js/lang.js?v=20260623"></script>
+  <script>document.addEventListener("click",function(e){var b=e.target.closest(".tab-btn");if(b){document.querySelectorAll(".tab-btn,.tab-panel").forEach(function(x){x.classList.remove("active")});b.classList.add("active");var p=document.getElementById(b.dataset.tab);if(p)p.classList.add("active")}});document.querySelectorAll(".sum-item").forEach(function(e){e.addEventListener("click",function(){this.classList.remove("pop");void this.offsetWidth;this.classList.add("pop")})});</script><script src="/finance/js/main.js?v=20260623"></script>
   <script>
   // 风格切换
   // 背景音乐
@@ -362,35 +363,6 @@
   if (typeof switchLang === 'function') switchLang(savedLang);
   </script>
 
-<script>
-// 加载公开数据（无需登录）
-(function(){
-  var apiBase = window.location.pathname.startsWith("/finance/") ? "/finance" : "";
-  var xhr = new XMLHttpRequest();
-  xhr.open("GET", apiBase + "/api/public/reimburse", true);
-  xhr.onload = function() {
-    try {
-      var data = JSON.parse(xhr.responseText);
-      if (!data || !data.length) return;
-      // 应红林
-      var items = data.filter(function(r){ return r.person === "应红林"; });
-      var body = document.getElementById("reimburseYingBody");
-      if (body) {
-        body.innerHTML = "";
-        var total = 0;
-        items.forEach(function(r) {
-          total += r.amount || 0;
-          body.innerHTML += "<tr><td>" + (r.date||"") + '</td><td class="amount expense">¥' + (r.amount||0).toFixed(2) + "</td><td>" + (r.reason||"") + "</td><td>—</td><td>—</td></tr>";
-        });
-        body.innerHTML += "<tr style='background:#f5f0e8;font-weight:700'><td>合计</td><td>¥" + total.toFixed(2) + "</td><td colspan='3'></td></tr>";
-      }
-      var e = document.getElementById("empty5c");
-      if (e) e.style.display = "none";
-    } catch(e) {}
-  };
-  xhr.send();
-})();
-</script>
 </body>
 
 </html>
