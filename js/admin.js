@@ -677,7 +677,7 @@ window.renderEditTable = function(section) {
             if (c.type === 'number') {
               ph += '<input type="number" step="0.01" value="' + (val||0) + '" data-row="' + realIdx + '" data-col="' + c.key + '" onchange="editCell(this)" style="width:80px;padding:2px 4px;border:1px solid #ccc">';
             } else if (c.type === 'date') {
-              ph += '<input type="date" value="' + (val||'') + '" data-row="' + realIdx + '" data-col="' + c.key + '" onchange="editCell(this)" style="width:120px;padding:2px 4px;border:1px solid #ccc">';
+              ph += '<input type="date" value="' + ((val||'').split(' ')[0]||'') + '" data-row="' + realIdx + '" data-col="' + c.key + '" onchange="editCell(this)" style="width:120px;padding:2px 4px;border:1px solid #ccc">';
             } else if (c.key === 'docs') {
               var display = Array.isArray(val) ? val.join('; ') : val;
               ph += '<div class="upload-inline" style="display:flex;gap:2px;align-items:center">';
@@ -735,7 +735,7 @@ window.renderEditTable = function(section) {
         } else if (c.type === 'number') {
           html += '<td><input type="number" step="0.01" value="' + (val || 0) + '" data-row="' + idx + '" data-col="' + c.key + '" onchange="editCell(this)"></td>';
         } else if (c.type === 'date') {
-          html += '<td><input type="date" value="' + (val || '') + '" data-row="' + idx + '" data-col="' + c.key + '" onchange="editCell(this)"></td>';
+          html += '<td><input type="date" value="' + ((val||'').split(' ')[0]||'') + '" data-row="' + idx + '" data-col="' + c.key + '" onchange="editCell(this)"></td>';
         } else if (c.type === 'month') {
           html += '<td><input type="month" value="' + (val || '') + '" data-row="' + idx + '" data-col="' + c.key + '" onchange="editCell(this)"></td>';
         } else {
@@ -746,6 +746,14 @@ window.renderEditTable = function(section) {
     });
   }
   html += '</tbody></table>';
+  // 股本金合计行
+  if (section === 'capital' && data.length > 0) {
+    var ttl = data.reduce(function(s,r){return s+(r.amount||0);},0);
+    html += '<tr style="background:#f5f0e8;font-weight:700"><td colspan="2">合计</td><td style="padding:6px 10px;border-top:3px solid #000;text-align:right">¥' + ttl.toFixed(2) + '</td><td colspan="3" style="border-top:3px solid #000"></td></tr>';
+    html += '</tbody></table>';
+  } else {
+    html += '</tbody></table>';
+  }
   // 底部保存条
   html += '<div class="save-bar"><span style="font-size:0.75rem;font-weight:600;color:#555">编辑后记得点击保存按钮</span><button class="btn-save" onclick="saveData()">💾 保存数据</button></div>';
   wrap.innerHTML = html;
