@@ -65,8 +65,7 @@
   <!-- 版块导航标签 -->
   <nav class="tab-nav" id="tabNav">
     <button class="tab-btn active" data-tab="tab2"><span data-lk="tab2">🏦 股本金</span></button>
-    <button class="tab-btn" data-tab="tab1"><span data-lk="tab1">💳 支出</span></button>
-    <button class="tab-btn" data-tab="tab3"><span data-lk="tab3">📈 收入</span></button>
+    <button class="tab-btn" data-tab="tab14"><span>🏛️ 公司基本户收支</span></button>
     <button class="tab-btn" data-tab="tab4"><span data-lk="tab4">💰 备用金</span></button>
     <button class="tab-btn" data-tab="tab5"><span data-lk="tab5">🧾 报销</span></button>
     <button class="tab-btn" data-tab="tab6"><span data-lk="tab6">📤 应收款</span></button>
@@ -80,29 +79,8 @@
   </nav>
 
   <main class="main-content">
-    <!-- ===== ① 基本账户支出 ===== -->
-    <section class="tab-panel active" id="tab1">
-      <div class="panel-header">
-        <h2>💳 公司基本账户支出账目</h2>
-        <div class="panel-actions">
-          <button class="btn-print" onclick="window.print()">🖨️ 打印</button>
-        </div>
-      </div>
-      <div class="chart-row">
-        <div class="chart-card"><h4>📊 月度支出趋势</h4><div class="chart-box"><canvas id="chart1a"></canvas></div></div>
-        <div class="chart-card"><h4>🧩 支出分类占比</h4><div class="chart-box"><canvas id="chart1b"></canvas></div></div>
-      </div>
-      <div class="table-wrap">
-        <table class="data-table" id="incomeExpenseTable">
-          <thead><tr><th>日期</th><th>类别</th><th>摘要</th><th>收入</th><th>支出</th><th>余额</th><th>凭证</th></tr></thead>
-          <tbody id="incomeExpenseBody"></tbody>
-        </table>
-      </div>
-      <div class="table-empty" id="empty1"><span class="empty-icon">📋</span><span class="empty-text">暂无数据</span><span class="empty-hint">请点击下方按钮添加记录</span></div>
-    </section>
-
-    <!-- ===== ② 股本金 ===== -->
-    <section class="tab-panel" id="tab2">
+    <!-- ===== ① 股本金 ===== -->
+    <section class="tab-panel active" id="tab2">
       <div class="panel-header">
         <h2>🏦 公司股本金入账明细</h2>
       </div>
@@ -119,25 +97,19 @@
       <div class="table-empty" id="empty2"><span class="empty-icon">📭</span><span class="empty-text">暂无数据</span><span class="empty-hint">数据录入后将在次显示</span></div>
     </section>
 
-    <!-- ===== ③ 收入 ===== -->
-    <section class="tab-panel" id="tab3">
-      <div class="panel-header">
-        <h2>📈 公司收入账目</h2>
-      </div>
-      <div class="chart-row">
-        <div class="chart-card"><h4>📊 收入月度趋势</h4><div class="chart-box"><canvas id="chart3a"></canvas></div></div>
-        <div class="chart-card"><h4>🧩 收入类别分布</h4><div class="chart-box"><canvas id="chart3b"></canvas></div></div>
-      </div>
+    <!-- ===== ② 公司基本户收支 ===== -->
+    <section class="tab-panel" id="tab14">
+      <div class="panel-header"><h2>🏛️ 公司基本户收支</h2></div>
       <div class="table-wrap">
         <table class="data-table">
-          <thead><tr><th>日期</th><th>类别</th><th>金额</th><th>来源/归处</th><th>凭证</th></tr></thead>
-          <tbody id="incomeBody"></tbody>
+          <thead><tr><th>交易时间</th><th>收入金额</th><th>支出金额</th><th>对方账号</th><th>对方户名</th><th>交易用途</th><th>摘要</th></tr></thead>
+          <tbody id="bankFlowBody"></tbody>
         </table>
       </div>
-      <div class="table-empty" id="empty3"><span class="empty-icon">📭</span><span class="empty-text">暂无数据</span><span class="empty-hint">数据录入后将在次显示</span></div>
+      <div class="table-empty" id="empty14"><span class="empty-icon">📭</span><span class="empty-text">暂无数据</span></div>
     </section>
 
-    <!-- ===== ④ 备用金 ===== -->
+    <!-- ===== ③ 备用金 ===== -->
     <section class="tab-panel" id="tab4">
       <div class="panel-header">
         <h2>💰 备用金账目明细</h2>

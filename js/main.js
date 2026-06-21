@@ -330,16 +330,13 @@ function renderCharts() {
   if (!active) return;
   var id = active.id;
   if (id === 'tab0') { renderDashCharts(); }
-  else if (id === 'tab1') { renderChart1a(); renderChart1b(); }
   else if (id === 'tab2') { renderChart2a(); renderChart2b(); }
-  else if (id === 'tab3') { renderChart3a(); renderChart3b(); }
   else if (id === 'tab4') { renderChart4a(); renderChart4b(); }
   else if (id === 'tab5') { renderChart5a(); renderChart5b(); }
   else if (id === 'tab6') { renderChart6a(); renderChart6b(); }
   else if (id === 'tab7') { renderChart7a(); renderChart7b(); }
   else if (id === 'tab8') { renderChart8a(); renderChart8b(); }
   else if (id === 'tab9') { renderChart9a(); renderChart9b(); }
-  else if (id === 'tab10') { renderChart10a(); renderChart10b(); }
 }
 
 function makeChart(id, type, labels, datasets, opts) {
@@ -714,10 +711,27 @@ function submitForm() {
 }
 
 // === 初始化全量渲染 ===
+function renderBankFlow() {
+  var data = DataStore.bankFlow || [];
+  var body = $('bankFlowBody');
+  if (!body) return;
+  body.innerHTML = '';
+  if (data.length === 0) { var e = $('empty14'); if(e) e.style.display = 'block'; return; }
+  var e = $('empty14'); if(e) e.style.display = 'none';
+  data.forEach(function(r) {
+    body.innerHTML += '<tr><td>' + (r.date||'') + '</td>' +
+      '<td class="amount">' + (r.income ? formatNum(r.income) : '') + '</td>' +
+      '<td class="amount">' + (r.expense ? formatNum(r.expense) : '') + '</td>' +
+      '<td>' + (r.counterparty_account||'') + '</td>' +
+      '<td>' + (r.counterparty_name||'') + '</td>' +
+      '<td>' + (r.purpose||'') + '</td>' +
+      '<td>' + (r.summary||'') + '</td></tr>';
+  });
+}
+
 function renderAll() {
-  renderIncomeExpense();
   renderCapital();
-  renderIncome();
+  renderBankFlow();
   renderPettyCash();
   renderReceivable();
   renderAsset();
@@ -883,7 +897,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
   // 从公共API加载数据（无需登录，确保数据最新）
   showLoading(true);
-  var pubSections = ['capital','incomeExpense','income','pettyCash','receivable','asset','management','salary','baseExpense'];
+  var pubSections = ['capital','bankFlow','pettyCash','receivable','asset','management','salary','baseExpense'];
   var pubLoaded = 0;
   pubSections.forEach(function(s) {
     var xhr = new XMLHttpRequest();
