@@ -3,9 +3,12 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="cache-control" content="no-cache, no-store, must-revalidate">
+  <meta http-equiv="pragma" content="no-cache">
+  <meta http-equiv="expires" content="0">
   <base href="/finance/">
   <title>五源兴农业 · 后台管理</title>
-  <link rel="stylesheet" href="/finance/css/admin.css">
+  <link rel="stylesheet" href="/finance/css/admin.css?v=20260622">
   <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
 </head>
 <body>
@@ -21,9 +24,11 @@
       </div>
       <div class="admin-top-right">
         <span class="admin-status" id="saveStatus">✅ 已保存</span>
+        <span class="admin-user-name" id="userName" style="font-size:0.7rem;opacity:0.7;font-weight:700"></span>
+        <button class="admin-user-btn" onclick="showChangePwd()" title="修改密码">🔑</button>
         <select class="style-select" id="styleSelect" onchange="switchStyle(this.value)" style="padding:4px 10px;border:2px solid rgba(255,255,255,0.4);background:rgba(255,255,255,0.1);color:#fff;font-size:0.7rem;font-weight:700;font-family:inherit;cursor:pointer;">
-          <option value="brutalist">🎨 野兽派</option>
           <option value="magazine">📰 杂志风</option>
+          <option value="brutalist">🎨 野兽派</option>
         </select>
         <a href="index.html" class="admin-back-btn">← 返回前台</a>
       </div>
@@ -35,7 +40,7 @@
     <div class="toolbar-inner">
       <div class="toolbar-tabs" id="adminTabs">
         <button class="tool-tab active" data-section="capital">① 股本金</button>
-        <button class="tool-tab" data-section="incomeExpense">② 收支</button>
+        <button class="tool-tab" data-section="incomeExpense">② 支出</button>
         <button class="tool-tab" data-section="income">③ 收入</button>
         <button class="tool-tab" data-section="pettyCash">④ 备用金</button>
         <button class="tool-tab" data-section="reimburse">⑤ 报销</button>
@@ -44,6 +49,9 @@
         <button class="tool-tab" data-section="management">⑧ 管理费</button>
         <button class="tool-tab" data-section="salary">⑨ 工资</button>
         <button class="tool-tab" data-section="baseExpense">⑩ 基地支出</button>
+        <button class="tool-tab" data-section="companyInfo">⑪ 公司信息</button>
+        <button class="tool-tab" data-section="contracts">⑫ 合同</button>
+        <button class="tool-tab" data-section="bankAccounts">⑬ 银行账户</button>
       </div>
       <div class="toolbar-actions">
         <input type="text" id="searchInput" placeholder="🔍 搜索..." oninput="filterTable(this.value)" style="padding:6px 10px;border:2px solid #000;font-size:0.72rem;font-weight:600;font-family:inherit;width:140px">
@@ -60,10 +68,11 @@
       <!-- 数据编辑区 -->
       <div class="data-editor" id="dataEditor">
         <div class="editor-header">
-          <h2 id="sectionTitle">基本账户收支</h2>
+          <h2 id="sectionTitle">基本账户支出</h2>
           <div class="editor-actions">
             <span class="record-count" id="recordCount">0 条记录</span>
             <button class="btn-add-row" onclick="addRow()">＋ 新增一行</button>
+            <button class="btn-save" onclick="saveData()">💾 保存数据</button>
           </div>
         </div>
         <div class="table-edit-wrap" id="tableEditWrap">
@@ -104,7 +113,7 @@
       <div class="form-group">
         <label>选择导入到哪个版块</label>
         <select id="importSection" style="width:100%;padding:8px;border:3px solid #000;font-family:inherit;font-weight:700;">
-          <option value="incomeExpense">① 基本账户收支</option>
+          <option value="incomeExpense">① 基本账户支出</option>
           <option value="capital">② 股本金</option>
           <option value="income">③ 收入</option>
           <option value="pettyCash">④ 备用金</option>
@@ -114,6 +123,9 @@
           <option value="management">⑧ 管理费用</option>
           <option value="salary">⑨ 工资</option>
           <option value="baseExpense">⑩ 基地支出</option>
+          <option value="companyInfo">⑪ 公司信息</option>
+          <option value="contracts">⑫ 合同管理</option>
+          <option value="bankAccounts">⑬ 银行账户</option>
         </select>
       </div>
       <div class="form-group">
@@ -150,5 +162,34 @@
   </script>
   <script src="/finance/js/upload.js"></script>
   <script src="/finance/js/admin.js"></script>
+
+<script>
+// 合计行 - 内联版
+document.addEventListener("DOMContentLoaded",function(){
+  var t=document.querySelector(".edit-table tbody");
+  if(!t||t.rows.length<2)return;
+  var rows=t.querySelectorAll("tr");
+  var last=rows[rows.length-1];
+  if(last&&last.textContent.indexOf("合计")>=0)return;
+  var nums=[];
+  for(var i=0;i<rows.length;i++){
+    var c=rows[i].querySelector("td:nth-child(3) input[type=number]");
+    if(c)nums.push(parseFloat(c.value)||0);
+  }
+  var total=nums.reduce(function(a,b){return a+b},0);
+  var tr=document.createElement("tr");
+  tr.style.fontWeight="700";tr.style.background="#fff8f0";
+  var td=document.createElement("td");td.textContent="合计";
+  td.style.padding="6px 10px";td.style.borderTop="3px solid #000";
+  tr.appendChild(td);
+  td=document.createElement("td");tr.appendChild(td);
+  td=document.createElement("td");td.textContent=total.toFixed(2);
+  td.style.padding="6px 10px";td.style.borderTop="3px solid #000";
+  tr.appendChild(td);
+  for(var j=3;j<7;j++){td=document.createElement("td");td.style.borderTop="3px solid #000";tr.appendChild(td)}
+  t.appendChild(tr);
+});
+</script>
 </body>
+
 </html>

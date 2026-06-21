@@ -91,7 +91,8 @@ var COLUMNS = {
     {key:'person', label:'人员', type:'select', options:['任海涛','庞尚韬','应红林']},
     {key:'amount', label:'金额', type:'number'},
     {key:'reason', label:'事由', type:'text'},
-    {key:'docs', label:'单据文件', type:'text'}
+    {key:'docs', label:'单据文件', type:'text'},
+    {key:'payment_method', label:'支付方式', type:'select', options:['','公司账户支付','备用金抵扣']}
   ],
   receivable: [
     {key:'date', label:'日期', type:'date'},
@@ -449,6 +450,15 @@ function confirmClear() {
 }
 
 // === 更新列名提示 ===
+
+function switchPersonTab(person, btn) {
+  var p = btn.closest('.data-editor');
+  if (p) { p.querySelectorAll('.sub-tab-btn').forEach(function(b){b.classList.remove('active')});p.querySelectorAll('.person-section').forEach(function(s){s.style.display='none'}); }
+  btn.classList.add('active');
+  var sec = document.getElementById('person_' + person);
+  if (sec) sec.style.display = 'block';
+}
+
 function updateColumnGuide() {
   var html = '';
   for (var key in COLUMNS) {
@@ -467,10 +477,44 @@ function showSaved() {
   var el = $id('saveStatus');
   if (!el) return;
   el.textContent = '💾 保存中...';
+  el.classList.remove('save-flash');
   clearTimeout(saveTimer);
   saveTimer = setTimeout(function() {
     el.textContent = '✅ 已保存';
-  }, 500);
+    el.classList.add('save-flash');
+  }, 300);
+}
+
+// === 报销支付方式批量保存（之前遗漏的函数！） ===
+function updateBatchPayment(el) {
+  var date = el.dataset.date;
+  var person = el.dataset.person;
+  var val = el.value;
+  var data = DB.get('reimburse');
+  data.forEach(function(row) {
+    if (row.person === person && row.reimburse_date === date) {
+      row.payment_method = val;
+    }
+  });
+  DB.set('reimburse', data);
+  showSaved();
+}
+
+// === 显式保存按钮 ===
+function saveData() {
+  var data = DB.get(currentSection);
+  DB.set(currentSection, data);
+  showSaved();
+  // 所有保存按钮文字反馈（顶部+底部）
+  var btns = document.querySelectorAll('.btn-save');
+  btns.forEach(function(btn) {
+    btn.textContent = '✅ 已保存';
+    btn.style.background = '#D35400';
+    setTimeout(function() {
+      btn.textContent = '💾 保存数据';
+      btn.style.background = '';
+    }, 1500);
+  });
 }
 
 // === 搜索/筛选 ===
@@ -518,6 +562,66 @@ renderEditTable = function(section) {
 
   if (!cols) { wrap.innerHTML = '<p style="padding:20px;color:#999">暂未定义此版块</p>'; return; }
 
+
+  if (section === 'reimburse' || section === 'pettyCash') {
+    var persons = section === 'reimburse' ? ['任海涛','庞尚韬','应红林'] : ['任海涛','庞尚韬'];
+    var ph = '<div class="sub-tabs">';
+    persons.forEach(function(p) {
+      var pdata = data.filter(function(r){return r.person===p;});
+      ph += '<button class="sub-tab-btn" data-person="' + p + '" onclick="switchPersonTab(this.dataset.person,this)" style="border-left:3px solid ' + (p==='任海涛'?'#3498db':p==='庞尚韬'?'#e74c3c':'#2ecc71') + '">' + p + '</button>';
+    });
+    ph += '</div>';
+    persons.forEach(function(person) {
+      var pdata = data.filter(function(r){return r.person===person;});
+      var display = person === '任海涛' ? 'block' : 'none';
+      ph += '<div class="person-section" id="person_' + person + '" style="display:' + display + '">';
+      // 按报销日期分组
+      var grps = {};
+      pdata.forEach(function(r) { var rd = r.reimburse_date || '未分组'; if(!grps[rd]) grps[rd] = []; grps[rd].push(r); });
+      var dates = Object.keys(grps).sort();
+      dates.forEach(function(d) {
+        var items = grps[d];
+        var total = items.reduce(function(s,r){return s+(r.amount||0);},0);
+        var pm = items[0].payment_method || '';
+        ph += '<div style="margin:8px 0;border:1px solid #ddd;border-radius:4px;overflow:hidden">';
+        ph += '<div style="background:#e8f4fd;padding:6px 10px;font-weight:700;font-size:0.82rem;border-bottom:1px solid #3498db;display:flex;justify-content:space-between;align-items:center">';
+        ph += '<span>📅 报销日期 ' + d + ' · ' + items.length + '笔 · 合计 ¥' + total.toFixed(2) + '</span>';
+        ph += '<select data-date="' + d + '" data-person="' + person + '" onchange="updateBatchPayment(this)" style="padding:2px 8px;font-size:0.75rem;border:1px solid #3498db;border-radius:3px;background:#fff">';
+        ph += '<option value="">支付方式</option><option value="公司账户支付"' + (pm==='公司账户支付'?' selected':'') + '>公司账户支付</option><option value="备用金抵扣"' + (pm==='备用金抵扣'?' selected':'') + '>备用金抵扣</option>';
+        ph += '</select></div>';
+        ph += '<table class="edit-table" style="border:none"><thead><tr>';
+        cols.forEach(function(c) { if(c.key!=='person'&&c.key!=='payment_method'&&c.key!=='reimburse_date') ph += '<th>' + c.label + '</th>'; });
+        ph += '<th style="width:36px">操作</th></tr></thead><tbody>';
+        items.forEach(function(row) {
+          var realIdx = data.indexOf(row);
+          ph += '<tr>';
+          cols.forEach(function(c) {
+            if (c.key==='person'||c.key==='payment_method'||c.key==='reimburse_date') return;
+            var val = row[c.key] !== undefined && row[c.key] !== null ? row[c.key] : '';
+            ph += '<td>';
+            if (c.type === 'number') {
+              ph += '<input type="number" step="0.01" value="' + (val||0) + '" data-row="' + realIdx + '" data-col="' + c.key + '" onchange="editCell(this)" style="width:80px;padding:2px 4px;border:1px solid #ccc">';
+            } else if (c.type === 'date') {
+              ph += '<input type="date" value="' + (val||'') + '" data-row="' + realIdx + '" data-col="' + c.key + '" onchange="editCell(this)" style="width:120px;padding:2px 4px;border:1px solid #ccc">';
+            } else if (c.key === 'docs') {
+              ph += '<input type="text" value="' + escHtml(val) + '" data-row="' + realIdx + '" data-col="' + c.key + '" onchange="editCell(this)" style="width:100%;padding:2px 4px;border:1px solid #ccc;font-size:0.7rem">';
+            } else {
+              ph += '<input type="text" value="' + escHtml(val) + '" data-row="' + realIdx + '" data-col="' + c.key + '" onchange="editCell(this)" style="width:100%;padding:2px 4px;border:1px solid #ccc">';
+            }
+            ph += '</td>';
+          });
+          ph += '<td><button class="row-del-btn" onclick="deleteRow(' + realIdx + ')" title="删除此行" style="width:24px;height:24px">✕</button></td></tr>';
+        });
+        ph += '</tbody></table></div>';
+      });
+      ph += '</div>';
+    });
+    // 底部保存条
+    ph += '<div class="save-bar"><span style="font-size:0.75rem;font-weight:600;color:#555">编辑后记得点击保存按钮</span><button class="btn-save" onclick="saveData()">💾 保存数据</button></div>';
+    wrap.innerHTML = ph;
+    return;
+  }
+
   var html = '<table class="edit-table"><thead><tr>';
   cols.forEach(function(c) { html += '<th>' + c.label + '</th>'; });
   html += '<th style="width:36px">操作</th></tr></thead><tbody>';
@@ -560,6 +664,8 @@ renderEditTable = function(section) {
     });
   }
   html += '</tbody></table>';
+  // 底部保存条
+  html += '<div class="save-bar"><span style="font-size:0.75rem;font-weight:600;color:#555">编辑后记得点击保存按钮</span><button class="btn-save" onclick="saveData()">💾 保存数据</button></div>';
   wrap.innerHTML = html;
 
   // 上传按钮事件

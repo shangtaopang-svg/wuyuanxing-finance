@@ -25,6 +25,8 @@ body { font-family: 'Courier New','PingFang SC','Microsoft YaHei',monospace; bac
 .admin-status { font-size:0.7rem; font-weight:700; color:var(--green); }
 .admin-back-btn { padding:6px 14px; background:var(--primary); color:#fff; border:2px solid #fff; font-size:0.72rem; font-weight:800; text-decoration:none; font-family:inherit; }
 .admin-back-btn:hover { background:#fff; color:#000; border-color:#fff; }
+.admin-user-btn { width:32px;height:32px;border:2px solid rgba(255,255,255,0.4);background:rgba(255,255,255,0.1);color:#fff;font-size:1rem;cursor:pointer;border-radius:50%;display:flex;align-items:center;justify-content:center; }
+.admin-user-btn:hover { background:rgba(255,255,255,0.2);border-color:#fff; }
 
 /* 工具栏 */
 .admin-toolbar { background:var(--card); border-bottom:4px solid var(--border); position:sticky; top:60px; z-index:99; }
@@ -52,6 +54,32 @@ body { font-family: 'Courier New','PingFang SC','Microsoft YaHei',monospace; bac
 .record-count { font-size:0.72rem; font-weight:700; color:var(--text-light); }
 .btn-add-row { padding:6px 14px; background:#000; color:#fff; border:2px solid #000; font-size:0.72rem; font-weight:800; cursor:pointer; font-family:inherit; }
 .btn-add-row:hover { background:var(--primary); border-color:var(--primary); }
+
+/* 保存按钮 — 超大醒目 */
+.btn-save {
+  padding:8px 22px; background:var(--primary); color:#fff;
+  border:3px solid #000; font-size:0.82rem; font-weight:900;
+  cursor:pointer; font-family:inherit; letter-spacing:0.05em;
+  transition:all 0.15s; box-shadow:3px 3px 0 #000;
+}
+.btn-save:hover { background:#e67e22; transform:translate(-1px,-1px); box-shadow:4px 4px 0 #000; }
+.btn-save:active { transform:translate(2px,2px); box-shadow:1px 1px 0 #000; }
+
+/* 底部保存条 */
+.save-bar {
+  display:flex; justify-content:space-between; align-items:center;
+  padding:10px 16px; border-top:3px solid var(--border);
+  background:var(--bg);
+}
+.save-bar .btn-save { font-size:0.9rem; padding:10px 30px; }
+
+/* 保存状态闪烁动画 */
+@keyframes saveFlash {
+  0% { opacity:0.3; transform:scale(0.9); }
+  50% { opacity:1; transform:scale(1.2); color:var(--primary); font-weight:900; }
+  100% { opacity:1; transform:scale(1); }
+}
+.save-flash { animation: saveFlash 0.5s ease; display:inline-block; }
 
 /* 可编辑表格 */
 .table-edit-wrap { overflow-x:auto; padding:0; }
