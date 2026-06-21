@@ -961,7 +961,8 @@ function addChartCanvases() {
             body.innerHTML += '<tr style="background:#e8f4fd;font-weight:700"><td colspan="5" style="padding:8px 10px;font-size:0.85rem;border-bottom:2px solid #3498db">📅 报销日期 ' + bid + ' · ' + grp.length + '笔 · 合计 ¥' + batchTotal.toFixed(2) + '  [' + (grp[0].payment_method || '未指定') + ']' + '</td></tr>';
 
             grp.forEach(function(r) {
-              body.innerHTML += '<tr><td>' + (r.date||'') + '</td><td class="amount expense">¥' + (r.amount||0).toFixed(2) + '</td><td>' + (r.reason||'') + '</td><td>—</td><td>—</td></tr>';
+              var docLink = r.docs ? '<a href="/uploads/vouchers/' + r.docs + '" target="_blank" style="color:#D35400;font-weight:700;text-decoration:none;border-bottom:1px dashed #D35400">📎 单据</a>' : '—';
+              body.innerHTML += '<tr><td>' + (r.date||'') + '</td><td class="amount expense">¥' + (r.amount||0).toFixed(2) + '</td><td>' + (r.reason||'') + '</td><td>—</td><td>' + docLink + '</td></tr>';
             });
           });
           var allTotal = items.reduce(function(s,r){return s+(r.amount||0);},0);
