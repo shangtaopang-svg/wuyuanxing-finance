@@ -13,7 +13,7 @@ var DB = {
     if (!noSync) { DB.syncToServer(key, data); showSaved(); }
   },
   getAll: function() {
-    var sections = ['incomeExpense','capital','bankFlow','income','pettyCash','reimburse','receivable','asset','management','salary','baseExpense'];
+    var sections = ['incomeExpense','capital','bankFlow','income','pettyCash','reimburse','receivable','asset','management','salary','baseExpense','companyInfo','contracts','bankAccounts'];
     var all = {};
     sections.forEach(function(s) { all[s] = DB.get(s); });
     return all;
@@ -47,7 +47,7 @@ var DB = {
   },
   // 批量从服务器加载全部
   loadAllFromServer: function(callback) {
-    var sections = ['incomeExpense','capital','bankFlow','income','pettyCash','reimburse','receivable','asset','management','salary','baseExpense'];
+    var sections = ['incomeExpense','capital','bankFlow','income','pettyCash','reimburse','receivable','asset','management','salary','baseExpense','companyInfo','contracts','bankAccounts'];
     var loaded = 0;
     sections.forEach(function(s) {
       DB.loadFromServer(s, function() {
@@ -144,13 +144,32 @@ var COLUMNS = {
     {key:'amount', label:'金额', type:'number'},
     {key:'note', label:'说明', type:'text'},
     {key:'invoices', label:'凭证', type:'text'}
+  ],
+  bankAccounts: [
+    {key:'bank_name', label:'银行', type:'text'},
+    {key:'account_name', label:'户名', type:'text'},
+    {key:'account_number', label:'账号', type:'text'},
+    {key:'balance', label:'余额', type:'number'},
+    {key:'note', label:'备注', type:'text'}
+  ],
+  contracts: [
+    {key:'date', label:'日期', type:'date'},
+    {key:'contract_name', label:'合同名称', type:'text'},
+    {key:'party', label:'签约方', type:'text'},
+    {key:'amount', label:'金额', type:'number'},
+    {key:'status', label:'状态', type:'select', options:['进行中','已完成','已终止']},
+    {key:'note', label:'备注', type:'text'}
+  ],
+  companyInfo: [
+    {key:'field_name', label:'项目', type:'text'},
+    {key:'field_value', label:'内容', type:'text'}
   ]
 };
 
 var SECTION_NAMES = {
   incomeExpense:'基本账户收支', capital:'股本金', income:'收入',
   pettyCash:'备用金', reimburse:'报销', receivable:'应收账款',
-  asset:'固定资产', management:'管理费用', salary:'工资', baseExpense:'基地支出', bankFlow:'公司基本户收支'
+  asset:'固定资产', management:'管理费用', salary:'工资', baseExpense:'基地支出', bankFlow:'公司基本户收支', bankAccounts:'银行账户', contracts:'合同管理', companyInfo:'公司信息'
 };
 
 var currentSection = 'incomeExpense';
