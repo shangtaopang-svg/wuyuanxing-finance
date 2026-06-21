@@ -615,7 +615,7 @@ function syncFromServer() {
 // === 初始化 - 从服务器加载 ===
 // 修改 renderEditTable 以支持搜索过滤
 var _origRenderEditTable = renderEditTable;
-renderEditTable = function(section) {
+window.renderEditTable = function(section) {
   var data = DB.get(section);
   var cols = COLUMNS[section];
   var wrap = $id('tableEditWrap');
