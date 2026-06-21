@@ -34,7 +34,7 @@
           <option value="zh">中文</option>
           <option value="en">EN</option>
         </select>
-        <a href="admin.html" class="top-link" data-lk="admin">⚙️ 管理</a>
+        <a href="admin.html" class="top-link" data-lk="admin">⚙️ 管理</a><a href="javascript:localStorage.clear();location.reload()" style="color:#e74c3c;font-size:0.7rem;border:1px solid #e74c3c;padding:2px 8px;border-radius:3px;text-decoration:none">🔄 刷新数据</a>
         <a href="report.html" class="top-link" data-lk="report">📄 报告</a>
         <a href="statements.html" class="top-link">📊 报表</a>
         <span style="font-size:0.55rem;opacity:0.3;letter-spacing:0.1em">v2.1</span>
@@ -326,7 +326,7 @@
   <script>var API_BASE = window.location.pathname.startsWith('/finance/') ? '/finance' : '';</script>
   <script src="/finance/js/data.js?v=20260623"></script>
   <script src="/finance/js/lang.js?v=20260623"></script>
-  <script>document.addEventListener("click",function(e){var b=e.target.closest(".tab-btn");if(b){document.querySelectorAll(".tab-btn,.tab-panel").forEach(function(x){x.classList.remove("active")});b.classList.add("active");var p=document.getElementById(b.dataset.tab);if(p)p.classList.add("active")}});document.querySelectorAll(".sum-item").forEach(function(e){e.addEventListener("click",function(){this.classList.remove("pop");void this.offsetWidth;this.classList.add("pop")})});</script><script src="/finance/js/main.js?v=20260627"></script>
+  <script>document.addEventListener("click",function(e){var b=e.target.closest(".tab-btn");if(b){document.querySelectorAll(".tab-btn,.tab-panel").forEach(function(x){x.classList.remove("active")});b.classList.add("active");var p=document.getElementById(b.dataset.tab);if(p)p.classList.add("active")}});document.querySelectorAll(".sum-item").forEach(function(e){e.addEventListener("click",function(){this.classList.remove("pop");void this.offsetWidth;this.classList.add("pop")})});</script><script src="/finance/js/main.js?v=20260628"></script>
   <script>
   // 风格切换
   // 背景音乐
