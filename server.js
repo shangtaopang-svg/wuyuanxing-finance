@@ -138,7 +138,29 @@ function query(sql, params) {
   } catch(e) { console.error('SQL Error:', e); return []; }
 }
 
-function run(sql, params) { db.run(sql, params); saveDB(); }
+function run(sql, params) {
+  try { db.run(sql, params); saveDB(); } catch(e) { console.error('[DB] SQL错误:', e.message); throw e; }
+}
+
+// 自动备份数据库（保留最近5份）
+function backupDB() {
+  try {
+    var backupDir = path.join(__dirname, 'backups');
+    if (!fs.existsSync(backupDir)) fs.mkdirSync(backupDir, { recursive: true });
+    var dateStr = new Date().toISOString().slice(0,10).replace(/-/g, '');
+    var backupFile = path.join(backupDir, 'finance_' + dateStr + '.db');
+    if (!fs.existsSync(backupFile)) {
+      fs.copyFileSync(DB_PATH, backupFile);
+      console.log('[备份] 已创建: ' + backupFile);
+    }
+    // 清理旧备份，保留最近5份
+    var files = fs.readdirSync(backupDir).filter(function(f) { return f.endsWith('.db'); }).sort();
+    while (files.length > 5) {
+      fs.unlinkSync(path.join(backupDir, files[0]));
+      files.shift();
+    }
+  } catch(e) { console.error('[备份] 失败:', e.message); }
+}
 
 // ===== JWT 认证中间件 =====
 function authMW(req, res, next) {
@@ -188,27 +210,43 @@ app.get('/api/data/:section', authMW, (req, res) => {
   res.json(data);
 });
 
-// 保存全部数据（覆盖式）
+// 保存全部数据（覆盖式，带事务保护和自动备份）
 app.post('/api/data/:section', authMW, (req, res) => {
   const cfg = TABLE_MAP[req.params.section];
   if (!cfg) return res.status(400).json({ error: '未知版块' });
   const { data } = req.body;
   if (!Array.isArray(data)) return res.status(400).json({ error: '数据格式错误' });
 
-  // 清空旧数据
-  run(`DELETE FROM ${cfg.table}`);
+  // 验证数据格式
+  for (var i = 0; i < data.length; i++) {
+    if (typeof data[i] !== 'object') return res.status(400).json({ error: '第'+(i+1)+'行数据格式错误' });
+  }
 
-  // 插入新数据
-  data.forEach(row => {
-    const vals = cfg.fields.map(f => {
-      const v = row[f];
-      return Array.isArray(v) ? JSON.stringify(v) : (v !== undefined && v !== null ? v : '');
+  // 自动备份（每天一次）
+  backupDB();
+
+  try {
+    // 事务保护：要么全部成功，要么全部回滚
+    db.run("BEGIN");
+    run(`DELETE FROM ${cfg.table}`);
+    data.forEach(row => {
+      const vals = cfg.fields.map(f => {
+        const v = row[f];
+        if (typeof v === 'number' && isNaN(v)) return 0;
+        return Array.isArray(v) ? JSON.stringify(v) : (v !== undefined && v !== null ? v : '');
+      });
+      const placeholders = cfg.fields.map(() => '?').join(',');
+      run(`INSERT INTO ${cfg.table} (${cfg.fields.join(',')}) VALUES (${placeholders})`, vals);
     });
-    const placeholders = cfg.fields.map(() => '?').join(',');
-    run(`INSERT INTO ${cfg.table} (${cfg.fields.join(',')}) VALUES (${placeholders})`, vals);
-  });
-
-  res.json({ ok: true, count: data.length });
+    db.run("COMMIT");
+    saveDB();
+    console.log('[保存] ' + cfg.table + ' ' + data.length + '条');
+    res.json({ ok: true, count: data.length });
+  } catch(e) {
+    db.run("ROLLBACK");
+    console.error('[保存失败]', e.message);
+    res.status(500).json({ error: '保存失败: ' + e.message });
+  }
 });
 
 // ===== 公开只读API =====
