@@ -922,8 +922,7 @@ function doGlobalSearch(keyword) {
 
 // === 新加版块渲染 ===
 function renderCompanyInfo() {
-  var d = typeof SERVER_DATA !== 'undefined' ? SERVER_DATA : {};
-  var data = d.companyInfo || [];
+  var data = (typeof SERVER_DATA !== 'undefined' ? SERVER_DATA : {}).companyInfo || DataStore.companyInfo || [];
   var body = document.getElementById('companyInfoBody');
   if (!body) return;
   body.innerHTML = '';
@@ -932,8 +931,7 @@ function renderCompanyInfo() {
   data.forEach(function(r){ body.innerHTML += '<tr><td style="font-weight:700;width:120px">'+(r.field_name||'')+'</td><td>'+(r.field_value||'')+'</td></tr>'; });
 }
 function renderContracts() {
-  var d = typeof SERVER_DATA !== 'undefined' ? SERVER_DATA : {};
-  var data = d.contracts || [];
+  var data = (typeof SERVER_DATA !== 'undefined' ? SERVER_DATA : {}).contracts || DataStore.contracts || [];
   var body = document.getElementById('contractsBody');
   if (!body) return;
   body.innerHTML = '';
@@ -942,8 +940,7 @@ function renderContracts() {
   data.forEach(function(r){ body.innerHTML += '<tr><td>'+(r.date||'')+'</td><td>'+(r.contract_name||'')+'</td><td>'+(r.party||'')+'</td><td class="amount">'+formatNum(r.amount||0)+'</td><td>'+(r.status||'')+'</td><td>'+(r.note||'')+'</td></tr>'; });
 }
 function renderBankAccounts() {
-  var d = typeof SERVER_DATA !== 'undefined' ? SERVER_DATA : {};
-  var data = d.bankAccounts || [];
+  var data = (typeof SERVER_DATA !== 'undefined' ? SERVER_DATA : {}).bankAccounts || DataStore.bankAccounts || [];
   var body = document.getElementById('bankAccountsBody');
   if (!body) return;
   body.innerHTML = '';
@@ -975,7 +972,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
   // 从公共API加载数据（无需登录，确保数据最新）
   showLoading(true);
-  var pubSections = ['capital','bankFlow','pettyCash','receivable','asset','management','salary','baseExpense'];
+  var pubSections = ['capital','bankFlow','pettyCash','bankAccounts','contracts','companyInfo','receivable','asset','management','salary','baseExpense'];
   var pubLoaded = 0;
   pubSections.forEach(function(s) {
     var xhr = new XMLHttpRequest();
