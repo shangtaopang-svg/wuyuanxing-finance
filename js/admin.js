@@ -761,7 +761,8 @@ window.renderEditTable = function(section) {
       (_filterKeyword ? '未找到匹配 "' + _filterKeyword + '"' : '暂无数据，点击"＋ 新增一行"添加') + '</td></tr>';
   } else {
     data.forEach(function(row, idx) {
-      html += '<tr>';
+      var rowBg = section === 'bankFlow' ? (row.income > 0 ? '#f0faf4' : (row.expense > 0 ? '#fef2f2' : '')) : '';
+      html += '<tr style="background:' + rowBg + '">';
       cols.forEach(function(c) {
         var val = row[c.key] !== undefined && row[c.key] !== null ? row[c.key] : '';
         if (c.key === 'invoices' || c.key === 'voucher' || c.key === 'docs') {
