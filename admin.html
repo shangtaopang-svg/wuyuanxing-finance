@@ -57,6 +57,7 @@
       <div class="toolbar-actions">
         <input type="text" id="searchInput" placeholder="🔍 搜索..." oninput="filterTable(this.value)" style="padding:6px 10px;border:2px solid #000;font-size:0.72rem;font-weight:600;font-family:inherit;width:140px">
         <button class="tb-btn tb-sync" onclick="syncFromServer()" title="从服务器同步">🔄 同步</button>
+        <button class="tb-btn" onclick="forceSync()" title="推送本地数据到服务器" style="border-color:#D35400;color:#D35400">⬆️ 推送</button>
         <button class="tb-btn tb-import" onclick="showImportModal()">📥 导入Excel</button>
         <button class="tb-btn tb-export" onclick="exportData()">📤 导出</button>
         <button class="tb-btn tb-clear" onclick="confirmClear()">🗑️ 清空</button>
