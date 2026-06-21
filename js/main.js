@@ -164,11 +164,14 @@ function renderCapital() {
   body.innerHTML = '';
   if (data.length === 0) { $('empty2').style.display = 'block'; return; }
   $('empty2').style.display = 'none';
+  var total = 0;
   data.forEach(function(r) {
+    total += r.amount || 0;
     body.innerHTML += '<tr><td>' + r.date + '</td><td><strong>' + r.name + '</strong></td>' +
       '<td class="amount green">' + formatNum(r.amount) + '</td><td>' + r.method + '</td>' +
       '<td>' + (r.voucher ? '<span class="invoice-link" onclick="previewFile(\'' + encodeURIComponent(r.voucher) + '\')">📎 回单</span>' : '—') + '</td></tr>';
   });
+  body.innerHTML += '<tr style="background:#f5f0e8;font-weight:700"><td colspan="2">合计</td><td class="amount green">' + formatNum(total) + '</td><td colspan="2"></td></tr>';
 }
 
 // ③ 收入
