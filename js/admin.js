@@ -8,9 +8,9 @@ var DB = {
   get: function(key) {
     try { return JSON.parse(localStorage.getItem('wyx_' + key)) || []; } catch(e) { return []; }
   },
-  set: function(key, data) {
+  set: function(key, data, noSync) {
     localStorage.setItem('wyx_' + key, JSON.stringify(data));
-    DB.syncToServer(key, data);
+    if (!noSync) { DB.syncToServer(key, data); showSaved(); }
   },
   getAll: function() {
     var sections = ['incomeExpense','capital','bankFlow','income','pettyCash','reimburse','receivable','asset','management','salary','baseExpense'];
@@ -21,14 +21,19 @@ var DB = {
   importAll: function(data) {
     for (var k in data) { DB.set(k, data[k]); }
   },
-  // API同步
+  // API同步（带状态反馈）
   syncToServer: function(section, data) {
-    if (!window.API_TOKEN) return;
-    fetch(API_BASE + '/api/data/' + section, {
+    if (!window.API_TOKEN) { console.warn('未登录，无法同步'); return false; }
+    var apiBase = (typeof API_BASE !== 'undefined') ? API_BASE : '';
+    fetch(apiBase + '/api/data/' + section, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + window.API_TOKEN },
       body: JSON.stringify({ data: data })
-    }).catch(function() {});
+    }).then(function(r) {
+      if (r.ok) { console.log('✅ 已同步 ' + section + ' ' + data.length + '条'); return true; }
+      else { console.error('❌ 同步 ' + section + ' 失败:', r.status); return false; }
+    }).catch(function(e) { console.error('❌ 同步 ' + section + ' 网络错误:', e); });
+    return true;
   },
   loadFromServer: function(section, callback) {
     if (!window.API_TOKEN) { if (callback) callback(DB.get(section)); return; }
@@ -439,16 +444,18 @@ function $id(id) { return document.getElementById(id); }
 function $title(id) { return document.getElementById(id); }
 
 var saveTimer = null;
-function showSaved() {
+function showSaved(msg) {
   var el = $id('saveStatus');
   if (!el) return;
-  el.textContent = '💾 保存中...';
+  el.textContent = '💾 ' + (msg || '保存中...');
+  el.style.color = '#f39c12';
   el.classList.remove('save-flash');
   clearTimeout(saveTimer);
   saveTimer = setTimeout(function() {
-    el.textContent = '✅ 已保存';
+    el.textContent = '✅ ' + (msg || '已保存');
+    el.style.color = '#27ae60';
     el.classList.add('save-flash');
-  }, 300);
+  }, msg ? 100 : 300);
 }
 
 // === 报销支付方式批量保存（之前遗漏的函数！） ===
