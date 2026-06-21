@@ -868,7 +868,7 @@ document.addEventListener('DOMContentLoaded', function() {
       xhr.setRequestHeader('Authorization', 'Bearer ' + token);
       xhr.onload = function() {
         try {
-          if (xhr.status === 401) { showError('登录已过期，请重新登录'); localStorage.removeItem('wyx_token'); return; }
+          if (xhr.status === 401) { localStorage.removeItem("wyx_token"); showError("登录已过期"); setTimeout(function(){ location.reload(); }, 1500); return; }
           if (xhr.status !== 200) { showError('数据加载失败，请刷新重试'); return; }
           var d = JSON.parse(xhr.responseText) || [];
           if (typeof SERVER_DATA !== 'undefined') {
