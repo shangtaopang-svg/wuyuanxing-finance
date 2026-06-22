@@ -64,7 +64,8 @@
 
   <!-- 版块导航标签 -->
   <nav class="tab-nav" id="tabNav">
-    <button class="tab-btn active" data-tab="tab2"><span data-lk="tab2">🏦 股本金</span></button>
+    <button class="tab-btn active" data-tab="tab0"><span>📊 数据总览</span></button>
+    <button class="tab-btn" data-tab="tab2"><span data-lk="tab2">🏦 股本金</span></button>
     <button class="tab-btn" data-tab="tab14"><span>🏛️ 公司基本户收支</span></button>
     <button class="tab-btn" data-tab="tab4"><span data-lk="tab4">💰 备用金</span></button>
     <button class="tab-btn" data-tab="tab5"><span data-lk="tab5">🧾 报销</span></button>
@@ -79,8 +80,42 @@
   </nav>
 
   <main class="main-content">
+    <!-- ===== 📊 数据总览 ===== -->
+    <section class="tab-panel active" id="tab0">
+      <div class="dash-grid" id="dashGrid">
+        <div class="dash-card" style="border-left:4px solid #27ae60">
+          <div class="dash-label">总收入</div>
+          <div class="dash-value" style="color:#27ae60" id="dashIncome">—</div>
+        </div>
+        <div class="dash-card" style="border-left:4px solid #e53e3e">
+          <div class="dash-label">总支出</div>
+          <div class="dash-value" style="color:#e53e3e" id="dashExpense">—</div>
+        </div>
+        <div class="dash-card" style="border-left:4px solid #D35400">
+          <div class="dash-label">净余额</div>
+          <div class="dash-value" style="color:#D35400" id="dashBalance">—</div>
+        </div>
+        <div class="dash-card" style="border-left:4px solid #3182ce">
+          <div class="dash-label">股本金</div>
+          <div class="dash-value" style="color:#3182ce" id="dashCapital">—</div>
+        </div>
+        <div class="dash-card" style="border-left:4px solid #9b59b6">
+          <div class="dash-label">报销笔数</div>
+          <div class="dash-value" style="color:#9b59b6" id="dashReimburse">—</div>
+        </div>
+        <div class="dash-card" style="border-left:4px solid #1abc9c">
+          <div class="dash-label">基本户流水</div>
+          <div class="dash-value" style="color:#1abc9c" id="dashBankFlow">—</div>
+        </div>
+      </div>
+      <div class="chart-row" style="margin-top:12px">
+        <div class="chart-card" style="flex:1.5"><h4>📊 月度收支趋势</h4><div class="chart-box"><canvas id="dashChart"></canvas></div></div>
+        <div class="chart-card" style="flex:1"><h4>🧩 支出分类</h4><div class="chart-box"><canvas id="dashPie"></canvas></div></div>
+      </div>
+    </section>
+
     <!-- ===== ① 股本金 ===== -->
-    <section class="tab-panel active" id="tab2">
+    <section class="tab-panel" id="tab2">
       <div class="panel-header">
         <h2>🏦 公司股本金入账明细</h2>
       </div>

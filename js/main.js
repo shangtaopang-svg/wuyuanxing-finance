@@ -376,42 +376,50 @@ function makeChart(id, type, labels, datasets, opts) {
 
 // === 仪表盘图表 ===
 function renderDashCharts() {
-  var ie = DataStore.incomeExpense || [];
+  var bf = DataStore.bankFlow || [];
   var cap = DataStore.capital || [];
-  var bases = DataStore.baseExpense || [];
-
-  // 更新数字
-  var totalIncome = ie.reduce(function(s,r) { return s + (r.income||0); }, 0);
-  var totalExpense = ie.reduce(function(s,r) { return s + (r.expense||0); }, 0);
+  var reim = DataStore._reimburseFlat || DataStore.reimburse || [];
+  var reimCount = Array.isArray(reim) ? reim.length : 0;
+  var totalIncome = bf.reduce(function(s,r) { return s + (r.income||0); }, 0);
+  var totalExpense = bf.reduce(function(s,r) { return s + (r.expense||0); }, 0);
   var totalCapital = cap.reduce(function(s,r) { return s + (r.amount||0); }, 0);
-  var totalReceivable = (DataStore.receivable||[]).reduce(function(s,r) { return s + (r.amount||0); }, 0);
-  var totalSalary = (DataStore.salary||[]).reduce(function(s,r) { return s + (r.amount||0); }, 0);
-  var totalBase = bases.reduce(function(s,r) { return s + (r.amount||0); }, 0);
 
   $('dashIncome').textContent = formatNum(totalIncome);
   $('dashExpense').textContent = formatNum(totalExpense);
+  $('dashBalance').textContent = formatNum(totalIncome - totalExpense);
   $('dashCapital').textContent = formatNum(totalCapital);
-  $('dashReceivable').textContent = formatNum(totalReceivable);
-  $('dashSalary').textContent = formatNum(totalSalary);
-  $('dashBase').textContent = formatNum(totalBase);
+  $('dashReimburse').textContent = reimCount + '笔';
+  $('dashBankFlow').textContent = bf.length + '笔';
 
-  // 收支月度趋势
-  var labels = ie.map(function(r) { return r.date.slice(5); });
-  var incomes = ie.map(function(r) { return r.income||0; });
-  var expenses = ie.map(function(r) { return r.expense||0; });
-  makeChart('dashChart1', 'bar', labels, [
-    { label: '收入', data: incomes, backgroundColor: '#27ae60', borderColor: '#000', borderWidth: 2 },
-    { label: '支出', data: expenses, backgroundColor: '#c0392b', borderColor: '#000', borderWidth: 2 }
-  ]);
+  // 月度收支趋势（使用bankFlow数据）
+  var months = {};
+  bf.forEach(function(r) {
+    var m = (r.date||'').slice(0,7);
+    if (!m) return;
+    if (!months[m]) months[m] = { income:0, expense:0 };
+    months[m].income += r.income||0;
+    months[m].expense += r.expense||0;
+  });
+  var mLabels = Object.keys(months).sort();
+  var mIncome = mLabels.map(function(m){return months[m].income;});
+  var mExpense = mLabels.map(function(m){return months[m].expense;});
+  makeChart('dashChart', 'bar', mLabels, [
+    { label: '收入', data: mIncome, backgroundColor: 'rgba(39,174,96,0.7)', borderColor: '#27ae60', borderWidth: 2 },
+    { label: '支出', data: mExpense, backgroundColor: 'rgba(229,62,62,0.7)', borderColor: '#e53e3e', borderWidth: 2 }
+  ], {
+    plugins: { datalabels: { anchor:'end', align:'end', color:'#000', font:{weight:'bold',size:9}, formatter:function(v){return '¥' + Math.round(v).toLocaleString('zh-CN');} } }
+  });
 
-  // 支出分类占比
-  var expByType = {};
-  ie.forEach(function(r) { if (r.expense > 0) { expByType[r.summary] = (expByType[r.summary]||0) + r.expense; } });
-  var eLabels = Object.keys(expByType);
-  var eValues = eLabels.map(function(k) { return expByType[k]; });
-  makeChart('dashChart2', 'doughnut', eLabels, [
-    { data: eValues, backgroundColor: ['#D35400','#2b6cb0','#38a169','#d69e2e','#9f7aea','#e53e3e'], borderColor: '#000', borderWidth: 2 }
-  ]);
+  // 支出用途占比（从基本户取）
+  var expByPurpose = {};
+  bf.forEach(function(r) { if (r.expense > 0 && r.purpose) { var p = r.purpose.slice(0,4); expByPurpose[p] = (expByPurpose[p]||0) + r.expense; } });
+  var eLabels = Object.keys(expByPurpose).sort(function(a,b){return expByPurpose[b]-expByPurpose[a];}).slice(0,8);
+  var eValues = eLabels.map(function(k) { return expByPurpose[k]; });
+  makeChart('dashPie', 'doughnut', eLabels, [
+    { data: eValues, backgroundColor: ['#D35400','#2b6cb0','#38a169','#d69e2e','#9f7aea','#e53e3e','#1abc9c','#34495e'], borderColor: '#000', borderWidth: 2 }
+  ], {
+    plugins: { datalabels: { color:'#fff', font:{weight:'bold',size:10}, formatter:function(v,ctx){var t=ctx.dataset.data.reduce(function(a,b){return a+b;},0);return (v/t*100).toFixed(1)+'%';} } }
+  });
 
   // 股本金构成
   var cLabels = cap.map(function(r) { return r.name; });

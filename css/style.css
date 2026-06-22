@@ -172,6 +172,13 @@ body { font-family:var(--font); background:var(--bg); color:var(--text); line-he
 
 /* ===== 暗色模式 ===== */
 [data-theme="dark"] { --bg:#1a1a2e; --card:#16213e; --border:#0f3460; --text:#e0e0e0; --text-light:#8899aa; --primary:#e94560; --primary-dark:#0f0f23; }
+/* 数据仪表盘卡片 */
+.dash-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(150px,1fr)); gap:10px; margin-bottom:4px; }
+.dash-card { background:var(--card); border:1px solid var(--border); border-radius:8px; padding:14px 16px; box-shadow:0 1px 6px rgba(0,0,0,0.04); transition:transform 0.2s,box-shadow 0.2s; }
+.dash-card:hover { transform:translateY(-2px); box-shadow:0 4px 16px rgba(0,0,0,0.08); }
+.dash-label { font-size:0.68rem; font-weight:700; color:var(--text-light); text-transform:uppercase; letter-spacing:0.04em; margin-bottom:4px; }
+.dash-value { font-size:1.3rem; font-weight:900; font-family:var(--font-mono); }
+
 [data-theme="dark"] .sum-item { background:var(--card); }
 [data-theme="dark"] .data-table { background:var(--card); }
 [data-theme="dark"] .data-table th { background:#0f3460; color:#fff; }
