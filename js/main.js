@@ -390,9 +390,7 @@ function openChartViewer(canvasId) {
     var cfg = charts[canvasId].config;
     var newCanvas = document.getElementById(newId);
     if (newCanvas) {
-      // 深拷贝配置，避免共享同一份数据
-      var cfgClone = JSON.parse(JSON.stringify(cfg));
-      charts[newId] = new Chart(newCanvas, cfgClone);
+      charts[newId] = new Chart(newCanvas, cfg);
     }
   }
 }
