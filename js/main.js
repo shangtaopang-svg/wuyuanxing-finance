@@ -1274,7 +1274,7 @@ function addChartCanvases() {
             grp.forEach(function(r) {
               var hasDoc = r.docs && (typeof r.docs === "string" || r.docs.length > 0);
               var docFiles = hasDoc ? (typeof r.docs === "string" ? r.docs.split(";") : r.docs) : [];
-              var docLink = docFiles.length ? docFiles.map(function(f){return f.trim();}).filter(Boolean).map(function(f){return '<a href="#" onclick="previewFile(\'" + f + "\')" style="color:#D35400;font-weight:700;text-decoration:none;border-bottom:1px dashed #D35400">📎 ' + f + '</a>';}).join(' ') : '—';
+              var docLink = docFiles.length ? docFiles.map(function(f){return f.trim();}).filter(Boolean).map(function(f){return '<a href="/finance/uploads/vouchers/' + f + '" target="_blank" style="color:#D35400;font-weight:700;text-decoration:none;border-bottom:1px dashed #D35400">📎 ' + f + '</a>';}).join(" ") : "—";
               body.innerHTML += '<tr><td>' + (r.date||'') + '</td><td class="amount expense">' + String.fromCharCode(165) + (r.amount||0).toFixed(2) + '</td><td>' + (r.reason||'') + '</td><td>' + String.fromCharCode(8212) + '</td><td>' + docLink + '</td></tr>';
             });
           });
