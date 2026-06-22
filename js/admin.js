@@ -758,7 +758,7 @@ window.renderEditTable = function(section) {
         ph += '</select></div>';
         ph += '<table class="edit-table" style="border:none"><thead><tr>';
         cols.forEach(function(c) { 
-          if(c.key==='date') ph += '<th style="width:70px">' + c.label + '</th>';
+          if(c.key==='date') ph += '<th style="width:35px">' + c.label + '</th>';
           else if(c.key==='amount') ph += '<th style="width:85px">' + c.label + '</th>';
           else if(c.key==='reason') ph += '<th style="width:110px">' + c.label + '</th>';
           else if(c.key==='docs') ph += '<th style="width:150px">' + c.label + '</th>';
@@ -805,7 +805,7 @@ window.renderEditTable = function(section) {
 
   var html = '<table class="edit-table"><thead><tr>';
   cols.forEach(function(c) { 
-    if(c.key==='date') html += '<th style="width:70px">' + c.label + '</th>';
+    if(c.key==='date') html += '<th style="width:35px">' + c.label + '</th>';
     else if(c.key==='amount') html += '<th style="width:85px">' + c.label + '</th>';
     else if(c.key==='reason') html += '<th style="width:110px">' + c.label + '</th>';
     else if(c.key==='docs') html += '<th style="width:150px">' + c.label + '</th>';
