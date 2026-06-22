@@ -783,7 +783,7 @@ window.renderEditTable = function(section) {
               ph += '<input type="text" id="docsTxt_' + rowKey + '" value="' + escHtml(display) + '" data-row="' + realIdx + '" data-col="docs" data-date="' + (row.date||'') + '" data-person="' + (row.person||'') + '" data-amount="' + (row.amount||0) + '" style="flex:1;min-width:40px;padding:2px 4px;border:1px solid #ccc;font-size:0.65rem;font-family:inherit" readonly>';
               ph += '<button onclick="var v=document.getElementById(\'docsTxt_' + rowKey + '\').value;if(v)window.open(\'/finance/uploads/vouchers/\'+v,\'_blank\')" style="padding:3px 6px;border:1px solid #999;background:#fff;cursor:pointer;font-size:0.75rem' + (display ? '' : ';display:none') + '" title="预览">👁️</button>';
               ph += '<button onclick="clearDocs(\'' + rowKey + '\',this)" style="padding:3px 6px;border:1px solid #e74c3c;background:#fff;color:#e74c3c;cursor:pointer;font-size:0.75rem' + (display ? '' : ';display:none') + '" title="删除">✖</button>';
-              ph += '<input type="file" accept=".jpg,.jpeg,.png,.gif,.pdf,.ofd,.xls,.xlsx" multiple onchange="uploadDocsFile(this)" style="padding:3px 6px;border:1px solid #999;background:#fff;cursor:pointer;font-size:0.75rem;width:100px" title="上传文件">';
+              ph += '<input type="file" accept=".jpg,.jpeg,.png,.gif,.pdf,.ofd,.xls,.xlsx" multiple onchange="uploadDocsFile(this)" style="padding:3px 6px;border:1px solid #999;background:#fff;cursor:pointer;font-size:0.75rem;width:180px" title="上传文件">';
               ph += '</div>';
             } else {
               ph += '<input type="text" value="' + escHtml(val) + '" data-row="' + realIdx + '" data-col="' + c.key + '" onchange="editCell(this)" style="width:100%;padding:2px 4px;border:1px solid #ccc">';
@@ -829,7 +829,7 @@ window.renderEditTable = function(section) {
           html += '<div class="upload-inline" style="display:flex;gap:2px;align-items:center">';
           html += '<input type="text" value="' + escHtml(display) + '" style="flex:1;min-width:40px;padding:2px 4px;border:1px solid #ccc;font-size:0.65rem;font-family:inherit" readonly>';
           html += '<button class="up-view" title="预览" style="padding:3px 6px;border:1px solid #999;background:#fff;cursor:pointer;font-size:0.75rem;' + (display ? '' : 'display:none') + '">👁️</button>';
-          html += '<input type="file" style="padding:3px 6px;border:1px solid #999;background:#fff;cursor:pointer;font-size:0.75rem;width:100px"' + (isMulti ? ' multiple' : '') + '>';
+          html += '<input type="file" style="padding:3px 6px;border:1px solid #999;background:#fff;cursor:pointer;font-size:0.75rem;width:180px"' + (isMulti ? ' multiple' : '') + '>';
           html += '</div></td>';
         } else if (c.type === 'select') {
           html += '<td><select data-row="' + idx + '" data-col="' + c.key + '" onchange="editCell(this)">';
