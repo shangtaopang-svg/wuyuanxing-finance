@@ -599,8 +599,8 @@ function clearDocs(rowKey, btn) {
 
 // 上传按钮事件委托（稳定可靠）
 document.addEventListener("click", function(e) {
-  var btn = e.target.closest(".up-btn2");
-  if (btn) {
+  var btn = e.target.closest("[data-upload]");
+  if (btn) { console.log("Upload btn clicked");
     var fi = btn.parentElement.querySelector('input[type="file"]');
     if (fi) fi.click();
   }
@@ -774,10 +774,9 @@ window.renderEditTable = function(section) {
               var display = Array.isArray(val) ? val.join('; ') : val;
               ph += '<div class="upload-inline" style="display:flex;gap:2px;align-items:center">';
               ph += '<input type="text" id="docsTxt_' + rowKey + '" value="' + escHtml(display) + '" data-row="' + realIdx + '" data-col="docs" data-date="' + (row.date||'') + '" data-person="' + (row.person||'') + '" data-amount="' + (row.amount||0) + '" style="flex:1;min-width:60px;padding:3px 4px;border:1px solid #ccc;font-size:0.7rem;font-family:inherit" readonly>';
-              ph += '<button class="up-btn2" type="button" style="padding:3px 6px;border:1px solid #999;background:#fff;cursor:pointer;font-size:0.75rem" title="上传文件">📎</button>';
               ph += '<button onclick="var v=document.getElementById(\'docsTxt_' + rowKey + '\').value;if(v)window.open(\'/finance/uploads/vouchers/\'+v,\'_blank\')" style="padding:3px 6px;border:1px solid #999;background:#fff;cursor:pointer;font-size:0.75rem' + (display ? '' : ';display:none') + '" title="预览">👁️</button>';
               ph += '<button onclick="clearDocs(\'' + rowKey + '\',this)" style="padding:3px 6px;border:1px solid #e74c3c;background:#fff;color:#e74c3c;cursor:pointer;font-size:0.75rem' + (display ? '' : ';display:none') + '" title="删除">✖</button>';
-              ph += '<input type="file" id="docsFile_' + rowKey + '" accept=".jpg,.jpeg,.png,.gif,.pdf,.ofd,.xls,.xlsx" style="display:none" multiple data-key="' + rowKey + '" data-row="' + realIdx + '" onchange="uploadDocsFile(this)">';
+              ph += '<span style="position:relative;display:inline-block"><button type="button" style="padding:3px 6px;border:1px solid #999;background:#fff;cursor:pointer;font-size:0.75rem" title="上传文件">📎</button><input type="file" accept=".jpg,.jpeg,.png,.gif,.pdf,.ofd,.xls,.xlsx" multiple onchange="uploadDocsFile(this)" style="position:absolute;top:0;left:0;width:100%;height:100%;opacity:0;cursor:pointer"></span>';
               ph += '</div>';
             } else {
               ph += '<input type="text" value="' + escHtml(val) + '" data-row="' + realIdx + '" data-col="' + c.key + '" onchange="editCell(this)" style="width:100%;padding:2px 4px;border:1px solid #ccc">';
