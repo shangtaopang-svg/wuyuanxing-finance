@@ -285,10 +285,9 @@ body { font-family:var(--font); background:var(--bg); color:var(--text); line-he
   .chart-box { height:160px; }
   .form-row { grid-template-columns:1fr; }
   .data-table { font-size:0.62rem; min-width:400px; }
-  .data-table th, .data-table td { padding:4px 6px; max-width:80px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
-  .data-table td.amount { max-width:none; }
-  .data-table td:last-child { max-width:120px; white-space:normal; overflow:visible; }
-  .data-table td:last-child a { display:inline-block; max-width:100px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; vertical-align:middle; }
+  .data-table { font-size:0.68rem; min-width:480px; }
+  .data-table th, .data-table td { padding:3px 5px; }
+  .data-table td:last-child a { display:inline-block; max-width:80px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; vertical-align:middle; }
   .dash-grid { grid-template-columns:repeat(2,1fr); gap:6px; }
   .dash-card { padding:10px 12px; }
   .dash-value { font-size:1rem; }
