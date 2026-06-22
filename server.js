@@ -33,9 +33,9 @@ app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(express.static(path.join(__dirname, '.'), {
-  maxAge: '1h',
   setHeaders: (res, p) => {
-    if (p.match(/\.(css|js|png|jpg)$/)) res.setHeader('Cache-Control', 'public, max-age=3600');
+    if (p.match(/\/js\/admin\.js/)) res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
+    else if (p.match(/\.(css|js|png|jpg)$/)) res.setHeader('Cache-Control', 'public, max-age=300');
   }
 }));
 
