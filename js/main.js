@@ -986,7 +986,7 @@ function renderChart14c() {
   data.forEach(function(r) {
     if (r.income > 0) {
       var p = r.purpose || '';
-      if (/股本金|投资款/.test(p)) cats['股本金'] += r.income;
+      if (/股本金|投资款|转存.*投资/.test(p)) cats['股本金'] += r.income;
       else if (/结息/.test(p)) cats['批量结息'] += r.income;
       else if (/汇款退回/.test(p)) cats['汇款退回'] += r.income;
       else if (/种苗/.test(p) || r.amount === 70000) cats['种苗款'] += r.income;
