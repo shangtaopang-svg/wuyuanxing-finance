@@ -260,14 +260,38 @@ body { font-family:var(--font); background:var(--bg); color:var(--text); line-he
 /* 打印 */
 @media print { .tab-nav,.top-bar,.btn-add,.btn-print { display:none!important; } .tab-panel { display:block!important; } }
 
-/* 响应式 */
-@media (max-width:768px) {
-  .top-inner { flex-direction:column; height:auto; padding:8px 0; gap:2px; }
-  .tab-nav { top:auto; padding:0 8px; }
-  .tab-btn { padding:8px 12px; font-size:0.68rem; }
-  .summary-inner { grid-template-columns:repeat(2,1fr); }
+/* 响应式 - 平板 */
+@media (max-width:900px) {
+  .dash-grid { grid-template-columns:repeat(3,1fr); }
   .chart-row { grid-template-columns:1fr; }
+}
+/* 响应式 - 手机 */
+@media (max-width:600px) {
+  .top-inner { flex-direction:column; height:auto; padding:6px 0; gap:2px; }
+  .top-info { flex-wrap:wrap; justify-content:center; gap:4px; }
+  .tab-nav { top:auto; padding:0 4px; overflow-x:auto; -webkit-overflow-scrolling:touch; display:flex; flex-wrap:nowrap; }
+  .tab-btn { padding:6px 10px; font-size:0.6rem; white-space:nowrap; flex-shrink:0; }
+  .summary-inner { grid-template-columns:repeat(2,1fr); gap:4px; }
+  .sum-item { padding:6px 4px; }
+  .sum-num { font-size:1rem!important; }
+  .chart-row { grid-template-columns:1fr; gap:8px; }
+  .chart-card { padding:10px; }
+  .chart-box { height:160px; }
   .form-row { grid-template-columns:1fr; }
-  .data-table { font-size:0.68rem; min-width:500px; }
-  .data-table th, .data-table td { padding:6px 8px; }
+  .data-table { font-size:0.62rem; min-width:400px; }
+  .data-table th, .data-table td { padding:4px 6px; }
+  .dash-grid { grid-template-columns:repeat(2,1fr); gap:6px; }
+  .dash-card { padding:10px 12px; }
+  .dash-value { font-size:1rem; }
+  .sub-tabs { overflow-x:auto; display:flex; flex-wrap:nowrap; gap:2px; }
+  .sub-tab-btn { font-size:0.6rem; padding:4px 10px; white-space:nowrap; flex-shrink:0; }
+  .panel-header { flex-direction:column; align-items:flex-start; gap:6px; }
+  .modal { width:95%; max-height:90vh; }
+  .chart-viewer-content { width:95vw; height:70vh; }
+}
+/* 响应式 - 小手机 */
+@media (max-width:380px) {
+  .dash-grid { grid-template-columns:1fr 1fr; }
+  .summary-inner { grid-template-columns:1fr 1fr; }
+  .tab-btn { font-size:0.55rem; padding:4px 6px; }
 }

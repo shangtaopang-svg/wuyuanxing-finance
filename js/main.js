@@ -408,7 +408,43 @@ document.addEventListener('click', function(e) {
 });
 
 // === 仪表盘图表 ===
+// 异常检测（大额支出、余额不足）
+function checkAnomalies() {
+  var bar = document.getElementById('valBar');
+  var txt = document.getElementById('valText');
+  if (!bar || !txt) return;
+  var bf = DataStore.bankFlow || [];
+  if (!bf.length) return;
+  var avg = 0, count = 0;
+  bf.forEach(function(r) { if (r.expense > 0) { avg += r.expense; count++; } });
+  if (!count) return;
+  avg = avg / count;
+  // 找出超过平均5倍的大额支出
+  var bigs = bf.filter(function(r) { return r.expense > avg * 5 && r.expense > 10000; });
+  if (bigs.length > 0) {
+    bigs.sort(function(a,b){return b.expense - a.expense;});
+    var msg = '⚠️ 发现 ' + bigs.length + ' 笔大额支出（最高 ¥' + Math.round(bigs[0].expense).toLocaleString('zh-CN') + '）';
+    txt.textContent = msg;
+    bar.style.display = 'block';
+    bar.onclick = function(){ this.style.display='none'; };
+  } else {
+    bar.style.display = 'none';
+  }
+  // 余额不足预警
+  var totalInc = 0, totalExp = 0;
+  bf.forEach(function(r) { totalInc += r.income||0; totalExp += r.expense||0; });
+  var balance = totalInc - totalExp;
+  if (balance < 0 && balance > -50000) {
+    bar.style.display = 'block';
+    txt.textContent = '⚠️ 余额不足预警：可用余额 ¥' + Math.round(balance).toLocaleString('zh-CN');
+  }
+}
+
 function renderDashCharts() {
+  // 异常检测：大额支出提醒
+  checkAnomalies();
+
+
   var bf = DataStore.bankFlow || [];
   var cap = DataStore.capital || [];
   var reim = DataStore._reimburseFlat || DataStore.reimburse || [];

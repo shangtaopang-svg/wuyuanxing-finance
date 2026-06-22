@@ -149,4 +149,20 @@ body { font-family: 'Courier New','PingFang SC','Microsoft YaHei',monospace; bac
 @media (max-width: 900px) {
   .admin-container { grid-template-columns:1fr; }
   .toolbar-inner { flex-direction:column; align-items:stretch; }
+  .admin-top-inner { height:auto; flex-wrap:wrap; gap:6px; padding:8px 12px; }
+  .toolbar-tabs { overflow-x:auto; display:flex; flex-wrap:nowrap; -webkit-overflow-scrolling:touch; }
+  .tool-tab { font-size:0.6rem; padding:4px 8px; white-space:nowrap; flex-shrink:0; }
+  .toolbar-actions { flex-wrap:wrap; }
+}
+@media (max-width: 600px) {
+  .admin-top { padding:0 8px; }
+  .admin-top-inner { flex-direction:column; align-items:stretch; text-align:center; }
+  .admin-top-right { justify-content:center; flex-wrap:wrap; }
+  .admin-logo { justify-content:center; }
+  .editor-header { flex-direction:column; align-items:stretch; text-align:center; }
+  .editor-actions { justify-content:center; flex-wrap:wrap; }
+  .edit-table { font-size:0.65rem; }
+  .edit-table th, .edit-table td { padding:3px 4px; }
+  .sub-tabs { overflow-x:auto; display:flex; flex-wrap:nowrap; }
+  .save-bar { flex-direction:column; text-align:center; gap:6px; }
 }
