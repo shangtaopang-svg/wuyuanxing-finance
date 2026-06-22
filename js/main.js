@@ -733,21 +733,29 @@ function renderChart1Donut() {
 // === 文件预览 ===
 function previewFile(path) {
   var decoded = decodeURIComponent(path);
-  // 检查文件扩展名
+  var apiBase = (typeof API_BASE !== 'undefined' ? API_BASE : '');
   var ext = decoded.split('.').pop().toLowerCase();
+  var fileUrl = apiBase + '/uploads/vouchers/' + decoded;
   if (['jpg','jpeg','png','gif','webp'].indexOf(ext) !== -1) {
-    $('previewImg').src = 'uploads/vouchers/' + decoded;
+    $('previewImg').src = fileUrl;
+    $('previewImg').style.display = '';
+    $('previewPdf').style.display = 'none';
     $('imgViewer').classList.add('show');
     $('imgOverlay').classList.add('show');
   } else {
-    // PDF/Excel文件尝试打开
-    window.open('uploads/vouchers/' + decoded, '_blank');
+    // PDF/其他文件用iframe嵌入查看
+    $('previewImg').style.display = 'none';
+    $('previewPdf').src = fileUrl;
+    $('previewPdf').style.display = '';
+    $('imgViewer').classList.add('show');
+    $('imgOverlay').classList.add('show');
   }
 }
 
 function closeImgViewer() {
   $('imgViewer').classList.remove('show');
   $('imgOverlay').classList.remove('show');
+  $('previewPdf').src = '';
 }
 
 // === 添加数据弹窗 ===
