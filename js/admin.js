@@ -675,27 +675,6 @@ function setupUploadEvents(wrap, section) {
 }
 
 // === 强制同步当前版块到服务器 ===
-function forceSync() {
-  var data = DB.get(currentSection);
-  if (!data || data.length === 0) { alert('当前版块无数据可同步'); return; }
-  if (!window.API_TOKEN) { alert('请先登录'); return; }
-  var apiBase = (typeof API_BASE !== 'undefined') ? API_BASE : '';
-  var btn = document.querySelector('.tb-sync');
-  btn.textContent = '⏳ 同步中...';
-  btn.disabled = true;
-  fetch(apiBase + '/api/data/' + currentSection, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + window.API_TOKEN },
-    body: JSON.stringify({ data: data })
-  }).then(function(r) {
-    if (r.ok) { btn.textContent = '✅ 已同步' + data.length + '条'; setTimeout(function(){ btn.textContent = '🔄 同步'; btn.disabled = false; }, 2000); }
-    else { btn.textContent = '❌ 同步失败'; btn.disabled = false; }
-  }).catch(function() {
-    btn.textContent = '❌ 网络错误'; btn.disabled = false;
-  });
-}
-
-// === 搜索/筛选 ===
 var _filterKeyword = '';
 function filterTable(keyword) {
   _filterKeyword = keyword.toLowerCase().trim();
