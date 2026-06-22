@@ -1240,6 +1240,28 @@ function addChartCanvases() {
   // 图表容器已在HTML中预置，无需动态添加
 }
 
+// 单据页内查看（手机友好）
+function showDoc(filename) {
+  var img = document.getElementById('previewImg');
+  var pdf = document.getElementById('previewPdf');
+  var viewer = document.getElementById('imgViewer');
+  var overlay = document.getElementById('imgOverlay');
+  if (!viewer || !overlay) return;
+  var ext = filename.split('.').pop().toLowerCase();
+  var url = '/finance/uploads/vouchers/' + filename;
+  if (['jpg','jpeg','png','gif','webp'].indexOf(ext) !== -1) {
+    img.src = url;
+    img.style.display = '';
+    pdf.style.display = 'none';
+  } else {
+    pdf.src = url;
+    pdf.style.display = '';
+    img.style.display = 'none';
+  }
+  viewer.classList.add('show');
+  overlay.classList.add('show');
+}
+
 // === 公开数据加载器（按批次显示） ===
 (function() {
   var apiBase = typeof API_BASE !== "undefined" ? API_BASE : (window.location.pathname.startsWith("/finance/") ? "/finance" : "");
@@ -1274,7 +1296,7 @@ function addChartCanvases() {
             grp.forEach(function(r) {
               var hasDoc = r.docs && (typeof r.docs === "string" || r.docs.length > 0);
               var docFiles = hasDoc ? (typeof r.docs === "string" ? r.docs.split(";") : r.docs) : [];
-              var docLink = docFiles.length ? docFiles.map(function(f){return f.trim();}).filter(Boolean).map(function(f){return '<a href="/finance/uploads/vouchers/' + f + '" target="_blank" style="color:#D35400;font-weight:700;text-decoration:none;border-bottom:1px dashed #D35400">📎 ' + f + '</a>';}).join(" ") : "—";
+              var docLink = docFiles.length ? docFiles.map(function(f){return f.trim();}).filter(Boolean).map(function(f){return '<a href="#" onclick="showDoc(\'" + f + "\')" style="color:#D35400;font-weight:700;text-decoration:none;border-bottom:1px dashed #D35400">📎 ' + f + '</a>';}).join(' ') : '—';
               body.innerHTML += '<tr><td>' + (r.date||'') + '</td><td class="amount expense">' + String.fromCharCode(165) + (r.amount||0).toFixed(2) + '</td><td>' + (r.reason||'') + '</td><td>' + String.fromCharCode(8212) + '</td><td>' + docLink + '</td></tr>';
             });
           });
