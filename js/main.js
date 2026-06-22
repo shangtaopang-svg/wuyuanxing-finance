@@ -382,7 +382,7 @@ function renderDashCharts() {
   var reimCount = Array.isArray(reim) ? reim.length : 0;
   var totalIncome = bf.reduce(function(s,r) { return s + (r.income||0); }, 0);
   var totalExpense = bf.reduce(function(s,r) { return s + (r.expense||0); }, 0);
-  var totalCapital = cap.reduce(function(s,r) { return s + (r.amount||0); }, 0);
+  var bases = DataStore.baseExpense || []; var totalCapital = cap.reduce(function(s,r) { return s + (r.amount||0); }, 0);
 
   $('dashIncome').textContent = formatNum(totalIncome);
   $('dashExpense').textContent = formatNum(totalExpense);
@@ -1079,9 +1079,9 @@ document.addEventListener('DOMContentLoaded', function() {
         }
       } catch(e) {}
       pubLoaded++;
-      if (pubLoaded === pubSections.length) { try { renderAll(); } catch(e) { console.error(e); } updateSummary(); showLoading(false); setTimeout(animateSummaryNumbers, 400); }
+      if (pubLoaded === pubSections.length) { try { renderAll(); } catch(e) { console.error(e); } updateSummary(); showLoading(false); setTimeout(animateSummaryNumbers, 400); setTimeout(renderCharts, 100); }
     };
-    xhr.onerror = function() { pubLoaded++; if (pubLoaded === pubSections.length) { try { renderAll(); } catch(e) { console.error(e); } updateSummary(); showLoading(false); } };
+    xhr.onerror = function() { pubLoaded++; if (pubLoaded === pubSections.length) { try { renderAll(); } catch(e) { console.error(e); } updateSummary(); showLoading(false); setTimeout(renderCharts, 100); } };
     xhr.send();
   });    // 加载完成后校验数据
     var _token = localStorage.getItem('wyx_token');
