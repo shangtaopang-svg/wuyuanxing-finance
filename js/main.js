@@ -996,8 +996,9 @@ function renderChart14c() {
   var labels = ['股本金','批量结息','汇款退回','种苗款','其他'];
   var values = labels.map(function(k){return cats[k];});
   var colors = {'股本金':'#3498db','批量结息':'#27ae60','汇款退回':'#f39c12','种苗款':'#e67e22','其他':'#95a5a6'};
-  makeChart('chart14c', 'doughnut', labels, [{ data: values, backgroundColor: labels.map(function(k){return colors[k];}), borderColor: '#000', borderWidth: 2 }], {
-    plugins: { legend: { position:'bottom', labels:{font:{size:10,weight:'bold'},boxWidth:12,usePointStyle:true} }, datalabels: { color:'#fff', font:{weight:'bold',size:11}, formatter:function(v,ctx){var t=ctx.dataset.data.reduce(function(a,b){return a+b;},0);return (v/t*100).toFixed(1)+'%';} } }
+  makeChart('chart14c', 'bar', labels, [{ data: values, backgroundColor: labels.map(function(k){return colors[k];}), borderColor: '#000', borderWidth: 2 }], {
+    indexAxis: 'y',
+    plugins: { legend: { display:false }, datalabels: { anchor:'end', align:'end', color:'#000', font:{weight:'bold',size:10}, formatter:function(v,ctx){var t=ctx.dataset.data.reduce(function(a,b){return a+b;},0);return '¥'+Math.round(v).toLocaleString('zh-CN')+' ('+(v/t*100).toFixed(1)+'%)';} } }
   });
 }
 
