@@ -596,6 +596,15 @@ function clearDocs(rowKey, btn) {
       DB.set(currentSection, data);
       showSaved();
     }
+
+// 上传按钮事件委托（稳定可靠）
+document.addEventListener("click", function(e) {
+  var btn = e.target.closest(".up-btn2");
+  if (btn) {
+    var fi = btn.parentElement.querySelector('input[type="file"]');
+    if (fi) fi.click();
+  }
+});
   }
   if (txt) txt.value = '';
   btn.style.display = 'none';
