@@ -758,7 +758,7 @@ window.renderEditTable = function(section) {
         ph += '</select></div>';
         ph += '<table class="edit-table" style="border:none"><thead><tr>';
         cols.forEach(function(c) { 
-          if(c.key==='date') ph += '<th style="width:35px">' + c.label + '</th>';
+          if(c.key==='date') ph += '<th style="max-width:30px">' + c.label + '</th>';
           else if(c.key==='amount') ph += '<th style="width:85px">' + c.label + '</th>';
           else if(c.key==='reason') ph += '<th style="width:110px">' + c.label + '</th>';
           else if(c.key==='docs') ph += '<th style="width:150px">' + c.label + '</th>';
@@ -776,7 +776,7 @@ window.renderEditTable = function(section) {
             if (c.type === 'number') {
               ph += '<input type="number" step="0.01" value="' + (val||0) + '" data-row="' + realIdx + '" data-col="' + c.key + '" onchange="editCell(this)" style="width:100%;padding:2px 4px;border:1px solid #ccc">';
             } else if (c.type === 'date') {
-              ph += '<input type="date" value="' + ((val||'').split(' ')[0]||'') + '" data-row="' + realIdx + '" data-col="' + c.key + '" onchange="editCell(this)" style="width:100%;padding:2px 4px;border:1px solid #ccc">';
+              ph += '<input type="date" value="' + ((val||'').split(' ')[0]||'') + '" data-row="' + realIdx + '" data-col="' + c.key + '" onchange="editCell(this)" style="width:68px;padding:2px 4px;border:1px solid #ccc">';
             } else if (c.key === 'docs') {
               var display = Array.isArray(val) ? val.join('; ') : val;
               ph += '<div class="upload-inline" style="display:flex;gap:2px;align-items:center">';
@@ -805,7 +805,7 @@ window.renderEditTable = function(section) {
 
   var html = '<table class="edit-table"><thead><tr>';
   cols.forEach(function(c) { 
-    if(c.key==='date') html += '<th style="width:35px">' + c.label + '</th>';
+    if(c.key==='date') html += '<th style="max-width:30px">' + c.label + '</th>';
     else if(c.key==='amount') html += '<th style="width:85px">' + c.label + '</th>';
     else if(c.key==='reason') html += '<th style="width:110px">' + c.label + '</th>';
     else if(c.key==='docs') html += '<th style="width:150px">' + c.label + '</th>';
