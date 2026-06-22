@@ -758,10 +758,10 @@ window.renderEditTable = function(section) {
         ph += '</select></div>';
         ph += '<table class="edit-table" style="border:none"><thead><tr>';
         cols.forEach(function(c) { 
-          if(c.key==='date') ph += '<th style="width:8%">' + c.label + '</th>';
-          else if(c.key==='amount') ph += '<th style="width:8%">' + c.label + '</th>';
-          else if(c.key==='reason') ph += '<th style="width:30%">' + c.label + '</th>';
-          else if(c.key==='docs') ph += '<th style="width:15%">' + c.label + '</th>';
+          if(c.key==='date') ph += '<th style="width:70px">' + c.label + '</th>';
+          else if(c.key==='amount') ph += '<th style="width:70px">' + c.label + '</th>';
+          else if(c.key==='reason') ph += '<th style="width:200px">' + c.label + '</th>';
+          else if(c.key==='docs') ph += '<th style="width:130px">' + c.label + '</th>';
           else if(c.key!=='person'&&c.key!=='payment_method'&&c.key!=='reimburse_date') ph += '<th>' + c.label + '</th>';
         });
         ph += '<th style="width:36px">操作</th></tr></thead><tbody>';
@@ -805,10 +805,10 @@ window.renderEditTable = function(section) {
 
   var html = '<table class="edit-table"><thead><tr>';
   cols.forEach(function(c) { 
-    if(c.key==='date') html += '<th style="width:8%">' + c.label + '</th>';
-    else if(c.key==='amount') html += '<th style="width:8%">' + c.label + '</th>';
-    else if(c.key==='reason') html += '<th style="width:30%">' + c.label + '</th>';
-    else if(c.key==='docs') html += '<th style="width:15%">' + c.label + '</th>';
+    if(c.key==='date') html += '<th style="width:70px">' + c.label + '</th>';
+    else if(c.key==='amount') html += '<th style="width:70px">' + c.label + '</th>';
+    else if(c.key==='reason') html += '<th style="width:200px">' + c.label + '</th>';
+    else if(c.key==='docs') html += '<th style="width:130px">' + c.label + '</th>';
     else html += '<th>' + c.label + '</th>';
   });
   html += '<th style="width:36px">操作</th></tr></thead><tbody>';
