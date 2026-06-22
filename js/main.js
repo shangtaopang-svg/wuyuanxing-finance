@@ -415,15 +415,33 @@ function renderDashCharts() {
     indexAxis: 'y', plugins: { datalabels: { anchor:'end', align:'end', color:'#000', font:{weight:'bold',size:12}, formatter:function(v){return '¥' + Math.round(v).toLocaleString('zh-CN');} } }
   });
 
-  // ③ 支出用途TOP10（水平柱状图）
-  var expByPurpose = {};
-  bf.forEach(function(r) { if (r.expense > 0 && r.purpose) { var p = r.purpose.slice(0,6); expByPurpose[p] = (expByPurpose[p]||0) + r.expense; } });
-  var eLabels = Object.keys(expByPurpose).sort(function(a,b){return expByPurpose[b]-expByPurpose[a];}).slice(0,10);
-  var eValues = eLabels.map(function(k) { return expByPurpose[k]; });
+  // ③ 支出用途分类（按关键词匹配）
+  var expCat = {};
+  bf.forEach(function(r) {
+    if (r.expense > 0 && r.purpose) {
+      var t = r.purpose;
+      var cat = '其他';
+      if (/种苗|苗款|种籽|种子|苗$/.test(t)) cat = '种苗采购';
+      else if (/农机|机械|犁|旋耕|覆膜/.test(t)) cat = '农业机械';
+      else if (/化肥|农药|除草|肥料/.test(t)) cat = '化肥农药';
+      else if (/土地流转|流转费/.test(t)) cat = '土地流转';
+      else if (/分红/.test(t)) cat = '集体分红';
+      else if (/工资|人工|民工|劳务|薪酬/.test(t)) cat = '人工工资';
+      else if (/运输|运费|物流|货运|配送/.test(t)) cat = '运输费用';
+      else if (/差旅|机票|车票|住宿|出差|交通/.test(t)) cat = '差旅开支';
+      else if (/报销/.test(t)) cat = '差旅开支';
+      else if (/备用金/.test(t)) cat = '人工工资';
+      expCat[cat] = (expCat[cat]||0) + r.expense;
+    }
+  });
+  var eLabels = ['种苗采购','人工工资','农业机械','化肥农药','土地流转','运输费用','差旅开支','集体分红','其他'].filter(function(c){return expCat[c];});
+  var eValues = eLabels.map(function(c){return expCat[c]||0;});
+  eLabels.push('其他'); eValues.push(expCat['其他']||0);
+  var eColors = {'种苗采购':'#27ae60','人工工资':'#e53e3e','农业机械':'#D35400','化肥农药':'#f39c12','土地流转':'#3182ce','运输费用':'#9b59b6','差旅开支':'#1abc9c','集体分红':'#e67e22','其他':'#95a5a6'};
   makeChart('dashExpenseBar', 'bar', eLabels, [
-    { data: eValues, backgroundColor: 'rgba(229,62,62,0.6)', borderColor: '#e53e3e', borderWidth: 1 }
+    { data: eValues, backgroundColor: eLabels.map(function(c){return eColors[c];}), borderColor: '#000', borderWidth: 1 }
   ], {
-    indexAxis: 'y', plugins: { datalabels: { anchor:'end', align:'end', color:'#000', font:{weight:'bold',size:9}, formatter:function(v){return '¥' + Math.round(v).toLocaleString('zh-CN');} } }
+    indexAxis: 'y', plugins: { datalabels: { anchor:'end', align:'end', color:'#000', font:{weight:'bold',size:10}, formatter:function(v){return '¥' + Math.round(v/10000).toLocaleString('zh-CN') + 'w';} } }
   });
 
   // ④ 股本金构成（水平柱状图）
