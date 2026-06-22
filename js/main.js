@@ -993,7 +993,7 @@ function renderChart14c() {
       else cats['其他'] += r.income;
     }
   });
-  var labels = ['股本金','批量结息','汇款退回','种苗款','其他'].filter(function(c){return cats[c]>0;});
+  var labels = ['股本金','批量结息','汇款退回','种苗款','其他'];
   var values = labels.map(function(k){return cats[k];});
   var colors = {'股本金':'#3498db','批量结息':'#27ae60','汇款退回':'#f39c12','种苗款':'#e67e22','其他':'#95a5a6'};
   makeChart('chart14c', 'doughnut', labels, [{ data: values, backgroundColor: labels.map(function(k){return colors[k];}), borderColor: '#000', borderWidth: 2 }], {
