@@ -391,14 +391,12 @@ function renderDashCharts() {
   $('dashReimburse').textContent = reimCount + '笔';
   $('dashBankFlow').textContent = bf.length + '笔';
 
-  // 月度收支趋势（使用bankFlow数据）
+  // ① 月度收支趋势
   var months = {};
   bf.forEach(function(r) {
-    var m = (r.date||'').slice(0,7);
-    if (!m) return;
+    var m = (r.date||'').slice(0,7); if (!m) return;
     if (!months[m]) months[m] = { income:0, expense:0 };
-    months[m].income += r.income||0;
-    months[m].expense += r.expense||0;
+    months[m].income += r.income||0; months[m].expense += r.expense||0;
   });
   var mLabels = Object.keys(months).sort();
   var mIncome = mLabels.map(function(m){return months[m].income;});
@@ -410,32 +408,35 @@ function renderDashCharts() {
     plugins: { datalabels: { anchor:'end', align:'end', color:'#000', font:{weight:'bold',size:9}, formatter:function(v){return '¥' + Math.round(v).toLocaleString('zh-CN');} } }
   });
 
-  // 支出用途占比（从基本户取）
-  var expByPurpose = {};
-  bf.forEach(function(r) { if (r.expense > 0 && r.purpose) { var p = r.purpose.slice(0,4); expByPurpose[p] = (expByPurpose[p]||0) + r.expense; } });
-  var eLabels = Object.keys(expByPurpose).sort(function(a,b){return expByPurpose[b]-expByPurpose[a];}).slice(0,8);
-  var eValues = eLabels.map(function(k) { return expByPurpose[k]; });
-  makeChart('dashPie', 'doughnut', eLabels, [
-    { data: eValues, backgroundColor: ['#D35400','#2b6cb0','#38a169','#d69e2e','#9f7aea','#e53e3e','#1abc9c','#34495e'], borderColor: '#000', borderWidth: 2 }
+  // ② 收支对比（总收入 vs 总支出 vs 净余额）
+  makeChart('dashCompare', 'bar', ['收入', '支出', '净余额'], [
+    { data: [totalIncome, totalExpense, totalIncome - totalExpense], backgroundColor: ['#27ae60','#e53e3e','#D35400'], borderColor: '#000', borderWidth: 2 }
   ], {
-    plugins: { datalabels: { color:'#fff', font:{weight:'bold',size:10}, formatter:function(v,ctx){var t=ctx.dataset.data.reduce(function(a,b){return a+b;},0);return (v/t*100).toFixed(1)+'%';} } }
+    indexAxis: 'y', plugins: { datalabels: { anchor:'end', align:'end', color:'#000', font:{weight:'bold',size:12}, formatter:function(v){return '¥' + Math.round(v).toLocaleString('zh-CN');} } }
   });
 
-  // 股本金构成
-  var cLabels = cap.map(function(r) { return r.name; });
-  var cValues = cap.map(function(r) { return r.amount||0; });
-  makeChart('dashChart3', 'doughnut', cLabels, [
-    { data: cValues, backgroundColor: ['#3498db','#e74c3c','#2ecc71','#f39c12','#9b59b6'], borderColor: '#000', borderWidth: 2 }
-  ]);
+  // ③ 支出用途TOP10（水平柱状图）
+  var expByPurpose = {};
+  bf.forEach(function(r) { if (r.expense > 0 && r.purpose) { var p = r.purpose.slice(0,6); expByPurpose[p] = (expByPurpose[p]||0) + r.expense; } });
+  var eLabels = Object.keys(expByPurpose).sort(function(a,b){return expByPurpose[b]-expByPurpose[a];}).slice(0,10);
+  var eValues = eLabels.map(function(k) { return expByPurpose[k]; });
+  makeChart('dashExpenseBar', 'bar', eLabels, [
+    { data: eValues, backgroundColor: 'rgba(229,62,62,0.6)', borderColor: '#e53e3e', borderWidth: 1 }
+  ], {
+    indexAxis: 'y', plugins: { datalabels: { anchor:'end', align:'end', color:'#000', font:{weight:'bold',size:9}, formatter:function(v){return '¥' + Math.round(v).toLocaleString('zh-CN');} } }
+  });
 
-  // 基地支出对比
-  var baseMap = {};
-  bases.forEach(function(r) { baseMap[r.base] = (baseMap[r.base]||0) + (r.amount||0); });
-  var bLabels = Object.keys(baseMap);
-  var bValues = bLabels.map(function(k) { return baseMap[k]; });
-  makeChart('dashChart4', 'bar', bLabels, [
-    { data: bValues, backgroundColor: '#27ae60', borderColor: '#000', borderWidth: 2 }
-  ]);
+  // ④ 股本金构成（水平柱状图）
+  if (cap.length > 0) {
+    var persons = {}; cap.forEach(function(r){ persons[r.name] = (persons[r.name]||0) + (r.amount||0); });
+    var cLabels = Object.keys(persons);
+    var cValues = cLabels.map(function(n){return persons[n];});
+    makeChart('dashCapitalChart', 'bar', cLabels, [
+      { data: cValues, backgroundColor: 'rgba(49,130,206,0.6)', borderColor: '#3182ce', borderWidth: 1 }
+    ], {
+      indexAxis: 'y', plugins: { datalabels: { anchor:'end', align:'end', color:'#000', font:{weight:'bold',size:10}, formatter:function(v){return '¥' + Math.round(v).toLocaleString('zh-CN');} } }
+    });
+  }
 }
 
 // ① 收支图表
