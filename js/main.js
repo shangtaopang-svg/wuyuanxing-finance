@@ -374,6 +374,39 @@ function makeChart(id, type, labels, datasets, opts) {
   return charts[id];
 }
 
+// 图表全屏查看
+function openChartViewer(canvasId) {
+  var overlay = document.getElementById('chartViewer');
+  var content = document.getElementById('chartViewerContent');
+  if (!overlay || !content) return;
+  var origCanvas = document.getElementById(canvasId);
+  if (!origCanvas) return;
+  var clone = origCanvas.cloneNode(true);
+  clone.id = canvasId + '_full';
+  clone.style.width = '100%';
+  clone.style.height = '100%';
+  content.innerHTML = '<div class="chart-box"><canvas id="' + clone.id + '"></canvas></div>';
+  overlay.style.display = 'flex';
+  // 重建图表
+  if (charts[canvasId]) {
+    var cfg = charts[canvasId].config;
+    charts[clone.id] = new Chart(clone, cfg);
+  }
+}
+function closeChartViewer() {
+  var overlay = document.getElementById('chartViewer');
+  if (overlay) overlay.style.display = 'none';
+  var content = document.getElementById('chartViewerContent');
+  if (content) content.innerHTML = '';
+}
+// 点击图表卡片放大
+document.addEventListener('click', function(e) {
+  var card = e.target.closest('.chart-card');
+  if (!card) return;
+  var canvas = card.querySelector('canvas');
+  if (canvas) openChartViewer(canvas.id);
+});
+
 // === 仪表盘图表 ===
 function renderDashCharts() {
   var bf = DataStore.bankFlow || [];

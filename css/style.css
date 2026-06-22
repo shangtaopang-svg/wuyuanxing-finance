@@ -184,6 +184,14 @@ body { font-family:var(--font); background:var(--bg); color:var(--text); line-he
 [data-theme="dark"] .data-table th { background:#0f3460; color:#fff; }
 [data-theme="dark"] .data-table td { border-bottom-color:#1a1a3e; }
 [data-theme="dark"] .data-table tr:hover td { background:#1a1a3e; }
+/* 图表全屏查看 */
+.chart-viewer-overlay { position:fixed; inset:0; background:rgba(0,0,0,0.8); z-index:9999; display:flex; align-items:center; justify-content:center; cursor:zoom-out; animation:fadeIn 0.2s ease; }
+.chart-viewer-content { width:90vw; height:85vh; background:var(--card); border-radius:8px; padding:20px; position:relative; cursor:default; }
+.chart-viewer-content .chart-box { height:calc(85vh - 60px); }
+.chart-viewer-close { position:fixed; top:20px; right:20px; width:40px; height:40px; border:none; background:rgba(0,0,0,0.5); color:#fff; font-size:1.2rem; cursor:pointer; border-radius:50%; z-index:10000; }
+.chart-viewer-close:hover { background:rgba(0,0,0,0.8); }
+.chart-card { cursor:zoom-in; }
+
 [data-theme="dark"] .chart-card { background:var(--card); }
 [data-theme="dark"] .sub-tab-btn { background:var(--card); color:var(--text-light); }
 [data-theme="dark"] .sub-tab-btn.active { background:var(--primary); color:#fff; }

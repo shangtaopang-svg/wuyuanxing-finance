@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>五源兴农业 · 财务数据平台</title>
-  <link rel="stylesheet" href="/finance/css/style.css?v=20260623">
+  <link rel="stylesheet" href="/finance/css/style.css?v=20260624">
   <meta http-equiv="pragma" content="no-cache">
   <meta http-equiv="cache-control" content="no-cache">
   <meta http-equiv="expires" content="0">
@@ -301,6 +301,12 @@
       <div class="table-empty" id="empty13"><span class="empty-icon">📭</span><span class="empty-text">暂无数据</span><span class="empty-hint">数据录入后将在次显示</span></div>
     </section>
   </main>
+  <!-- 图表全屏查看器 -->
+  <div class="chart-viewer-overlay" id="chartViewer" onclick="closeChartViewer()" style="display:none">
+    <button class="chart-viewer-close" onclick="closeChartViewer()">✕</button>
+    <div class="chart-viewer-content" id="chartViewerContent"></div>
+  </div>
+
 
   <!-- ===== 添加数据弹窗 ===== -->
   <div class="modal-overlay" id="modalOverlay" onclick="closeModal()"></div>
@@ -342,7 +348,7 @@
   <script>var API_BASE = window.location.pathname.startsWith('/finance/') ? '/finance' : '';</script>
   <script src="/finance/js/data.js?v=20260623"></script>
   <script src="/finance/js/lang.js?v=20260623"></script>
-  <script>document.addEventListener("click",function(e){var b=e.target.closest(".tab-btn");if(b){document.querySelectorAll(".tab-btn,.tab-panel").forEach(function(x){x.classList.remove("active")});b.classList.add("active");var p=document.getElementById(b.dataset.tab);if(p)p.classList.add("active")}});document.querySelectorAll(".sum-item").forEach(function(e){e.addEventListener("click",function(){this.classList.remove("pop");void this.offsetWidth;this.classList.add("pop")})});</script><script src="/finance/js/main.js?v=20260704"></script>
+  <script>document.addEventListener("click",function(e){var b=e.target.closest(".tab-btn");if(b){document.querySelectorAll(".tab-btn,.tab-panel").forEach(function(x){x.classList.remove("active")});b.classList.add("active");var p=document.getElementById(b.dataset.tab);if(p)p.classList.add("active")}});document.querySelectorAll(".sum-item").forEach(function(e){e.addEventListener("click",function(){this.classList.remove("pop");void this.offsetWidth;this.classList.add("pop")})});</script><script src="/finance/js/main.js?v=20260706"></script>
   <script>
   // 风格切换
   // 背景音乐
