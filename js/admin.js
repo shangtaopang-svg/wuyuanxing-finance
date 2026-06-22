@@ -768,9 +768,9 @@ window.renderEditTable = function(section) {
             var val = row[c.key] !== undefined && row[c.key] !== null ? row[c.key] : '';
             ph += '<td>';
             if (c.type === 'number') {
-              ph += '<input type="number" step="0.01" value="' + (val||0) + '" data-row="' + realIdx + '" data-col="' + c.key + '" onchange="editCell(this)" style="width:80px;padding:2px 4px;border:1px solid #ccc">';
+              ph += '<input type="number" step="0.01" value="' + (val||0) + '" data-row="' + realIdx + '" data-col="' + c.key + '" onchange="editCell(this)" style="width:100%;padding:2px 4px;border:1px solid #ccc">';
             } else if (c.type === 'date') {
-              ph += '<input type="date" value="' + ((val||'').split(' ')[0]||'') + '" data-row="' + realIdx + '" data-col="' + c.key + '" onchange="editCell(this)" style="width:120px;padding:2px 4px;border:1px solid #ccc">';
+              ph += '<input type="date" value="' + ((val||'').split(' ')[0]||'') + '" data-row="' + realIdx + '" data-col="' + c.key + '" onchange="editCell(this)" style="width:100%;padding:2px 4px;border:1px solid #ccc">';
             } else if (c.key === 'docs') {
               var display = Array.isArray(val) ? val.join('; ') : val;
               ph += '<div class="upload-inline" style="display:flex;gap:2px;align-items:center">';
