@@ -347,6 +347,7 @@ function renderCharts() {
   else if (id === 'tab7') { renderChart7a(); renderChart7b(); }
   else if (id === 'tab8') { renderChart8a(); renderChart8b(); }
   else if (id === 'tab9') { renderChart9a(); renderChart9b(); }
+  else if (id === 'tab14') { renderChart14a(); }
 }
 
 function makeChart(id, type, labels, datasets, opts) {
@@ -792,6 +793,27 @@ function renderBankFlow() {
       '<td>' + (r.purpose||"") + '</td>' +
       '<td>' + (r.summary||"") + '</td></tr>';
   });
+}
+
+// ①④ 月度收支趋势（公司基本户）
+function renderChart14a() {
+  var data = DataStore.bankFlow || [];
+  if (!data.length) return;
+  var months = {};
+  data.forEach(function(r) {
+    var m = (r.date||'').slice(0,7);
+    if (!m) return;
+    if (!months[m]) months[m] = { income:0, expense:0 };
+    months[m].income += r.income||0;
+    months[m].expense += r.expense||0;
+  });
+  var labels = Object.keys(months).sort();
+  var incomeData = labels.map(function(m){return months[m].income;});
+  var expenseData = labels.map(function(m){return months[m].expense;});
+  makeChart('chart14a', 'bar', labels, [
+    { label:'收入', data:incomeData, backgroundColor:'rgba(39,174,96,0.7)', borderColor:'#27ae60', borderWidth:2 },
+    { label:'支出', data:expenseData, backgroundColor:'rgba(229,62,62,0.7)', borderColor:'#e53e3e', borderWidth:2 }
+  ], { plugins: { legend: { position:'top', labels:{font:{size:11,weight:'bold'},boxWidth:14,usePointStyle:true} } } });
 }
 
 function renderAll() {
