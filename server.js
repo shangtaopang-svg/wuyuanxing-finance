@@ -21,6 +21,7 @@ app.get('/', function(req, res) {
     // 日期
     var cnDate = new Date().toLocaleDateString('zh-CN', {timeZone:'Asia/Shanghai', year:'numeric', month:'2-digit', day:'2-digit'}).replace(/\//g, '-');
     html = html.replace('id="topDate">', 'id="topDate">' + cnDate);
+    res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
     res.send(html);
   } catch(e) {
     console.error('[首页错误]', e.message);
@@ -32,12 +33,6 @@ app.get('/', function(req, res) {
 app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
-app.use(express.static(path.join(__dirname, '.'), {
-  setHeaders: (res, p) => {
-    if (p.match(/\/js\/admin\.js/)) res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
-    else if (p.match(/\.(css|js|png|jpg)$/)) res.setHeader('Cache-Control', 'public, max-age=300');
-  }
-}));
 
 // 文件上传
 if (!fs.existsSync(UPLOAD_DIR)) fs.mkdirSync(UPLOAD_DIR, { recursive: true });
@@ -349,6 +344,13 @@ function fmt(n) { return '¥' + Number(n||0).toLocaleString('zh-CN', {minimumFra
 
 // ===== 启动 =====
 initDB().then(() => {
+  // 静态文件服务放最后，避免拦截 API 路由
+  app.use(express.static(path.join(__dirname, '.'), {
+    setHeaders: (res, p) => {
+      if (p.match(/\/js\/admin\.js/)) res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
+      else if (p.match(/\.(css|js|png|jpg)$/)) res.setHeader('Cache-Control', 'public, max-age=300');
+    }
+  }));
   app.listen(PORT, '0.0.0.0', () => {
     console.log(`
   🌾 五源兴财务平台

@@ -12,6 +12,9 @@
   <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.2.0/dist/chartjs-plugin-datalabels.min.js"></script>
 </head>
 <body>
+<div style="background:#ff0000;color:#fff;text-align:center;padding:20px;font-size:24px;font-weight:bold">✅ 缓存已更新 - 2026年6月22日新版</div>
+  <!-- 缓存验证标记：如果看到这行文字说明页面已更新 -->
+  <div id="cacheMarker" style="display:none">CACHE_UPDATED_20260722</div>
   <!-- 顶部导航 -->
   <header class="top-bar">
     <div class="top-inner">
@@ -38,7 +41,7 @@
         <a href="admin.html" class="top-link" data-lk="admin">⚙️ 管理</a><a href="javascript:localStorage.clear();location.reload()" style="color:#e74c3c;font-size:0.7rem;border:1px solid #e74c3c;padding:2px 8px;border-radius:3px;text-decoration:none">🔄 刷新数据</a>
         <a href="report.html" class="top-link" data-lk="report">📄 报告</a>
         <a href="statements.html" class="top-link">📊 报表</a>
-        <span style="font-size:0.55rem;opacity:0.3;letter-spacing:0.1em">v2.1</span>
+        <span style="font-size:0.55rem;opacity:0.3;letter-spacing:0.1em">v2.2</span>
         <button id="musicBtn" onclick="toggleMusic()" style="background:none;border:1px solid rgba(255,255,255,0.3);color:#fff;cursor:pointer;padding:2px 6px;font-size:0.72rem;border-radius:3px" title="背景音乐">🎵</button>
         <audio id="bgMusic" loop preload="auto"><source src="/uploads/回家.mp3" type="audio/mpeg"></audio>
       </div>
@@ -142,10 +145,6 @@
       <div class="chart-row">
         <div class="chart-card"><h4>📊 月度收支趋势</h4><div class="chart-box"><canvas id="chart14a"></canvas></div></div>
         <div class="chart-card"><h4>🧩 收支结构</h4><div class="chart-box"><canvas id="chart14b"></canvas></div></div>
-      </div>
-      <div class="chart-row" style="margin-top:10px">
-        <div class="chart-card"><h4>📈 收入类别</h4><div class="chart-box"><canvas id="chart14c"></canvas></div></div>
-        <div class="chart-card"><h4>📉 支出类别</h4><div class="chart-box"><canvas id="chart14d"></canvas></div></div>
       </div>
       <div class="table-wrap">
         <table class="data-table">
@@ -355,10 +354,12 @@
   </div>
   <!-- 错误提示 -->
   <div class="error-toast" id="errorToast"></div>
+  <!-- 强制移除收入/支出类别图（数据关联不完整） -->
+  <script>!function(){['chart14c','chart14d'].forEach(function(id){var e=document.getElementById(id);if(e&&e.parentElement){var card=e.closest('.chart-card');if(card)card.remove();else e.parentElement.remove()}})}();</script>
   <script>var API_BASE = window.location.pathname.startsWith('/finance/') ? '/finance' : '';</script>
   <script src="/finance/js/data.js?v=20260623"></script>
   <script src="/finance/js/lang.js?v=20260623"></script>
-  <script>document.addEventListener("click",function(e){var b=e.target.closest(".tab-btn");if(b){document.querySelectorAll(".tab-btn,.tab-panel").forEach(function(x){x.classList.remove("active")});b.classList.add("active");var p=document.getElementById(b.dataset.tab);if(p)p.classList.add("active")}});document.querySelectorAll(".sum-item").forEach(function(e){e.addEventListener("click",function(){this.classList.remove("pop");void this.offsetWidth;this.classList.add("pop")})});</script><script src="/finance/js/main.js?v=20260716"></script>
+  <script>document.addEventListener("click",function(e){var b=e.target.closest(".tab-btn");if(b){document.querySelectorAll(".tab-btn,.tab-panel").forEach(function(x){x.classList.remove("active")});b.classList.add("active");var p=document.getElementById(b.dataset.tab);if(p)p.classList.add("active")}});document.querySelectorAll(".sum-item").forEach(function(e){e.addEventListener("click",function(){this.classList.remove("pop");void this.offsetWidth;this.classList.add("pop")})});</script><script src="/finance/js/main.js?v=20260722"></script>
   <script>
   // 风格切换
   // 背景音乐
@@ -394,7 +395,8 @@
   document.getElementById('langSelect').value = savedLang;
   if (typeof switchLang === 'function') switchLang(savedLang);
   </script>
+  <!-- 再次确保移除收入/支出类别图 -->
+  <script>document.addEventListener('DOMContentLoaded',function(){['chart14c','chart14d'].forEach(function(id){var e=document.getElementById(id);if(e&&e.parentElement){var card=e.closest('.chart-card');if(card)card.remove()}})});</script>
 
 </body>
-
 </html>
