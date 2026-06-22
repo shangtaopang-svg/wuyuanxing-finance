@@ -436,7 +436,7 @@ function renderDashCharts() {
   });
   var eLabels = ['种苗采购','人工工资','农业机械','化肥农药','土地流转','运输费用','差旅开支','集体分红','其他'].filter(function(c){return expCat[c];});
   var eValues = eLabels.map(function(c){return expCat[c]||0;});
-  eLabels.push('其他'); eValues.push(expCat['其他']||0);
+  if (expCat['其他']) { eLabels.push('其他'); eValues.push(expCat['其他']); }
   var eColors = {'种苗采购':'#27ae60','人工工资':'#e53e3e','农业机械':'#D35400','化肥农药':'#f39c12','土地流转':'#3182ce','运输费用':'#9b59b6','差旅开支':'#1abc9c','集体分红':'#e67e22','其他':'#95a5a6'};
   makeChart('dashExpenseBar', 'bar', eLabels, [
     { data: eValues, backgroundColor: eLabels.map(function(c){return eColors[c];}), borderColor: '#000', borderWidth: 1 }
