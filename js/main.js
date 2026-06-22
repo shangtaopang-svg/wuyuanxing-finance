@@ -735,7 +735,7 @@ function previewFile(path) {
   var decoded = decodeURIComponent(path);
   var apiBase = (typeof API_BASE !== 'undefined' ? API_BASE : '');
   var ext = decoded.split('.').pop().toLowerCase();
-  var fileUrl = apiBase + '/uploads/vouchers/' + decoded;
+  var fileUrl = '/finance/uploads/vouchers/' + decoded;
   if (['jpg','jpeg','png','gif','webp'].indexOf(ext) !== -1) {
     $('previewImg').src = fileUrl;
     $('previewImg').style.display = '';
