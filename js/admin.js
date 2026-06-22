@@ -759,7 +759,7 @@ window.renderEditTable = function(section) {
         ph += '<table class="edit-table" style="border:none"><thead><tr>';
         cols.forEach(function(c) { 
           if(c.key==='date') ph += '<th style="width:115px">' + c.label + '</th>';
-          else if(c.key==='amount') ph += '<th style="width:115px">' + c.label + '</th>';
+          else if(c.key==='amount') ph += '<th style="width:80px">' + c.label + '</th>';
           else if(c.key==='reason') ph += '<th style="width:150px">' + c.label + '</th>';
           else if(c.key==='docs') ph += '<th style="width:130px">' + c.label + '</th>';
           else if(c.key!=='person'&&c.key!=='payment_method'&&c.key!=='reimburse_date') ph += '<th>' + c.label + '</th>';
@@ -806,7 +806,7 @@ window.renderEditTable = function(section) {
   var html = '<table class="edit-table"><thead><tr>';
   cols.forEach(function(c) { 
     if(c.key==='date') html += '<th style="width:115px">' + c.label + '</th>';
-    else if(c.key==='amount') html += '<th style="width:115px">' + c.label + '</th>';
+    else if(c.key==='amount') html += '<th style="width:80px">' + c.label + '</th>';
     else if(c.key==='reason') html += '<th style="width:150px">' + c.label + '</th>';
     else if(c.key==='docs') html += '<th style="width:130px">' + c.label + '</th>';
     else html += '<th>' + c.label + '</th>';
