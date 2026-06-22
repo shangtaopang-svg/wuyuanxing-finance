@@ -143,6 +143,10 @@
         <div class="chart-card"><h4>📊 月度收支趋势</h4><div class="chart-box"><canvas id="chart14a"></canvas></div></div>
         <div class="chart-card"><h4>🧩 收支结构</h4><div class="chart-box"><canvas id="chart14b"></canvas></div></div>
       </div>
+      <div class="chart-row" style="margin-top:10px">
+        <div class="chart-card"><h4>📈 收入类别</h4><div class="chart-box"><canvas id="chart14c"></canvas></div></div>
+        <div class="chart-card"><h4>📉 支出类别</h4><div class="chart-box"><canvas id="chart14d"></canvas></div></div>
+      </div>
       <div class="table-wrap">
         <table class="data-table">
           <thead><tr><th>交易时间</th><th>收入金额</th><th>支出金额</th><th>对方账号</th><th>对方户名</th><th>交易用途</th><th>摘要</th></tr></thead>
@@ -354,7 +358,7 @@
   <script>var API_BASE = window.location.pathname.startsWith('/finance/') ? '/finance' : '';</script>
   <script src="/finance/js/data.js?v=20260623"></script>
   <script src="/finance/js/lang.js?v=20260623"></script>
-  <script>document.addEventListener("click",function(e){var b=e.target.closest(".tab-btn");if(b){document.querySelectorAll(".tab-btn,.tab-panel").forEach(function(x){x.classList.remove("active")});b.classList.add("active");var p=document.getElementById(b.dataset.tab);if(p)p.classList.add("active")}});document.querySelectorAll(".sum-item").forEach(function(e){e.addEventListener("click",function(){this.classList.remove("pop");void this.offsetWidth;this.classList.add("pop")})});</script><script src="/finance/js/main.js?v=20260715"></script>
+  <script>document.addEventListener("click",function(e){var b=e.target.closest(".tab-btn");if(b){document.querySelectorAll(".tab-btn,.tab-panel").forEach(function(x){x.classList.remove("active")});b.classList.add("active");var p=document.getElementById(b.dataset.tab);if(p)p.classList.add("active")}});document.querySelectorAll(".sum-item").forEach(function(e){e.addEventListener("click",function(){this.classList.remove("pop");void this.offsetWidth;this.classList.add("pop")})});</script><script src="/finance/js/main.js?v=20260716"></script>
   <script>
   // 风格切换
   // 背景音乐
