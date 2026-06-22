@@ -381,16 +381,19 @@ function openChartViewer(canvasId) {
   if (!overlay || !content) return;
   var origCanvas = document.getElementById(canvasId);
   if (!origCanvas) return;
-  var clone = origCanvas.cloneNode(true);
-  clone.id = canvasId + '_full';
-  clone.style.width = '100%';
-  clone.style.height = '100%';
-  content.innerHTML = '<div class="chart-box"><canvas id="' + clone.id + '"></canvas></div>';
+  // 在查看器中插入新的画布容器
+  var newId = canvasId + '_full';
+  content.innerHTML = '<div class="chart-box"><canvas id="' + newId + '"></canvas></div>';
   overlay.style.display = 'flex';
-  // 重建图表
+  // 在新画布上重建图表
   if (charts[canvasId]) {
     var cfg = charts[canvasId].config;
-    charts[clone.id] = new Chart(clone, cfg);
+    var newCanvas = document.getElementById(newId);
+    if (newCanvas) {
+      // 深拷贝配置，避免共享同一份数据
+      var cfgClone = JSON.parse(JSON.stringify(cfg));
+      charts[newId] = new Chart(newCanvas, cfgClone);
+    }
   }
 }
 function closeChartViewer() {
