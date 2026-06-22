@@ -347,7 +347,7 @@ function renderCharts() {
   else if (id === 'tab7') { renderChart7a(); renderChart7b(); }
   else if (id === 'tab8') { renderChart8a(); renderChart8b(); }
   else if (id === 'tab9') { renderChart9a(); renderChart9b(); }
-  else if (id === 'tab14') { renderChart14a(); }
+  else if (id === 'tab14') { renderChart14a(); renderChart14b(); }
 }
 
 function makeChart(id, type, labels, datasets, opts) {
@@ -821,6 +821,29 @@ function renderChart14a() {
         anchor: 'end', align: 'end', color: '#000',
         font: { weight: 'bold', size: 10 },
         formatter: function(v) { return '¥' + Math.round(v).toLocaleString('zh-CN'); }
+      }
+    }
+  });
+}
+
+// 收支结构占比（收入 vs 支出金额）
+function renderChart14b() {
+  var data = DataStore.bankFlow || [];
+  if (!data.length) return;
+  var totalInc = 0, totalExp = 0;
+  data.forEach(function(r) { totalInc += r.income||0; totalExp += r.expense||0; });
+  var colors = ['#27ae60', '#e53e3e'];
+  makeChart('chart14b', 'doughnut', ['收入', '支出'], [
+    { data: [totalInc, totalExp], backgroundColor: colors, borderColor: '#000', borderWidth: 2 }
+  ], {
+    plugins: {
+      legend: { position:'bottom', labels:{font:{size:12,weight:'bold'},boxWidth:16,usePointStyle:true} },
+      datalabels: {
+        color: '#fff', font: { weight: 'bold', size: 13 },
+        formatter: function(v, ctx) {
+          var total = ctx.dataset.data.reduce(function(a,b){return a+b;},0);
+          return (v/total*100).toFixed(1) + '%';
+        }
       }
     }
   });
