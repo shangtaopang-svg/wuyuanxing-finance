@@ -982,12 +982,21 @@ function renderChart14b() {
 function renderChart14c() {
   var data = DataStore.bankFlow || [];
   if (!data.length) return;
-  var cats = {};
-  data.forEach(function(r) { if (r.income > 0 && r.purpose) { var p = r.purpose.replace(/^[0-9．\s]+/, '').slice(0,6); cats[p] = (cats[p]||0) + r.income; } });
-  var labels = Object.keys(cats).sort(function(a,b){return cats[b]-cats[a];}).slice(0,8);
+  var cats = {'股本金':0,'批量结息':0,'汇款退回':0,'种苗款':0,'其他':0};
+  data.forEach(function(r) {
+    if (r.income > 0) {
+      var p = r.purpose || '';
+      if (/股本金|投资款/.test(p)) cats['股本金'] += r.income;
+      else if (/结息/.test(p)) cats['批量结息'] += r.income;
+      else if (/汇款退回/.test(p)) cats['汇款退回'] += r.income;
+      else if (/种苗/.test(p) || r.amount === 70000) cats['种苗款'] += r.income;
+      else cats['其他'] += r.income;
+    }
+  });
+  var labels = ['股本金','批量结息','汇款退回','种苗款','其他'].filter(function(c){return cats[c]>0;});
   var values = labels.map(function(k){return cats[k];});
-  var colors = ['#27ae60','#2ecc71','#1abc9c','#3498db','#9b59b6','#f39c12','#e67e22','#95a5a6'];
-  makeChart('chart14c', 'doughnut', labels, [{ data: values, backgroundColor: colors, borderColor: '#000', borderWidth: 2 }], {
+  var colors = {'股本金':'#3498db','批量结息':'#27ae60','汇款退回':'#f39c12','种苗款':'#e67e22','其他':'#95a5a6'};
+  makeChart('chart14c', 'doughnut', labels, [{ data: values, backgroundColor: labels.map(function(k){return colors[k];}), borderColor: '#000', borderWidth: 2 }], {
     plugins: { legend: { position:'bottom', labels:{font:{size:10,weight:'bold'},boxWidth:12,usePointStyle:true} }, datalabels: { color:'#fff', font:{weight:'bold',size:11}, formatter:function(v,ctx){var t=ctx.dataset.data.reduce(function(a,b){return a+b;},0);return (v/t*100).toFixed(1)+'%';} } }
   });
 }
