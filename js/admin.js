@@ -816,9 +816,8 @@ window.renderEditTable = function(section) {
           html += '<td class="td-upload-cell" data-row="' + idx + '" data-col="' + c.key + '" data-multi="' + isMulti + '" data-val="' + escHtml(display) + '">';
           html += '<div class="upload-inline" style="display:flex;gap:2px;align-items:center">';
           html += '<input type="text" value="' + escHtml(display) + '" style="flex:1;min-width:60px;padding:3px 4px;border:1px solid #ccc;font-size:0.7rem;font-family:inherit" readonly>';
-          html += '<button class="up-btn" title="上传文件" style="padding:3px 6px;border:1px solid #999;background:#fff;cursor:pointer;font-size:0.75rem">📎</button>';
           html += '<button class="up-view" title="预览" style="padding:3px 6px;border:1px solid #999;background:#fff;cursor:pointer;font-size:0.75rem;' + (display ? '' : 'display:none') + '">👁️</button>';
-          html += '<input type="file" style="display:none"' + (isMulti ? ' multiple' : '') + '>';
+          html += '<input type="file" style="padding:3px 6px;border:1px solid #999;background:#fff;cursor:pointer;font-size:0.75rem;width:34px"' + (isMulti ? ' multiple' : '') + '>';
           html += '</div></td>';
         } else if (c.type === 'select') {
           html += '<td><select data-row="' + idx + '" data-col="' + c.key + '" onchange="editCell(this)">';
