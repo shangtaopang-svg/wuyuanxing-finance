@@ -83,7 +83,7 @@ body { font-family: 'Courier New','PingFang SC','Microsoft YaHei',monospace; bac
 
 /* 可编辑表格 */
 .table-edit-wrap { overflow-x:auto; padding:0; }
-.edit-table { border-collapse:collapse; font-size:0.75rem; }
+.edit-table { width:100%; border-collapse:collapse; font-size:0.75rem; }
 .edit-table th { background:#000; color:#fff; padding:10px 12px; text-align:left; font-weight:800; font-size:0.68rem; white-space:nowrap; border:1px solid #333; }
 .edit-table td { padding:6px 8px; border:1px solid #e8e5e0; transition:background 0.12s; }
 .edit-table tbody tr:nth-child(even) td { background:#fcfbf9; }
