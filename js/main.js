@@ -1246,7 +1246,7 @@ function showDoc(filename) {
   var pdf = document.getElementById('previewPdf');
   var viewer = document.getElementById('imgViewer');
   var overlay = document.getElementById('imgOverlay');
-  if (!viewer || !overlay) return;
+  if (!viewer || !overlay) { window.open("/finance/uploads/vouchers/" + filename, "_blank"); return; }
   var ext = filename.split('.').pop().toLowerCase();
   var url = '/finance/uploads/vouchers/' + filename;
   if (['jpg','jpeg','png','gif','webp'].indexOf(ext) !== -1) {
@@ -1260,6 +1260,11 @@ function showDoc(filename) {
   }
   viewer.classList.add('show');
   overlay.classList.add('show');
+}
+
+// showDoc的window.open备选
+function fallbackOpen(filename) {
+  window.open('/finance/uploads/vouchers/' + filename, '_blank');
 }
 
 // === 公开数据加载器（按批次显示） ===
