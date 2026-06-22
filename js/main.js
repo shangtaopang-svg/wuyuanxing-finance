@@ -810,10 +810,21 @@ function renderChart14a() {
   var labels = Object.keys(months).sort();
   var incomeData = labels.map(function(m){return months[m].income;});
   var expenseData = labels.map(function(m){return months[m].expense;});
+  var maxVal = Math.max.apply(null, incomeData.concat(expenseData));
   makeChart('chart14a', 'bar', labels, [
     { label:'收入', data:incomeData, backgroundColor:'rgba(39,174,96,0.7)', borderColor:'#27ae60', borderWidth:2 },
     { label:'支出', data:expenseData, backgroundColor:'rgba(229,62,62,0.7)', borderColor:'#e53e3e', borderWidth:2 }
-  ], { plugins: { legend: { position:'top', labels:{font:{size:11,weight:'bold'},boxWidth:14,usePointStyle:true} } } });
+  ], {
+    scales: { y: { ticks: { callback: function(v) { return '¥' + (v/1000).toFixed(0) + 'k'; }, font: { size: 9 } } } },
+    plugins: {
+      legend: { position:'top', labels:{font:{size:11,weight:'bold'},boxWidth:14,usePointStyle:true} },
+      datalabels: {
+        anchor: 'end', align: 'end', color: '#000',
+        font: { weight: 'bold', size: 9 },
+        formatter: function(v) { return v >= 10000 ? '¥' + (v/10000).toFixed(1) + 'w' : '¥' + v.toFixed(0); }
+      }
+    }
+  });
 }
 
 function renderAll() {
