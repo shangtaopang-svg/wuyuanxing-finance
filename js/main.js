@@ -826,26 +826,51 @@ function renderChart14a() {
   });
 }
 
-// 收支结构占比（收入 vs 支出金额）
+// 收支结构占比 + 余额
 function renderChart14b() {
   var data = DataStore.bankFlow || [];
   if (!data.length) return;
   var totalInc = 0, totalExp = 0;
   data.forEach(function(r) { totalInc += r.income||0; totalExp += r.expense||0; });
+  var balance = totalInc - totalExp;
   var colors = ['#27ae60', '#e53e3e'];
-  makeChart('chart14b', 'doughnut', ['收入', '支出'], [
-    { data: [totalInc, totalExp], backgroundColor: colors, borderColor: '#000', borderWidth: 2 }
-  ], {
-    plugins: {
-      legend: { position:'bottom', labels:{font:{size:12,weight:'bold'},boxWidth:16,usePointStyle:true} },
-      datalabels: {
-        color: '#fff', font: { weight: 'bold', size: 13 },
-        formatter: function(v, ctx) {
-          var total = ctx.dataset.data.reduce(function(a,b){return a+b;},0);
-          return (v/total*100).toFixed(1) + '%';
+  var ctx = document.getElementById('chart14b');
+  if (!ctx) return;
+  if (charts['chart14b']) charts['chart14b'].destroy();
+  var balColor = balance >= 0 ? '#27ae60' : '#e53e3e';
+  charts['chart14b'] = new Chart(ctx, {
+    type: 'doughnut',
+    data: { labels: ['收入', '支出'], datasets: [{ data: [totalInc, totalExp], backgroundColor: colors, borderColor: '#000', borderWidth: 2 }] },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      plugins: {
+        legend: { position:'bottom', labels:{font:{size:12,weight:'bold'},boxWidth:16,usePointStyle:true} },
+        datalabels: {
+          color: '#fff', font: { weight: 'bold', size: 13 },
+          formatter: function(v, ctx2) {
+            var total = ctx2.dataset.data.reduce(function(a,b){return a+b;},0);
+            return (v/total*100).toFixed(1) + '%';
+          }
         }
       }
-    }
+    },
+    plugins: [{
+      id: 'centerText',
+      afterDraw: function(chart) {
+        var w = chart.width, h = chart.height;
+        var ctx3 = chart.ctx;
+        ctx3.save();
+        ctx3.textAlign = 'center';
+        ctx3.textBaseline = 'middle';
+        ctx3.font = '700 12px sans-serif';
+        ctx3.fillStyle = '#888';
+        ctx3.fillText('余额', w/2, h/2 - 16);
+        ctx3.font = '700 18px sans-serif';
+        ctx3.fillStyle = balColor;
+        ctx3.fillText('¥' + Math.round(balance).toLocaleString('zh-CN'), w/2, h/2 + 10);
+        ctx3.restore();
+      }
+    }]
   });
 }
 
