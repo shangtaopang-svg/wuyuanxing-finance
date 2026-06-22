@@ -239,6 +239,8 @@ app.post('/api/data/:section', authMW, (req, res) => {
       run(`INSERT INTO ${cfg.table} (${cfg.fields.join(',')}) VALUES (${placeholders})`, vals);
     });
     db.run("COMMIT");
+    // 自动清理重复数据（防止并发写入导致的重复）
+    try { db.exec("DELETE FROM " + cfg.table + " WHERE rowid NOT IN (SELECT MIN(rowid) FROM " + cfg.table + " GROUP BY " + cfg.fields.slice(0,4).join(',') + ")"); } catch(e) {}
     saveDB();
     console.log('[保存] ' + cfg.table + ' ' + data.length + '条');
     res.json({ ok: true, count: data.length });
