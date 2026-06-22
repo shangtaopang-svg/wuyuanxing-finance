@@ -93,6 +93,10 @@ body { font-family: 'Courier New','PingFang SC','Microsoft YaHei',monospace; bac
   font-family:inherit; font-weight:600; background:transparent; outline:none;
 }
 .edit-table input:focus, .edit-table select:focus { border-color:var(--primary); background:#fff8f0; }
+/* 文件上传按钮样式 */
+.edit-table input[type="file"] { width:80px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; padding:3px 6px; border:1px solid #999; background:#fff; cursor:pointer; font-size:0.75rem; color:transparent; }
+.edit-table input[type="file"]::file-selector-button { padding:0; border:none; background:none; font-size:0.75rem; font-weight:700; color:#000; cursor:pointer; font-family:inherit; }
+.edit-table input[type="file"]::file-selector-button:hover { color:#D35400; }
 .edit-table .row-del-btn {
   width:28px; height:28px; border:2px solid var(--red); background:var(--card);
   color:var(--red); font-weight:900; cursor:pointer; font-size:0.8rem; display:flex;
