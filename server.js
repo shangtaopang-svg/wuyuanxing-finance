@@ -226,30 +226,34 @@ app.post('/api/data/:section', authMW, (req, res) => {
   backupDB();
 
   try {
-    // 事务保护：要么全部成功，要么全部回滚
-    db.run("BEGIN");
+    // 先备份（每天一次）
+    backupDB();
+    // 清空旧数据
     run(`DELETE FROM ${cfg.table}`);
+    // 逐条插入（跳过格式错误的行）
+    var ok = 0, fail = 0;
     data.forEach(row => {
-      const vals = cfg.fields.map(f => {
-        const v = row[f];
-        if (typeof v === 'number' && isNaN(v)) return 0;
-        return Array.isArray(v) ? JSON.stringify(v) : (v !== undefined && v !== null ? v : '');
-      });
-      const placeholders = cfg.fields.map(() => '?').join(',');
-      run(`INSERT INTO ${cfg.table} (${cfg.fields.join(',')}) VALUES (${placeholders})`, vals);
+      try {
+        const vals = cfg.fields.map(f => {
+          const v = row[f];
+          if (typeof v === 'number' && isNaN(v)) return 0;
+          return Array.isArray(v) ? JSON.stringify(v) : (v !== undefined && v !== null ? v : '');
+        });
+        const placeholders = cfg.fields.map(() => '?').join(',');
+        db.run(`INSERT INTO ${cfg.table} (${cfg.fields.join(',')}) VALUES (${placeholders})`, vals);
+        ok++;
+      } catch(e) { fail++; }
     });
-    db.run("COMMIT");
-    // 自动清理重复数据（防止并发写入导致的重复）
+    // 自动清理重复数据
     try {
       var dedupFields = cfg.fields.filter(function(f){return f !== 'docs' && f !== 'reimburse_date' && f !== 'batch_id' && f !== 'payment_method' && f !== 'voucher' && f !== 'invoices';}).slice(0,4).join(',');
       db.exec("DELETE FROM " + cfg.table + " WHERE rowid NOT IN (SELECT MIN(rowid) FROM " + cfg.table + " GROUP BY " + dedupFields + ")");
     } catch(e) {}
     saveDB();
-    console.log('[保存] ' + cfg.table + ' ' + data.length + '条');
-    res.json({ ok: true, count: data.length });
+    console.log('[保存] ' + cfg.table + ' ' + ok + '条成功' + (fail ? ',' + fail + '条失败' : '') + (ok ? ' 去重后' + db.exec('SELECT COUNT(*) as c FROM ' + cfg.table)[0].values[0][0] + '条' : ''));
+    res.json({ ok: true, count: ok });
   } catch(e) {
-    db.run("ROLLBACK");
-    console.error('[保存失败]', e.message);
+    console.error('[保存崩溃]', e.message);
     res.status(500).json({ error: '保存失败: ' + e.message });
   }
 });
