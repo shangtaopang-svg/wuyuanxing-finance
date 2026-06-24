@@ -1338,6 +1338,7 @@ function fallbackOpen(filename) {
 
 // 每个版块表格列对应的字段名
 var COL_FIELDS = {
+  capitalBody:        ['date','name','amount','method'],
   pettyRenDrawBody:   ['date','amount','account','summary'],
   pettyPangDrawBody:  ['date','amount','account','summary'],
   pettyRenWriteBody:  ['date','amount','summary','voucher'],
@@ -1415,6 +1416,7 @@ window.onCellEdit = function(td, newVal) {
 
 function sectionFromBodyId(bodyId) {
   var map = {
+    capitalBody:'capital',
     pettyRenDrawBody:'pettyDraw', pettyPangDrawBody:'pettyDraw',
     pettyRenWriteBody:'pettyWrite', pettyPangWriteBody:'pettyWrite',
     receivableBody:'receivable', assetBody:'asset', managementBody:'management',
