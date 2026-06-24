@@ -1202,10 +1202,12 @@ function renderFarmer() {
 }
 function renderChart15a() {
   var data = DataStore.seedlingBill || [];
-  var items = data.filter(function(r){ return !r.is_total && !r.is_subtotal; });
-  if (!items.length) return;
-  var total = 0, prepaid = 0, unpaid = 0;
-  items.forEach(function(r){ total += r.total_amount||0; prepaid += r.prepaid||0; unpaid += r.unpaid||0; });
+  // 使用合计行数据（is_total=1），确保包含所有数据
+  var totalRow = data.filter(function(r){ return r.is_total; })[0];
+  if (!totalRow) return;
+  var total = totalRow.total_amount || 0;
+  var prepaid = totalRow.prepaid || 0;
+  var unpaid = totalRow.unpaid || 0;
   var pctPaid = total > 0 ? (prepaid/total*100).toFixed(1) : 0;
   var pctUnpaid = total > 0 ? (unpaid/total*100).toFixed(1) : 0;
   makeChart('chart15a', 'doughnut', ['✅ 已收 ¥' + prepaid.toLocaleString(), '❌ 未收 ¥' + unpaid.toLocaleString()], [
@@ -1231,10 +1233,11 @@ function renderChart15a() {
 }
 function renderChart15b() {
   var data = DataStore.seedlingBill || [];
-  var items = data.filter(function(r){ return !r.is_total && !r.is_subtotal; });
-  if (!items.length) return;
-  var total = 0, prepaid = 0, unpaid = 0;
-  items.forEach(function(r){ total += r.total_amount||0; prepaid += r.prepaid||0; unpaid += r.unpaid||0; });
+  var totalRow = data.filter(function(r){ return r.is_total; })[0];
+  if (!totalRow) return;
+  var total = totalRow.total_amount || 0;
+  var prepaid = totalRow.prepaid || 0;
+  var unpaid = totalRow.unpaid || 0;
   var pctPaid = total > 0 ? (prepaid/total*100).toFixed(1) : 0;
   var pctUnpaid = total > 0 ? (unpaid/total*100).toFixed(1) : 0;
   makeChart('chart15b', 'bar', ['种苗'], [
@@ -1271,10 +1274,11 @@ function renderChart15b() {
 }
 function renderChart15c() {
   var data = DataStore.materialsBill || [];
-  var items = data.filter(function(r){ return !r.is_total && !r.is_subtotal; });
-  if (!items.length) return;
-  var total = 0, paid = 0, unpaid = 0;
-  items.forEach(function(r){ total += r.total_amount||0; paid += r.paid||0; unpaid += r.unpaid||0; });
+  var totalRow = data.filter(function(r){ return r.is_total; })[0];
+  if (!totalRow) return;
+  var total = totalRow.total_amount || 0;
+  var paid = totalRow.paid || 0;
+  var unpaid = totalRow.unpaid || 0;
   var pctPaid = total > 0 ? (paid/total*100).toFixed(1) : 0;
   var pctUnpaid = total > 0 ? (unpaid/total*100).toFixed(1) : 0;
   makeChart('chart15c', 'doughnut', ['✅ 已收款 ¥' + paid.toLocaleString(), '❌ 未收款 ¥' + unpaid.toLocaleString()], [
@@ -1300,10 +1304,11 @@ function renderChart15c() {
 }
 function renderChart15d() {
   var data = DataStore.materialsBill || [];
-  var items = data.filter(function(r){ return !r.is_total && !r.is_subtotal; });
-  if (!items.length) return;
-  var total = 0, paid = 0, unpaid = 0;
-  items.forEach(function(r){ total += r.total_amount||0; paid += r.paid||0; unpaid += r.unpaid||0; });
+  var totalRow = data.filter(function(r){ return r.is_total; })[0];
+  if (!totalRow) return;
+  var total = totalRow.total_amount || 0;
+  var paid = totalRow.paid || 0;
+  var unpaid = totalRow.unpaid || 0;
   var pctPaid = total > 0 ? (paid/total*100).toFixed(1) : 0;
   var pctUnpaid = total > 0 ? (unpaid/total*100).toFixed(1) : 0;
   makeChart('chart15d', 'bar', ['农资'], [
