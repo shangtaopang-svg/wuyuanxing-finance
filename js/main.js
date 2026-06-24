@@ -1407,6 +1407,8 @@ function enableEditModeUI() {
       table.parentNode.insertBefore(addBar, table.nextSibling);
     }
   });
+  // 凭证字段上传功能
+  if (typeof enableFileUploadOnFields === 'function') enableFileUploadOnFields();
 }
 
 // 按表格新增行（知道具体是哪个表）
