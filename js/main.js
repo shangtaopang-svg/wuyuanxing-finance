@@ -1239,7 +1239,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
   // 从公共API加载数据（无需登录，确保数据最新）
   showLoading(true);
-  var pubSections = ['capital','bankFlow','pettyDraw','pettyWrite',''pettyCash','bankAccounts','contracts','companyInfo','receivable','asset','management','salary','baseExpense','farmerLedger';
+    var pubSections = ['capital','bankFlow','pettyDraw','pettyWrite','pettyCash','bankAccounts','contracts','companyInfo','receivable','asset','management','salary','baseExpense','farmerLedger'];
   var pubLoaded = 0;
   pubSections.forEach(function(s) {
     var xhr = new XMLHttpRequest();
