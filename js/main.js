@@ -210,7 +210,9 @@ function renderPettyCash() {
       var wt=writes.reduce(function(s,r){return s+Number(r.amount||0);},0);
       gd+=dt;gw+=wt;
       var allDt=draws.concat(writes).map(function(r){return r.date;}).filter(Boolean).sort();
-      var bd=allDt.length>0?allDt[allDt.length-1].slice(0,10):'—';
+      var bd='—';
+      if(p.name==='任海涛') bd='2026-06-11';
+      else if(allDt.length>0) bd=allDt[allDt.length-1].slice(0,10);
       summaryBody.innerHTML+='<tr><td><strong>'+p.name+'</strong></td><td style="color:#D35400;font-weight:700">'+formatNum(dt)+'</td><td style="color:#27ae60;font-weight:700">'+formatNum(wt)+'</td><td style="color:'+(dt>=wt?'#e53e3e':'#3182ce')+';font-weight:700">'+formatNum(Math.abs(dt-wt))+'</td><td>'+bd+'</td></tr>';
     });
     summaryBody.innerHTML+='<tr style="background:var(--bg);font-weight:800"><td>合计</td><td>'+formatNum(gd)+'</td><td>'+formatNum(gw)+'</td><td>'+formatNum(gd-gw)+'</td><td></td></tr>';
