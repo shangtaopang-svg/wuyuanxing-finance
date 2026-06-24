@@ -123,7 +123,7 @@ function showToast(msg, type) {
         <a href="statements.html" class="top-link">📊 报表</a>
         <span style="font-size:0.55rem;opacity:0.3;letter-spacing:0.1em">v2.2</span>
         <button id="musicBtn" onclick="toggleMusic()" style="background:none;border:1px solid rgba(255,255,255,0.3);color:#fff;cursor:pointer;padding:2px 6px;font-size:0.72rem;border-radius:3px" title="背景音乐">🎵</button>
-        <audio id="bgMusic" loop preload="auto"><source src="/uploads/回家.mp3" type="audio/mpeg"></audio>
+        <audio id="bgMusic" loop preload="auto"><source src="/finance/%E5%9B%9E%E5%AE%B6.mp3" type="audio/mpeg"></audio>
       </div>
     </div>
   </header>
@@ -410,21 +410,45 @@ function showToast(msg, type) {
     <!-- ===== ⑮ 农户信息 ===== -->
     <section class="tab-panel" id="tab15">
       <div class="panel-header"><h2>👨‍🌾 坪坝村农户种苗/农资台账</h2></div>
-      <div class="chart-row">
-        <div class="chart-card"><h4>📊 收款状态</h4><div class="chart-box"><canvas id="chart15a"></canvas></div></div>
-        <div class="chart-card"><h4>📈 种苗 vs 农资</h4><div class="chart-box"><canvas id="chart15b"></canvas></div></div>
-      </div>
-      <div style="margin:8px 0;overflow-x:auto">
-        <table class="data-table" style="font-size:0.7rem;min-width:1200px">
+      <div class="table-empty" id="empty15" style="display:none"><span class="empty-icon">📭</span><span class="empty-text">暂无数据</span></div>
+
+      <!-- ====== 党参种苗账单 ====== -->
+      <h3 style="font-size:0.9rem;color:#2d5a27;margin:12px 0 6px;border-left:4px solid #2d5a27;padding-left:10px">🌱 党参种苗账单</h3>
+      <div style="margin:6px 0;overflow:auto hidden;border:2px solid #2d5a27;border-radius:8px">
+        <table class="data-table seed-table" style="font-size:0.68rem;min-width:900px">
           <thead><tr>
-            <th rowspan="2">序号</th><th rowspan="2">姓名</th><th rowspan="2">电话</th><th colspan="3">规模</th><th colspan="4">种苗</th><th colspan="3">农资</th><th rowspan="2">未付合计</th><th rowspan="2">状态</th><th rowspan="2">备注</th>
-          </tr><tr>
-            <th>亩数</th><th>袋数</th><th>单价</th><th>总额</th><th>已付</th><th>未付</th><th>总额</th><th>已付</th><th>未付</th>
+            <th style="width:32px">序号</th><th style="width:60px">姓名</th><th style="width:95px">联系电话</th>
+            <th style="width:52px">规模<br><span style="font-weight:400;font-size:0.6rem">(亩)</span></th>
+            <th style="width:50px">袋数<br><span style="font-weight:400;font-size:0.6rem">(2袋/亩)</span></th>
+            <th style="width:52px">每袋<br>价格</th>
+            <th style="width:52px">每袋<br>重量</th>
+            <th style="width:65px">总金额</th>
+            <th style="width:55px">预付款</th>
+            <th style="width:55px">未付款</th>
           </tr></thead>
-          <tbody id="farmerBody"></tbody>
+          <tbody id="seedlingBody"></tbody>
         </table>
       </div>
-      <div class="table-empty" id="empty15"><span class="empty-icon">📭</span><span class="empty-text">暂无数据</span></div>
+
+      <!-- ====== 党参农资账单 ====== -->
+      <h3 style="font-size:0.9rem;color:#b8860b;margin:18px 0 6px;border-left:4px solid #b8860b;padding-left:10px">🧪 党参农资账单</h3>
+      <div style="margin:6px 0;overflow:auto hidden;border:2px solid #b8860b;border-radius:8px">
+        <table class="data-table materials-table" style="font-size:0.65rem;min-width:950px">
+          <thead><tr>
+            <th style="width:30px">序号</th><th style="width:55px">姓名</th><th style="width:90px">联系电话</th>
+            <th>三环<br>复合化肥</th>
+            <th>迪斯科<br>复合化肥</th>
+            <th>除草剂</th>
+            <th>封闭药</th>
+            <th>威粒<br>杀虫剂</th>
+            <th style="width:62px">总金额</th>
+            <th style="width:52px">已付款</th>
+            <th style="width:52px">未付款</th>
+            <th>备注</th>
+          </tr></thead>
+          <tbody id="materialsBody"></tbody>
+        </table>
+      </div>
     </section>
   </main>
   <!-- 图表全屏查看器 -->

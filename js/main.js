@@ -385,7 +385,7 @@ function renderCharts() {
   else if (id === 'tab8') { renderChart8a(); renderChart8b(); }
   else if (id === 'tab9') { renderChart9a(); renderChart9b(); }
   else if (id === "tab14") { renderChart14a(); renderChart14b(); }
-  else if (id === "tab15") { renderChart15a(); renderChart15b(); }
+  else if (id === "tab15") { }
 }
 
 function makeChart(id, type, labels, datasets, opts) {
@@ -1193,40 +1193,55 @@ function renderBankAccounts() {
 
 // ⑮ 农户信息
 function renderFarmer() {
-  var data = DataStore.farmerLedger || [];
   var body = $('farmerBody');
+  if (body) body.innerHTML = ''; // legacy
+  renderSeedlingBill();
+  renderMaterialsBill();
+}
+function renderSeedlingBill() {
+  var data = DataStore.seedlingBill || [];
+  var body = $('seedlingBody');
   if (!body) return;
   body.innerHTML = '';
-  if (data.length === 0) { var e = $('empty15'); if(e) e.style.display='block'; return; }
-  var e = $('empty15'); if(e) e.style.display='none';
+  if (!data.length) { var e=$('empty15'); if(e) e.style.display='block'; return; }
+  var e=$('empty15'); if(e) e.style.display='none';
   data.forEach(function(r) {
-    var unpaid = r.total_unpaid || 0;
-    var status = unpaid > 0 ? '<span style="color:#e53e3e;font-weight:700">未收</span>' : '<span style="color:#27ae60;font-weight:700">已收</span>';
-    body.innerHTML += '<tr><td>' + (r.seq||'') + '</td><td>' + (r.name||'') + '</td><td>' + (r.phone||'') + '</td>' +
-      '<td>' + (r.area||'') + '</td><td>' + (r.bags||'') + '</td><td>' + (r.price_per_bag||0) + '</td>' +
-      '<td>' + formatNum(r.seedling_total||0) + '</td><td>' + formatNum(r.prepaid||0) + '</td><td style="color:#e53e3e">' + formatNum(r.unpaid_seedling||0) + '</td>' +
-      '<td>' + formatNum(r.materials_total||0) + '</td><td>' + formatNum(r.materials_paid||0) + '</td><td style="color:#e53e3e">' + formatNum(r.materials_unpaid||0) + '</td>' +
-      '<td style="color:#e53e3e;font-weight:700">' + formatNum(unpaid) + '</td><td>' + status + '</td><td style="font-size:0.65rem;color:#888">' + (r.notes||'') + '</td></tr>';
+    var cls = r.is_total ? ' class="row-total"' : r.is_subtotal ? ' class="row-subtotal"' : '';
+    body.innerHTML += '<tr' + cls + '>' +
+      '<td class="col-seq">' + (r.seq||'') + '</td>' +
+      '<td class="col-name">' + (r.name||'') + '</td>' +
+      '<td class="col-phone">' + (r.phone||'') + '</td>' +
+      '<td class="col-num">' + (r.area||'') + '</td>' +
+      '<td class="col-num">' + (r.bags||'') + '</td>' +
+      '<td class="col-num">' + (r.price_per_bag||'') + '</td>' +
+      '<td class="col-num">' + (r.weight_per_bag||'') + '</td>' +
+      '<td class="col-amount">' + formatNum(r.total_amount||0) + '</td>' +
+      '<td class="col-paid">' + formatNum(r.prepaid||0) + '</td>' +
+      '<td class="col-unpaid">' + formatNum(r.unpaid||0) + '</td></tr>';
   });
 }
-function renderChart15a() {
-  var data = DataStore.farmerLedger || [];
-  var paid = data.filter(function(r){return !r.total_unpaid||r.total_unpaid===0||r.total_unpaid==='0';}).length;
-  var unpaid = data.filter(function(r){return r.total_unpaid>0;}).length;
-  makeChart('chart15a', 'doughnut', ['已收('+paid+')','未收('+unpaid+')'], [
-    { data: [paid, unpaid], backgroundColor: ['#27ae60','#e53e3e'], borderColor: '#000', borderWidth: 2 }
-  ]);
-}
-function renderChart15b() {
-  var data = DataStore.farmerLedger || [];
-  var sl = data.reduce(function(s,r){return s+(r.seedling_total||0);},0);
-  var sp = data.reduce(function(s,r){return s+(r.prepaid||0);},0);
-  var mt = data.reduce(function(s,r){return s+(r.materials_total||0);},0);
-  var mp = data.reduce(function(s,r){return s+(r.materials_paid||0);},0);
-  makeChart('chart15b', 'bar', ['种苗','农资'], [
-    { label: '总额', data: [sl, mt], backgroundColor: '#f39c12', borderColor: '#000', borderWidth: 2 },
-    { label: '已付', data: [sp, mp], backgroundColor: '#27ae60', borderColor: '#000', borderWidth: 2 }
-  ]);
+function renderMaterialsBill() {
+  var data = DataStore.materialsBill || [];
+  var body = $('materialsBody');
+  if (!body) return;
+  body.innerHTML = '';
+  if (!data.length) return;
+  data.forEach(function(r) {
+    var cls = r.is_total ? ' class="row-total"' : r.is_subtotal ? ' class="row-subtotal"' : '';
+    body.innerHTML += '<tr' + cls + '>' +
+      '<td class="col-seq">' + (r.seq||'') + '</td>' +
+      '<td class="col-name">' + (r.name||'') + '</td>' +
+      '<td class="col-phone">' + (r.phone||'') + '</td>' +
+      '<td class="col-num">' + formatNum(r.fertilizer_a||0) + '</td>' +
+      '<td class="col-num">' + formatNum(r.fertilizer_b||0) + '</td>' +
+      '<td class="col-num">' + formatNum(r.herbicide||0) + '</td>' +
+      '<td class="col-num">' + formatNum(r.sealant||0) + '</td>' +
+      '<td class="col-num">' + formatNum(r.pesticide||0) + '</td>' +
+      '<td class="col-amount">' + formatNum(r.total_amount||0) + '</td>' +
+      '<td class="col-paid">' + formatNum(r.paid||0) + '</td>' +
+      '<td class="col-unpaid">' + formatNum(r.unpaid||0) + '</td>' +
+      '<td class="col-notes" style="font-size:0.6rem;color:#888;max-width:120px">' + (r.notes||'') + '</td></tr>';
+  });
 }
 
 // 页面加载
@@ -1239,7 +1254,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
   // 从公共API加载数据（无需登录，确保数据最新）
   showLoading(true);
-    var pubSections = ['capital','bankFlow','pettyDraw','pettyWrite','pettyCash','bankAccounts','contracts','companyInfo','receivable','asset','management','salary','baseExpense','farmerLedger'];
+    var pubSections = ['capital','bankFlow','pettyDraw','pettyWrite','pettyCash','bankAccounts','contracts','companyInfo','receivable','asset','management','salary','baseExpense','farmerLedger','seedlingBill','materialsBill'];
   var pubLoaded = 0;
   pubSections.forEach(function(s) {
     var xhr = new XMLHttpRequest();

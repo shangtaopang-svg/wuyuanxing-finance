@@ -89,20 +89,26 @@ body { font-family:var(--font); background:var(--bg); color:var(--text); line-he
 .sub-panel.active { display:block; }
 
 /* 表格 */
-.table-wrap { overflow-x:auto; margin-bottom:4px; }
+.table-wrap { overflow-x:auto; margin-bottom:4px; -webkit-overflow-scrolling:touch; }
 .data-table { width:100%; border-collapse:collapse; font-size:0.78rem; background:var(--card); border-radius:8px; overflow:hidden; box-shadow:0 1px 6px rgba(0,0,0,0.06); }
-.data-table th { background:#faf8f5; padding:11px 14px; text-align:left; font-weight:700; color:var(--text-light); font-size:0.68rem; letter-spacing:0.04em; border-bottom:2px solid var(--border); }
-.data-table td { padding:10px 14px; border-bottom:1px solid #f0ede8; transition:background 0.15s; max-width:200px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.data-table th { background:#2d5a27; padding:11px 14px; text-align:left; font-weight:700; color:#fff; font-size:0.68rem; letter-spacing:0.04em; border-bottom:2px solid var(--border); }
+.data-table td { padding:10px 14px; border-bottom:1px solid #d4d0c8; transition:background 0.15s; max-width:200px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; color:#1a1a1a; }
 .data-table td:last-child { max-width:300px; }
 .data-table .amount { max-width:none; white-space:nowrap; }
-.data-table tbody tr:nth-child(even) td { background:#fcfbf9; }
+.data-table tbody tr:nth-child(even) td { background:#f5f8f2; }
 .data-table tbody tr:last-child td { border-bottom:none; }
-.data-table tbody tr:hover td { background:#f5f0e8 !important; }
+.data-table tbody tr:hover td { background:#e8f0e0 !important; }
 .data-table .amount { font-weight:700; font-family:var(--font-mono); font-size:0.85rem; }
 .data-table .income { color:var(--green); }
 .data-table .expense { color:var(--red); }
-/* 表格容器滚动支持 */
-.table-wrap { overflow-x:auto; -webkit-overflow-scrolling:touch; }
+
+/* 农户台账表格加强样式 */
+#tab15 .data-table th { background:#1e4d1a; color:#fff; font-size:0.65rem; padding:9px 6px; text-align:center; border:1px solid #3a7a33; white-space:nowrap; }
+#tab15 .data-table th[rowspan="2"] { vertical-align:middle; }
+#tab15 .data-table td { padding:7px 6px; border:1px solid #d4d0c8; text-align:center; font-size:0.68rem; color:#1a1a1a; }
+#tab15 .data-table tbody tr:nth-child(even) td { background:#f0f7ec; }
+#tab15 .data-table tbody tr:hover td { background:#dcebd2 !important; }
+#tab15 .data-table td:first-child { font-weight:700; color:#2d5a27; }
 
 /* 发票链接 */
 .invoice-link { color:var(--primary); text-decoration:none; font-size:0.68rem; font-weight:600; border:1px solid var(--primary); border-radius:3px; padding:2px 8px; display:inline-block; margin:1px; transition:all 0.15s; }
@@ -188,8 +194,68 @@ body { font-family:var(--font); background:var(--bg); color:var(--text); line-he
 [data-theme="dark"] .sum-item { background:var(--card); }
 [data-theme="dark"] .data-table { background:var(--card); }
 [data-theme="dark"] .data-table th { background:#0f3460; color:#fff; }
-[data-theme="dark"] .data-table td { border-bottom-color:#1a1a3e; }
+[data-theme="dark"] .data-table td { border-bottom-color:#1a1a3e; color:#e0e0e0; }
 [data-theme="dark"] .data-table tr:hover td { background:#1a1a3e; }
+[data-theme="dark"] #tab15 .data-table th { background:#0a2a3e; color:#00d4ff; border-color:#1e5a7a; }
+[data-theme="dark"] #tab15 .data-table td { border-color:#1e3a5a; color:#e0e0e0; }
+[data-theme="dark"] #tab15 .data-table tbody tr:nth-child(even) td { background:#111e30; }
+[data-theme="dark"] #tab15 .data-table tbody tr:hover td { background:#1a2e40 !important; }
+[data-theme="dark"] #tab15 .data-table td:first-child { color:#00d4ff; }
+[data-theme="dark"] #tab15 .farmer-table + div[style*="border"] { border-color:#1e5a7a !important; }
+[data-theme="dark"] #tab15 .col-total-unpaid { background:#2a1520; }
+[data-theme="dark"] #tab15 .seed-table + div[style*="border"] { border-color:#1e5a7a !important; }
+[data-theme="dark"] #tab15 .materials-table + div[style*="border"] { border-color:#8a6a20 !important; }
+
+/* 种苗/农资账单列样式 */
+.seed-table th { background:#2d5a27 !important; color:#fff !important; font-size:0.62rem; padding:8px 5px; text-align:center; border:1px solid #3a7a33; }
+.seed-table td { padding:6px 5px; border:1px solid #d4d0c8; text-align:center; font-size:0.68rem; color:#1a1a1a; }
+.seed-table tbody tr:nth-child(even) td { background:#f0f7ec; }
+.seed-table tbody tr:hover td { background:#dcebd2 !important; }
+.seed-table .row-total td { background:#e8f5e0 !important; font-weight:700; border-top:2px solid #2d5a27; }
+.seed-table .row-subtotal td { background:#f5faf0 !important; font-style:italic; }
+
+.materials-table th { background:#b8860b !important; color:#fff !important; font-size:0.6rem; padding:7px 4px; text-align:center; border:1px solid #d4a030; }
+.materials-table td { padding:5px 4px; border:1px solid #d4d0c8; text-align:center; font-size:0.65rem; color:#1a1a1a; }
+.materials-table tbody tr:nth-child(even) td { background:#fdf8ee; }
+.materials-table tbody tr:hover td { background:#f5edd6 !important; }
+.materials-table .row-total td { background:#faf0d0 !important; font-weight:700; border-top:2px solid #b8860b; }
+.materials-table .row-subtotal td { background:#fdf8ee !important; font-style:italic; }
+
+/* 暗色模式 */
+[data-theme="dark"] .seed-table td { border-color:#1e3a5a; color:#e0e0e0; }
+[data-theme="dark"] .seed-table tbody tr:nth-child(even) td { background:#111e30; }
+[data-theme="dark"] .seed-table tbody tr:hover td { background:#1a2e40 !important; }
+[data-theme="dark"] .seed-table .row-total td { background:#1a2a20 !important; }
+[data-theme="dark"] .seed-table .row-subtotal td { background:#152520 !important; }
+[data-theme="dark"] .materials-table td { border-color:#3a2a10; color:#e0e0e0; }
+[data-theme="dark"] .materials-table tbody tr:nth-child(even) td { background:#1e1a10; }
+[data-theme="dark"] .materials-table tbody tr:hover td { background:#2a2215 !important; }
+[data-theme="dark"] .materials-table .row-total td { background:#2a2010 !important; }
+[data-theme="dark"] .materials-table .row-subtotal td { background:#221a10 !important; }
+
+/* dataviz风格 */
+[data-style="dataviz"] .seed-table th { background:rgba(0,212,255,0.12) !important; color:#00d4ff !important; border-color:rgba(0,212,255,0.2); }
+[data-style="dataviz"] .seed-table td { border-color:rgba(30,42,90,0.6); }
+[data-style="dataviz"] .seed-table tbody tr:nth-child(even) td { background:rgba(0,212,255,0.03); }
+[data-style="dataviz"] .seed-table tbody tr:hover td { background:rgba(0,212,255,0.06) !important; }
+[data-style="dataviz"] .materials-table th { background:rgba(0,212,255,0.12) !important; color:#00d4ff !important; border-color:rgba(0,212,255,0.2); }
+[data-style="dataviz"] .materials-table td { border-color:rgba(30,42,90,0.6); }
+[data-style="dataviz"] .materials-table tbody tr:nth-child(even) td { background:rgba(0,212,255,0.03); }
+[data-style="dataviz"] .materials-table tbody tr:hover td { background:rgba(0,212,255,0.06) !important; }
+
+/* 农户台账列样式 */
+#tab15 .col-seq { font-weight:700; color:#2d5a27; width:32px; }
+#tab15 .col-name { font-weight:600; text-align:left !important; min-width:70px; }
+#tab15 .col-phone { font-family:var(--font-mono); font-size:0.65rem; letter-spacing:0.02em; min-width:90px; }
+#tab15 .col-num { font-family:var(--font-mono); font-size:0.65rem; }
+#tab15 .col-amount { font-family:var(--font-mono); font-weight:600; }
+#tab15 .col-paid { font-family:var(--font-mono); color:#27ae60; font-weight:600; }
+#tab15 .col-unpaid { font-family:var(--font-mono); color:#e53e3e; font-weight:600; }
+#tab15 .col-total-unpaid { font-family:var(--font-mono); color:#e53e3e; font-weight:800; font-size:0.75rem; background:#fff5f5; border-radius:3px; }
+#tab15 .col-status { font-weight:700; }
+#tab15 .col-notes { font-size:0.6rem; color:#888; max-width:100px; }
+.tag-paid { display:inline-block; background:#27ae60; color:#fff; padding:1px 8px; border-radius:3px; font-size:0.6rem; font-weight:700; letter-spacing:0.05em; }
+.tag-unpaid { display:inline-block; background:#e53e3e; color:#fff; padding:1px 8px; border-radius:3px; font-size:0.6rem; font-weight:700; letter-spacing:0.05em; }
 /* 图表全屏查看 */
 .chart-viewer-overlay { position:fixed; inset:0; background:rgba(0,0,0,0.8); z-index:9999; display:flex; align-items:center; justify-content:center; cursor:zoom-out; animation:fadeIn 0.2s ease; }
 .chart-viewer-content { width:90vw; height:85vh; background:var(--card); border-radius:8px; padding:20px; position:relative; cursor:default; }
@@ -224,8 +290,13 @@ body { font-family:var(--font); background:var(--bg); color:var(--text); line-he
 [data-style="dataviz"] .chart-card h4 { color:var(--text-light); }
 [data-style="dataviz"] .data-table { background:var(--card); border:1px solid var(--border); border-radius:8px; box-shadow:0 0 30px rgba(0,212,255,0.03); }
 [data-style="dataviz"] .data-table th { background:rgba(0,212,255,0.06); color:#00d4ff; font-weight:600; border-bottom:2px solid var(--border); }
-[data-style="dataviz"] .data-table td { border-bottom-color:rgba(30,42,90,0.5); }
+[data-style="dataviz"] .data-table td { border-bottom-color:rgba(30,42,90,0.5); color:var(--text); }
 [data-style="dataviz"] .data-table tr:hover td { background:rgba(0,212,255,0.03); }
+[data-style="dataviz"] #tab15 .data-table th { background:rgba(0,212,255,0.12); color:#00d4ff; border-color:rgba(0,212,255,0.2); }
+[data-style="dataviz"] #tab15 .data-table td { border-color:rgba(30,42,90,0.6); }
+[data-style="dataviz"] #tab15 .data-table tbody tr:nth-child(even) td { background:rgba(0,212,255,0.03); }
+[data-style="dataviz"] #tab15 .data-table tbody tr:hover td { background:rgba(0,212,255,0.06) !important; }
+[data-style="dataviz"] #tab15 .data-table td:first-child { color:#00d4ff; font-weight:700; }
 [data-style="dataviz"] .invoice-link { color:#00d4ff; border-color:#00d4ff; }
 [data-style="dataviz"] .invoice-link:hover { background:#00d4ff; color:#000; }
 [data-style="dataviz"] .sub-tab-btn { border-color:var(--border); background:var(--card); color:var(--text-light); }

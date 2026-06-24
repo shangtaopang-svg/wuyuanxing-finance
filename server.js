@@ -15,7 +15,7 @@ const DB_PATH = path.join(__dirname, 'finance.db');
 const UPLOAD_DIR = path.join(__dirname, 'uploads/vouchers');
 
 // ===== 首页直接渲染（服务端只注入日期，报销数据由客户端加载） =====
-app.get('/', function(req, res) {
+app.get(['/', '/finance', '/finance/'], function(req, res) {
   try {
     var html = fs.readFileSync(path.join(__dirname, 'index.html'), 'utf8');
     // 日期
@@ -99,6 +99,30 @@ async function initDB() {
     id INTEGER PRIMARY KEY, date TEXT, income REAL DEFAULT 0,
     expense REAL DEFAULT 0, counterparty_account TEXT DEFAULT '', counterparty_name TEXT DEFAULT '',
     purpose TEXT DEFAULT '', summary TEXT DEFAULT ''
+  )`);
+  db.run(`CREATE TABLE IF NOT EXISTS farmer_ledger (
+    id INTEGER PRIMARY KEY, seq TEXT, name TEXT, phone TEXT,
+    area REAL DEFAULT 0, bags REAL DEFAULT 0, price_per_bag REAL DEFAULT 0, weight_per_bag REAL DEFAULT 0,
+    seedling_total REAL DEFAULT 0, prepaid REAL DEFAULT 0, unpaid_seedling REAL DEFAULT 0,
+    fertilizer_a REAL DEFAULT 0, fertilizer_b REAL DEFAULT 0, herbicide REAL DEFAULT 0,
+    pesticide REAL DEFAULT 0, mulch REAL DEFAULT 0,
+    materials_total REAL DEFAULT 0, materials_paid REAL DEFAULT 0, materials_unpaid REAL DEFAULT 0,
+    total_unpaid REAL DEFAULT 0, notes TEXT DEFAULT '', paid TEXT DEFAULT ''
+  )`);
+  // 党参种苗账单
+  db.run(`CREATE TABLE IF NOT EXISTS seedling_bill (
+    id INTEGER PRIMARY KEY, seq TEXT, name TEXT, phone TEXT,
+    area REAL DEFAULT 0, bags REAL DEFAULT 0, price_per_bag REAL DEFAULT 0, weight_per_bag REAL DEFAULT 0,
+    total_amount REAL DEFAULT 0, prepaid REAL DEFAULT 0, unpaid REAL DEFAULT 0,
+    is_total INTEGER DEFAULT 0, is_subtotal INTEGER DEFAULT 0
+  )`);
+  // 党参农资账单
+  db.run(`CREATE TABLE IF NOT EXISTS materials_bill (
+    id INTEGER PRIMARY KEY, seq TEXT, name TEXT, phone TEXT,
+    fertilizer_a REAL DEFAULT 0, fertilizer_b REAL DEFAULT 0,
+    herbicide REAL DEFAULT 0, sealant REAL DEFAULT 0, pesticide REAL DEFAULT 0,
+    total_amount REAL DEFAULT 0, paid REAL DEFAULT 0, unpaid REAL DEFAULT 0,
+    notes TEXT DEFAULT '', is_total INTEGER DEFAULT 0, is_subtotal INTEGER DEFAULT 0
   )`);
 
   // 插入默认管理员
@@ -197,7 +221,9 @@ const TABLE_MAP = {
   contracts: { table: 'contracts', fields: ['date','contract_name','party','amount','status','note'] },
   bankAccounts: { table: 'bank_accounts', fields: ['bank_name','account_name','account_number','balance','note'] },
   bankFlow: { table: 'bank_flow', fields: ['date','income','expense','counterparty_account','counterparty_name','purpose','summary'] },
-  farmerLedger: { table: 'farmer_ledger', fields: ['seq','name','phone','area','bags','price_per_bag','weight_per_bag','seedling_total','prepaid','unpaid_seedling','fertilizer_a','fertilizer_b','herbicide','pesticide','mulch','materials_total','materials_paid','materials_unpaid','total_unpaid','notes','paid'] }
+  farmerLedger: { table: 'farmer_ledger', fields: ['seq','name','phone','area','bags','price_per_bag','weight_per_bag','seedling_total','prepaid','unpaid_seedling','fertilizer_a','fertilizer_b','herbicide','pesticide','mulch','materials_total','materials_paid','materials_unpaid','total_unpaid','notes','paid'] },
+  seedlingBill: { table: 'seedling_bill', fields: ['seq','name','phone','area','bags','price_per_bag','weight_per_bag','total_amount','prepaid','unpaid','is_total','is_subtotal'] },
+  materialsBill: { table: 'materials_bill', fields: ['seq','name','phone','fertilizer_a','fertilizer_b','herbicide','sealant','pesticide','total_amount','paid','unpaid','notes','is_total','is_subtotal'] }
 };
 
 // 获取数据
@@ -299,12 +325,14 @@ const PUBLIC_SECTIONS = {
   bankFlow: { fields: ['date','income','expense','counterparty_account','counterparty_name','purpose','summary'] },
   baseExpense: { fields: ["date","base","item","amount","note","invoices"] },
   farmerLedger: { fields: ["seq","name","phone","area","bags","price_per_bag","weight_per_bag","seedling_total","prepaid","unpaid_seedling","fertilizer_a","fertilizer_b","herbicide","pesticide","mulch","materials_total","materials_paid","materials_unpaid","total_unpaid","notes","paid"] },
+  seedlingBill: { fields: ["seq","name","phone","area","bags","price_per_bag","weight_per_bag","total_amount","prepaid","unpaid","is_total","is_subtotal"] },
+  materialsBill: { fields: ["seq","name","phone","fertilizer_a","fertilizer_b","herbicide","sealant","pesticide","total_amount","paid","unpaid","notes","is_total","is_subtotal"] },
 };
 Object.keys(PUBLIC_SECTIONS).forEach(function(key) {
   app.get('/api/public/' + key, function(req, res) {
     try {
       var cfg = PUBLIC_SECTIONS[key];
-      var table = key === 'incomeExpense' ? 'income_expense' : key === 'pettyCash' || key === 'pettyDraw' || key === 'pettyWrite' ? 'petty_cash' : key === "baseExpense" ? "base_expense" : key === "bankFlow" ? "bank_flow" : key === "companyInfo" ? "company_info" : key === "bankAccounts" ? "bank_accounts" : key === "farmerLedger" ? "farmer_ledger" : key;
+      var table = key === 'incomeExpense' ? 'income_expense' : key === 'pettyCash' || key === 'pettyDraw' || key === 'pettyWrite' ? 'petty_cash' : key === "baseExpense" ? "base_expense" : key === "bankFlow" ? "bank_flow" : key === "companyInfo" ? "company_info" : key === "bankAccounts" ? "bank_accounts" : key === "farmerLedger" ? "farmer_ledger" : key === "seedlingBill" ? "seedling_bill" : key === "materialsBill" ? "materials_bill" : key;
       var sql = "SELECT " + cfg.fields.join(',') + " FROM " + table; if (key === 'pettyDraw') sql += " WHERE type='领用'"; else if (key === 'pettyWrite') sql += " WHERE type='核销'"; var data = query(sql + " ORDER BY id");
       res.json(data);
     } catch(e) { res.json([]); }
@@ -405,6 +433,12 @@ initDB().then(() => {
     setHeaders: (res, p) => {
       if (p.match(/\/js\/admin\.js/)) res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
       else if (p.match(/\.(css|js|png|jpg)$/)) res.setHeader('Cache-Control', 'public, max-age=300');
+    }
+  }));
+  // 支持 /finance/ 前缀（生产环境通过 nginx 反代，本地方便测试）
+  app.use('/finance', express.static(path.join(__dirname, '.'), {
+    setHeaders: (res, p) => {
+      if (p.match(/\.(css|js|png|jpg)$/)) res.setHeader('Cache-Control', 'public, max-age=300');
     }
   }));
   app.listen(PORT, '0.0.0.0', () => {
