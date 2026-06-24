@@ -1758,34 +1758,41 @@ function confirmFrontImport() {
       // 同步到 DataStore 让数据立即显示
       if (typeof DataStore !== 'undefined') {
         if (section === 'pettyDraw') {
-          // 追加到 DataStore.pettyDraw 同时更新综合的 pettyCash
-          DataStore.pettyDraw = (DataStore.pettyDraw || []).concat(existing);
-          DataStore._pettyCashFlat = (DataStore._pettyCashFlat || []).concat(existing);
+          DataStore.pettyDraw = existing;
+          DataStore._pettyCashFlat = existing;
           DataStore.pettyCash = {
-            ren: (DataStore._pettyCashFlat||[]).filter(function(r){ return r.person === '任海涛'; }),
-            pang: (DataStore._pettyCashFlat||[]).filter(function(r){ return r.person === '庞尚韬'; })
+            ren: existing.filter(function(r){ return r.person === '任海涛'; }),
+            pang: existing.filter(function(r){ return r.person === '庞尚韬'; })
           };
-          DataStore.pettyWrite = (DataStore._pettyCashFlat||[]).filter(function(r){ return r.type === '核销'; });
+          DataStore.pettyWrite = existing.filter(function(r){ return r.type === '核销'; });
         } else if (section === 'pettyWrite') {
-          DataStore.pettyWrite = (DataStore.pettyWrite || []).concat(existing);
-          DataStore._pettyCashFlat = (DataStore._pettyCashFlat || []).concat(existing);
+          DataStore.pettyWrite = existing;
+          DataStore._pettyCashFlat = existing;
           DataStore.pettyCash = {
-            ren: (DataStore._pettyCashFlat||[]).filter(function(r){ return r.person === '任海涛'; }),
-            pang: (DataStore._pettyCashFlat||[]).filter(function(r){ return r.person === '庞尚韬'; })
+            ren: existing.filter(function(r){ return r.person === '任海涛'; }),
+            pang: existing.filter(function(r){ return r.person === '庞尚韬'; })
           };
-          DataStore.pettyDraw = (DataStore._pettyCashFlat||[]).filter(function(r){ return r.type === '领用'; });
+          DataStore.pettyDraw = existing.filter(function(r){ return r.type === '领用'; });
         } else {
           DataStore[section] = existing;
         }
       }
       closeFrontImport();
       try { renderAll(); updateSummary(); } catch(e) { console.error(e); }
-      // 保存到服务器（用编辑密码）
+      // 保存到服务器（合并 DataStore 数据，避免覆盖）
+      var saveData = existing;
+      if (saveData.length === json.length - 1 && typeof DataStore !== 'undefined' && Array.isArray(DataStore[section]) && DataStore[section].length > saveData.length) {
+        saveData = JSON.parse(JSON.stringify(DataStore[section]));
+        existing.forEach(function(r) {
+          var dup = saveData.some(function(sr) { return JSON.stringify(sr) === JSON.stringify(r); });
+          if (!dup) saveData.push(r);
+        });
+      }
       var apiBase = (typeof API_BASE !== 'undefined' ? API_BASE : (window.location.pathname.startsWith('/finance/') ? '/finance' : ''));
       fetch(apiBase + '/api/public/save/' + section, {
         method: 'POST',
         headers: {'Content-Type':'application/json'},
-        body: JSON.stringify({ data: existing, password: '87700020' })
+        body: JSON.stringify({ data: saveData, password: '87700020' })
       }).catch(function(){});
       showToast('✅ 导入' + (json.length-1) + '条成功', 'success');
     } catch(err) {
