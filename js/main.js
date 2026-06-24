@@ -1178,13 +1178,17 @@ document.addEventListener('DOMContentLoaded', function() {
     xhr.onload = function() {
       try {
         var d = JSON.parse(xhr.responseText) || [];
-        if (typeof DataStore !== 'undefined') {
-          if (s === 'pettyCash') {
-            DataStore.pettyCash = { ren: d.filter(function(x){return x.person==='任海涛';}), pang: d.filter(function(x){return x.person==='庞尚韬';}) };
-            DataStore._pettyCashFlat = d;
-          } else {
-            DataStore[s] = d;
-          }
+        if (typeof DataStore === 'undefined') { pubLoaded++; return; }
+        var localData = JSON.parse(localStorage.getItem('wyx_' + s)) || [];
+        var useData = localData.length > 0 ? localData : d;
+        if (s === 'pettyCash') {
+          DataStore.pettyCash = { ren: useData.filter(function(x){return x.person==='任海涛';}), pang: useData.filter(function(x){return x.person==='庞尚韬';}) };
+          DataStore._pettyCashFlat = useData;
+        } else {
+          DataStore[s] = useData;
+        }
+        if (localData.length === 0 && d.length > 0) {
+          localStorage.setItem('wyx_' + s, JSON.stringify(d));
         }
       } catch(e) {}
       pubLoaded++;
@@ -1224,7 +1228,7 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 
 
-// 自动定时刷新（保持与后台数据同步）
+// 自动定时刷新（本地修改优先，不覆盖）
 setInterval(function() {
   var sections = ['capital','bankFlow','pettyDraw','pettyWrite','pettyCash','receivable','asset','management','salary','baseExpense'];
   var loaded = 0;
@@ -1234,7 +1238,20 @@ setInterval(function() {
     xhr.onload = function() {
       try {
         var d = JSON.parse(xhr.responseText) || [];
-        if (typeof DataStore !== 'undefined' && d.length > 0) {
+        if (typeof DataStore === 'undefined') return;
+        var localData = JSON.parse(localStorage.getItem('wyx_' + s)) || [];
+        if (localData.length > 0) {
+          // 有本地修改，用本地数据（不覆盖）
+          if (s === 'pettyCash') {
+            DataStore._pettyCashFlat = localData;
+            DataStore.pettyCash = { ren: localData.filter(function(x){return x.person==='任海涛';}), pang: localData.filter(function(x){return x.person==='庞尚韬';}) };
+            DataStore.pettyDraw = localData.filter(function(x){return x.type==='领用';});
+            DataStore.pettyWrite = localData.filter(function(x){return x.type==='核销';});
+          } else {
+            DataStore[s] = localData;
+          }
+        } else if (d.length > 0) {
+          // 无本地修改，用服务器数据
           if (s === 'pettyCash') {
             DataStore.pettyCash = { ren: d.filter(function(x){return x.person==='任海涛';}), pang: d.filter(function(x){return x.person==='庞尚韬';}) };
             DataStore._pettyCashFlat = d;
