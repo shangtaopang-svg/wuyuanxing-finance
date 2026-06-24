@@ -59,7 +59,8 @@ function today() {
 }
 
 // === 标签页导航 ===
-var TAB_SECTION_MAP = { tab2:'capital', tab14:'bankFlow', tab4:'pettyDraw', tab5:'reimburse', tab6:'receivable', tab7:'asset', tab8:'management', tab9:'salary', tab10:'baseExpense', tab11:'companyInfo', tab12:'contracts', tab13:'bankAccounts' };
+var TAB_SECTION_MAP = { tab2:'capital', tab14:'bankFlow', tab4:'pettyDraw', tab5:'reimburse', tab6:'receivable', tab7:'asset', tab8:'management', tab9:'salary', tab10:'baseExpense', tab11:'companyInfo', tab12:'contracts', tab13:"bankAccounts",
+  tab15:"farmerLedger" };
 document.querySelectorAll('.tab-btn').forEach(function(btn) {
   btn.addEventListener('click', function() {
     document.querySelectorAll('.tab-btn').forEach(function(b) { b.classList.remove('active'); });
@@ -383,7 +384,8 @@ function renderCharts() {
   else if (id === 'tab7') { renderChart7a(); renderChart7b(); }
   else if (id === 'tab8') { renderChart8a(); renderChart8b(); }
   else if (id === 'tab9') { renderChart9a(); renderChart9b(); }
-  else if (id === 'tab14') { renderChart14a(); renderChart14b(); }
+  else if (id === "tab14") { renderChart14a(); renderChart14b(); }
+  else if (id === "tab15") { renderChart15a(); renderChart15b(); }
 }
 
 function makeChart(id, type, labels, datasets, opts) {
@@ -1032,6 +1034,7 @@ function renderAll() {
   renderCompanyInfo();
   renderContracts();
   renderBankAccounts();
+  renderFarmer();
   updateSummary();
 }
 
@@ -1188,6 +1191,44 @@ function renderBankAccounts() {
   }
 }
 
+// ⑮ 农户信息
+function renderFarmer() {
+  var data = DataStore.farmerLedger || [];
+  var body = $('farmerBody');
+  if (!body) return;
+  body.innerHTML = '';
+  if (data.length === 0) { var e = $('empty15'); if(e) e.style.display='block'; return; }
+  var e = $('empty15'); if(e) e.style.display='none';
+  data.forEach(function(r) {
+    var unpaid = r.total_unpaid || 0;
+    var status = unpaid > 0 ? '<span style="color:#e53e3e;font-weight:700">未收</span>' : '<span style="color:#27ae60;font-weight:700">已收</span>';
+    body.innerHTML += '<tr><td>' + (r.seq||'') + '</td><td>' + (r.name||'') + '</td><td>' + (r.phone||'') + '</td>' +
+      '<td>' + (r.area||'') + '</td><td>' + (r.bags||'') + '</td><td>' + (r.price_per_bag||0) + '</td>' +
+      '<td>' + formatNum(r.seedling_total||0) + '</td><td>' + formatNum(r.prepaid||0) + '</td><td style="color:#e53e3e">' + formatNum(r.unpaid_seedling||0) + '</td>' +
+      '<td>' + formatNum(r.materials_total||0) + '</td><td>' + formatNum(r.materials_paid||0) + '</td><td style="color:#e53e3e">' + formatNum(r.materials_unpaid||0) + '</td>' +
+      '<td style="color:#e53e3e;font-weight:700">' + formatNum(unpaid) + '</td><td>' + status + '</td><td style="font-size:0.65rem;color:#888">' + (r.notes||'') + '</td></tr>';
+  });
+}
+function renderChart15a() {
+  var data = DataStore.farmerLedger || [];
+  var paid = data.filter(function(r){return !r.total_unpaid||r.total_unpaid===0||r.total_unpaid==='0';}).length;
+  var unpaid = data.filter(function(r){return r.total_unpaid>0;}).length;
+  makeChart('chart15a', 'doughnut', ['已收('+paid+')','未收('+unpaid+')'], [
+    { data: [paid, unpaid], backgroundColor: ['#27ae60','#e53e3e'], borderColor: '#000', borderWidth: 2 }
+  ]);
+}
+function renderChart15b() {
+  var data = DataStore.farmerLedger || [];
+  var sl = data.reduce(function(s,r){return s+(r.seedling_total||0);},0);
+  var sp = data.reduce(function(s,r){return s+(r.prepaid||0);},0);
+  var mt = data.reduce(function(s,r){return s+(r.materials_total||0);},0);
+  var mp = data.reduce(function(s,r){return s+(r.materials_paid||0);},0);
+  makeChart('chart15b', 'bar', ['种苗','农资'], [
+    { label: '总额', data: [sl, mt], backgroundColor: '#f39c12', borderColor: '#000', borderWidth: 2 },
+    { label: '已付', data: [sp, mp], backgroundColor: '#27ae60', borderColor: '#000', borderWidth: 2 }
+  ]);
+}
+
 // 页面加载
 document.addEventListener('DOMContentLoaded', function() {
   addChartCanvases();
@@ -1198,7 +1239,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
   // 从公共API加载数据（无需登录，确保数据最新）
   showLoading(true);
-  var pubSections = ['capital','bankFlow','pettyDraw','pettyWrite','pettyCash','bankAccounts','contracts','companyInfo','receivable','asset','management','salary','baseExpense'];
+  var pubSections = ['capital','bankFlow','pettyDraw','pettyWrite',''pettyCash','bankAccounts','contracts','companyInfo','receivable','asset','management','salary','baseExpense','farmerLedger';
   var pubLoaded = 0;
   pubSections.forEach(function(s) {
     var xhr = new XMLHttpRequest();

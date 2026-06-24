@@ -170,6 +170,7 @@ function showToast(msg, type) {
     <button class="tab-btn" data-tab="tab11"><span>🏢 公司信息</span></button>
     <button class="tab-btn" data-tab="tab12"><span>📄 合同管理</span></button>
     <button class="tab-btn" data-tab="tab13"><span>🏦 银行账户</span></button>
+    <button class="tab-btn" data-tab="tab15"><span>👨‍🌾 农户信息</span></button>
   </nav>
 
   <main class="main-content">
@@ -405,6 +406,25 @@ function showToast(msg, type) {
         <tbody id="bankAccountsBody"></tbody>
       </table>
       <div class="table-empty" id="empty13"><span class="empty-icon">📭</span><span class="empty-text">暂无数据</span><span class="empty-hint">数据录入后将在次显示</span></div>
+    </section>
+    <!-- ===== ⑮ 农户信息 ===== -->
+    <section class="tab-panel" id="tab15">
+      <div class="panel-header"><h2>👨‍🌾 坪坝村农户种苗/农资台账</h2></div>
+      <div class="chart-row">
+        <div class="chart-card"><h4>📊 收款状态</h4><div class="chart-box"><canvas id="chart15a"></canvas></div></div>
+        <div class="chart-card"><h4>📈 种苗 vs 农资</h4><div class="chart-box"><canvas id="chart15b"></canvas></div></div>
+      </div>
+      <div style="margin:8px 0;overflow-x:auto">
+        <table class="data-table" style="font-size:0.7rem;min-width:1200px">
+          <thead><tr>
+            <th rowspan="2">序号</th><th rowspan="2">姓名</th><th rowspan="2">电话</th><th colspan="3">规模</th><th colspan="4">种苗</th><th colspan="3">农资</th><th rowspan="2">未付合计</th><th rowspan="2">状态</th><th rowspan="2">备注</th>
+          </tr><tr>
+            <th>亩数</th><th>袋数</th><th>单价</th><th>总额</th><th>已付</th><th>未付</th><th>总额</th><th>已付</th><th>未付</th>
+          </tr></thead>
+          <tbody id="farmerBody"></tbody>
+        </table>
+      </div>
+      <div class="table-empty" id="empty15"><span class="empty-icon">📭</span><span class="empty-text">暂无数据</span></div>
     </section>
   </main>
   <!-- 图表全屏查看器 -->

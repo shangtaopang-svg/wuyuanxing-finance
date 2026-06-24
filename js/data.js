@@ -17,5 +17,6 @@ var DataStore = {
   baseExpense: [],
   companyInfo: [],
   contracts: [],
-  bankAccounts: []
+  bankAccounts: [],
+  farmerLedger: []
 };
