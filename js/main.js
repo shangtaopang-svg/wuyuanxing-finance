@@ -1525,20 +1525,23 @@ function syncDataStore(section, data) {
   if (typeof DataStore === 'undefined') return;
   if (section === 'pettyDraw') {
     DataStore.pettyDraw = data;
-    DataStore._pettyCashFlat = (DataStore._pettyCashFlat||[]).concat(data);
+    DataStore._pettyCashFlat = data;
     DataStore.pettyCash = {
-      ren: (DataStore._pettyCashFlat||[]).filter(function(r){return r.person==='任海涛';}),
-      pang: (DataStore._pettyCashFlat||[]).filter(function(r){return r.person==='庞尚韬';})
+      ren: data.filter(function(r){return r.person==='任海涛';}),
+      pang: data.filter(function(r){return r.person==='庞尚韬';})
     };
-    DataStore.pettyWrite = (DataStore._pettyCashFlat||[]).filter(function(r){return r.type==='核销';});
+    DataStore.pettyWrite = data.filter(function(r){return r.type==='核销';});
   } else if (section === 'pettyWrite') {
     DataStore.pettyWrite = data;
-    DataStore._pettyCashFlat = (DataStore._pettyCashFlat||[]).concat(data);
+    DataStore._pettyCashFlat = data;
     DataStore.pettyCash = {
-      ren: (DataStore._pettyCashFlat||[]).filter(function(r){return r.person==='任海涛';}),
-      pang: (DataStore._pettyCashFlat||[]).filter(function(r){return r.person==='庞尚韬';})
+      ren: data.filter(function(r){return r.person==='任海涛';}),
+      pang: data.filter(function(r){return r.person==='庞尚韬';})
     };
-    DataStore.pettyDraw = (DataStore._pettyCashFlat||[]).filter(function(r){return r.type==='领用';});
+    DataStore.pettyDraw = data.filter(function(r){return r.type==='领用';});
+  } else if (section === 'reimburse') {
+    DataStore.reimburse = data;
+    DataStore._reimburseFlat = data;
   } else {
     DataStore[section] = data;
   }
