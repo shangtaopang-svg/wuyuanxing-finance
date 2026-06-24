@@ -412,6 +412,12 @@ function showToast(msg, type) {
       <div class="panel-header"><h2>👨‍🌾 坪坝村农户种苗/农资台账</h2></div>
       <div class="table-empty" id="empty15" style="display:none"><span class="empty-icon">📭</span><span class="empty-text">暂无数据</span></div>
 
+      <!-- 图表 -->
+      <div class="chart-row">
+        <div class="chart-card"><h4>🌱 种苗：应收/已收/未收</h4><div class="chart-box"><canvas id="chart15a"></canvas></div></div>
+        <div class="chart-card"><h4>🧪 农资：应收/已收/未收</h4><div class="chart-box"><canvas id="chart15b"></canvas></div></div>
+      </div>
+
       <!-- ====== 党参种苗账单 ====== -->
       <h3 style="font-size:0.9rem;color:#2d5a27;margin:12px 0 6px;border-left:4px solid #2d5a27;padding-left:10px">🌱 党参种苗账单</h3>
       <div style="margin:6px 0;overflow:auto hidden;border:2px solid #2d5a27;border-radius:8px">

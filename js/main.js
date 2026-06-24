@@ -385,7 +385,7 @@ function renderCharts() {
   else if (id === 'tab8') { renderChart8a(); renderChart8b(); }
   else if (id === 'tab9') { renderChart9a(); renderChart9b(); }
   else if (id === "tab14") { renderChart14a(); renderChart14b(); }
-  else if (id === "tab15") { }
+  else if (id === "tab15") { renderChart15a(); renderChart15b(); }
 }
 
 function makeChart(id, type, labels, datasets, opts) {
@@ -1197,6 +1197,36 @@ function renderFarmer() {
   if (body) body.innerHTML = ''; // legacy
   renderSeedlingBill();
   renderMaterialsBill();
+  renderChart15a();
+  renderChart15b();
+}
+function renderChart15a() {
+  var data = DataStore.seedlingBill || [];
+  if (!data.length) return;
+  var total = 0, prepaid = 0, unpaid = 0;
+  data.forEach(function(r){
+    if (r.is_total) return;
+    total += r.total_amount || 0;
+    prepaid += r.prepaid || 0;
+    unpaid += r.unpaid || 0;
+  });
+  makeChart('chart15a', 'doughnut', ['已收(预付款)','未收'], [
+    { data: [prepaid, unpaid], backgroundColor: ['#27ae60','#e53e3e'], borderColor: '#fff', borderWidth: 2 }
+  ]);
+}
+function renderChart15b() {
+  var data = DataStore.materialsBill || [];
+  if (!data.length) return;
+  var total = 0, paid = 0, unpaid = 0;
+  data.forEach(function(r){
+    if (r.is_total) return;
+    total += r.total_amount || 0;
+    paid += r.paid || 0;
+    unpaid += r.unpaid || 0;
+  });
+  makeChart('chart15b', 'doughnut', ['已收款','未收款'], [
+    { data: [paid, unpaid], backgroundColor: ['#2980b9','#e67e22'], borderColor: '#fff', borderWidth: 2 }
+  ]);
 }
 function renderSeedlingBill() {
   var data = DataStore.seedlingBill || [];
