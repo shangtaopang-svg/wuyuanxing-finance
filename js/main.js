@@ -1409,18 +1409,37 @@ function enableEditModeUI() {
         tr.appendChild(opTd);
       }
     });
-    // 表格下方"新增"按钮
+    // 表格下方工具栏（新增一行 + 导入Excel + 保存）
     if (!table.parentNode.querySelector('.add-row-bar[data-body="' + tbody.id + '"]')) {
       var addBar = document.createElement('div');
       addBar.className = 'add-row-bar';
       addBar.setAttribute('data-body', tbody.id);
-      addBar.style.cssText = 'margin:4px 0 12px;text-align:left';
+      addBar.style.cssText = 'margin:6px 0 16px;display:flex;gap:6px;flex-wrap:wrap';
+      var btnStyle = 'background:#22d3ee;color:#fff;border:none;font-size:0.72rem;padding:4px 10px;cursor:pointer;border-radius:3px;font-weight:600';
       var addBtn = document.createElement('button');
       addBtn.className = 'tb-btn';
-      addBtn.innerHTML = '＋ 新增';
-      addBtn.style.cssText = 'background:#22d3ee;color:#fff;border:none;font-size:0.72rem;padding:4px 10px;cursor:pointer;border-radius:3px';
+      addBtn.innerHTML = '＋ 新增一行';
+      addBtn.style.cssText = btnStyle;
       addBtn.onclick = function() { perTableAddRow(tbody.id); };
       addBar.appendChild(addBtn);
+      var impBtn = document.createElement('button');
+      impBtn.className = 'tb-btn';
+      impBtn.innerHTML = '📥 导入Excel';
+      impBtn.style.cssText = btnStyle.replace('#22d3ee','#f59e0b');
+      impBtn.onclick = function() {
+        var sec = sectionFromBodyId(tbody.id);
+        if (sec) showFrontImport(sec);
+      };
+      addBar.appendChild(impBtn);
+      var savBtn = document.createElement('button');
+      savBtn.className = 'tb-btn';
+      savBtn.innerHTML = '💾 保存';
+      savBtn.style.cssText = btnStyle.replace('#22d3ee','#27ae60');
+      savBtn.onclick = function() {
+        var sec = sectionFromBodyId(tbody.id);
+        if (sec) saveOneSection(sec);
+      };
+      addBar.appendChild(savBtn);
       table.parentNode.insertBefore(addBar, table.nextSibling);
     }
   });
@@ -1663,12 +1682,33 @@ function addFrontRow() {
   showToast('✅ 已新增一行', 'success');
 }
 
-function showFrontImport() {
+function showFrontImport(section) {
   document.getElementById('importOverlay').style.display = 'block';
   document.getElementById('importModal').style.display = 'block';
+  // 如果指定了版块，预选
+  if (section) {
+    var sel = document.getElementById('frontImportSection');
+    for (var i = 0; i < sel.options.length; i++) {
+      if (sel.options[i].value === section) { sel.selectedIndex = i; break; }
+    }
+  }
   // 重置人员选择状态
   var grp = document.getElementById('frontImportPersonGroup');
-  if (grp) grp.style.display = 'none';
+  if (grp) { grp.style.display = 'none'; if (section === 'pettyDraw' || section === 'pettyWrite') grp.style.display = 'block'; }
+}
+
+function saveOneSection(section) {
+  var data = JSON.parse(localStorage.getItem('wyx_' + section)) || [];
+  if (data.length === 0 && typeof DataStore !== 'undefined' && Array.isArray(DataStore[section])) {
+    data = JSON.parse(JSON.stringify(DataStore[section]));
+  }
+  if (data.length === 0) { showToast('⚠️ 该版块暂无数据', 'error'); return; }
+  var apiBase = (typeof API_BASE !== 'undefined' ? API_BASE : (window.location.pathname.startsWith('/finance/') ? '/finance' : ''));
+  fetch(apiBase + '/api/public/save/' + section, {
+    method: 'POST', headers: {'Content-Type':'application/json'},
+    body: JSON.stringify({data: data, password: '87700020'})
+  }).then(function() { showToast('✅ 保存成功', 'success'); })
+  .catch(function() { showToast('❌ 保存失败', 'error'); });
 }
 
 function toggleFrontImportPerson() {
