@@ -1769,7 +1769,8 @@ function confirmFrontImport() {
 }
 
 function saveFrontData() {
-  var sections = ['capital','bankFlow','incomeExpense','income','pettyDraw','pettyWrite','reimburse','receivable','asset','management','salary','baseExpense'];
+  showToast('⏳ 保存中...', 'info');
+  var sections = ['capital','bankFlow','pettyDraw','pettyWrite','reimburse','receivable','asset','management','salary','baseExpense'];
   var done = 0, total = sections.length;
   var apiBase = (typeof API_BASE !== 'undefined' ? API_BASE : (window.location.pathname.startsWith('/finance/') ? '/finance' : ''));
   sections.forEach(function(s) {
