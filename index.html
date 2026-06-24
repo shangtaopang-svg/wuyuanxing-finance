@@ -29,7 +29,9 @@ function toggleEditMode() {
     EDIT_MODE = false;
     document.body.classList.remove('edit-mode');
     document.getElementById('editToolbar').style.display = 'none';
-    if (window.renderCurrentTab) renderCurrentTab();
+    document.querySelectorAll('.del-btn, .add-row-bar').forEach(function(el) { el.remove(); });
+    document.querySelectorAll('[data-editor-ready]').forEach(function(el) { el.removeAttribute('data-editor-ready'); });
+    try { renderAll(); updateSummary(); } catch(e) {}
     showToast('已退出编辑模式');
   } else {
     checkEditPw();
@@ -39,7 +41,7 @@ function enterEditMode() {
   EDIT_MODE = true;
   document.body.classList.add('edit-mode');
   document.getElementById('editToolbar').style.display = 'flex';
-  if (window.renderCurrentTab) renderCurrentTab();
+  setTimeout(function() { enableEditModeUI(); }, 200);
 }
 // 连点5次标题解锁
 var clickCount = 0;

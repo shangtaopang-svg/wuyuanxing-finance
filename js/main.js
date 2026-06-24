@@ -1339,6 +1339,7 @@ function fallbackOpen(filename) {
 // 每个版块表格列对应的字段名
 var COL_FIELDS = {
   capitalBody:        ['date','name','amount','method'],
+  bankFlowBody:       ['date','income','expense','counterparty_account','counterparty_name','purpose','summary'],
   pettyRenDrawBody:   ['date','amount','account','summary'],
   pettyPangDrawBody:  ['date','amount','account','summary'],
   pettyRenWriteBody:  ['date','amount','summary','voucher'],
@@ -1352,35 +1353,88 @@ var COL_FIELDS = {
   reimburseYingBody:  ['date','amount','reason'],
   baseJinyinhuaBody:  ['date','item','amount','note','invoices'],
   baseDangshenBody:   ['date','item','amount','note','invoices'],
-  baseSeedlingBody:   ['date','item','amount','note','invoices']
+  baseSeedlingBody:   ['date','item','amount','note','invoices'],
+  companyInfoBody:    ['field_name','field_value'],
+  contractsBody:      ['date','contract_name','party','amount','status','note'],
+  bankAccountsBody:   ['bank_name','account_name','account_number','balance','note']
 };
 
-// 给所有数据行加上 data-idx 和删除按钮
+// 给所有数据行加上 data-idx 和删除按钮，以及表下方的"新增"按钮
 function enableEditModeUI() {
   if (!EDIT_MODE) return;
   document.querySelectorAll('.data-table tbody').forEach(function(tbody) {
     var bodyId = tbody.id;
-    var fields = COL_FIELDS[bodyId];
-    if (!fields) return;
-    var rows = tbody.querySelectorAll('tr:not(:last-child)'); // 排除合计行
+    if (!COL_FIELDS[bodyId]) return;
+    if (tbody.getAttribute('data-editor-ready')) return;
+    tbody.setAttribute('data-editor-ready', '1');
+
+    var rows = tbody.querySelectorAll('tr:not(:last-child)');
     rows.forEach(function(tr, idx) {
       tr.setAttribute('data-idx', idx);
-      // 删除按钮
       var lastTd = tr.querySelector('td:last-child');
       if (lastTd && !lastTd.querySelector('.del-btn')) {
         var delBtn = document.createElement('button');
         delBtn.className = 'del-btn';
         delBtn.textContent = '🗑️';
-        delBtn.style.cssText = 'background:none;border:none;cursor:pointer;font-size:14px;padding:2px 6px';
+        delBtn.style.cssText = 'background:none;border:none;cursor:pointer;font-size:14px;padding:2px 6px;opacity:0.6';
         delBtn.title = '删除此行';
-        delBtn.onclick = function(e) {
-          e.stopPropagation();
-          deleteRow(bodyId, idx);
-        };
+        delBtn.onclick = function(e) { e.stopPropagation(); deleteRow(bodyId, idx); };
         lastTd.appendChild(delBtn);
       }
     });
+
+    // 表格下方加"新增"按钮
+    var table = tbody.closest('table');
+    if (table && (!table.nextElementSibling || !table.nextElementSibling.classList.contains('add-row-bar'))) {
+      var addBar = document.createElement('div');
+      addBar.className = 'add-row-bar';
+      addBar.style.cssText = 'margin:4px 0 12px;text-align:left';
+      var addBtn = document.createElement('button');
+      addBtn.className = 'tb-btn';
+      addBtn.innerHTML = '＋ 新增';
+      addBtn.style.cssText = 'background:#22d3ee;color:#fff;border:none;font-size:0.72rem;padding:4px 10px;cursor:pointer;border-radius:3px';
+      addBtn.onclick = function() { perTableAddRow(bodyId); };
+      addBar.appendChild(addBtn);
+      table.parentNode.insertBefore(addBar, table.nextSibling);
+    }
   });
+}
+
+// 按表格新增行（知道具体是哪个表）
+function perTableAddRow(bodyId) {
+  var section = sectionFromBodyId(bodyId);
+  if (!section) return;
+  var data = JSON.parse(localStorage.getItem('wyx_' + section)) || [];
+  if (data.length === 0 && typeof DataStore !== 'undefined' && Array.isArray(DataStore[section])) {
+    data = DataStore[section].slice();
+  }
+  // 根据 bodyId 确定默认值
+  var defaults = {date:'', amount:0, summary:''};
+  if (bodyId === 'capitalBody') defaults = {date:'', name:'', amount:0, method:'银行转账', voucher:''};
+  else if (bodyId === 'bankFlowBody') defaults = {date:'', income:0, expense:0, counterparty_account:'', counterparty_name:'', purpose:'', summary:''};
+  else if (bodyId === 'pettyRenDrawBody' || bodyId === 'pettyPangDrawBody') {
+    var person = bodyId === 'pettyRenDrawBody' ? '任海涛' : '庞尚韬';
+    defaults = {date:'', person:person, type:'领用', amount:0, account:'', summary:''};
+  } else if (bodyId === 'pettyRenWriteBody' || bodyId === 'pettyPangWriteBody') {
+    var person = bodyId === 'pettyRenWriteBody' ? '任海涛' : '庞尚韬';
+    defaults = {date:'', person:person, type:'核销', amount:0, summary:'', voucher:''};
+  } else if (bodyId === 'receivableBody') defaults = {date:'', party:'', amount:0, reason:'', status:'未收回'};
+  else if (bodyId === 'assetBody') defaults = {date:'', name:'', amount:0, location:'', status:'在用'};
+  else if (bodyId === 'managementBody') defaults = {date:'', category:'', amount:0, summary:'', invoices:''};
+  else if (bodyId === 'salaryBody') defaults = {month:'', name:'', position:'', amount:0, payDate:'', voucher:''};
+  else if (bodyId === 'reimburseRenBody' || bodyId === 'reimbursePangBody' || bodyId === 'reimburseYingBody') {
+    var pmap = {reimburseRenBody:'任海涛', reimbursePangBody:'庞尚韬', reimburseYingBody:'应红林'};
+    defaults = {date:'', person:pmap[bodyId], amount:0, reason:'', docs:[]};
+  } else if (bodyId === 'baseJinyinhuaBody' || bodyId === 'baseDangshenBody' || bodyId === 'baseSeedlingBody') {
+    var bmap = {baseJinyinhuaBody:'金银花基地', baseDangshenBody:'党参基地', baseSeedlingBody:'党参育苗基地'};
+    defaults = {date:'', base:bmap[bodyId], item:'', amount:0, note:'', invoices:''};
+  }
+  data.push(defaults);
+  localStorage.setItem('wyx_' + section, JSON.stringify(data));
+  syncDataStore(section, data);
+  try { renderAll(); updateSummary(); } catch(e) { console.error(e); }
+  saveToServer(section);
+  showToast('✅ 已新增一行', 'success');
 }
 
 // 双机编辑保存
@@ -1416,13 +1470,14 @@ window.onCellEdit = function(td, newVal) {
 
 function sectionFromBodyId(bodyId) {
   var map = {
-    capitalBody:'capital',
+    capitalBody:'capital', bankFlowBody:'bankFlow',
     pettyRenDrawBody:'pettyDraw', pettyPangDrawBody:'pettyDraw',
     pettyRenWriteBody:'pettyWrite', pettyPangWriteBody:'pettyWrite',
     receivableBody:'receivable', assetBody:'asset', managementBody:'management',
     salaryBody:'salary',
     reimburseRenBody:'reimburse', reimbursePangBody:'reimburse', reimburseYingBody:'reimburse',
-    baseJinyinhuaBody:'baseExpense', baseDangshenBody:'baseExpense', baseSeedlingBody:'baseExpense'
+    baseJinyinhuaBody:'baseExpense', baseDangshenBody:'baseExpense', baseSeedlingBody:'baseExpense',
+    companyInfoBody:'companyInfo', contractsBody:'contracts', bankAccountsBody:'bankAccounts'
   };
   return map[bodyId] || null;
 }
