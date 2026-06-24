@@ -196,7 +196,8 @@ const TABLE_MAP = {
   companyInfo: { table: 'company_info', fields: ['field_name','field_value'] },
   contracts: { table: 'contracts', fields: ['date','contract_name','party','amount','status','note'] },
   bankAccounts: { table: 'bank_accounts', fields: ['bank_name','account_name','account_number','balance','note'] },
-  bankFlow: { table: 'bank_flow', fields: ['date','income','expense','counterparty_account','counterparty_name','purpose','summary'] }
+  bankFlow: { table: 'bank_flow', fields: ['date','income','expense','counterparty_account','counterparty_name','purpose','summary'] },
+  farmerLedger: { table: 'farmer_ledger', fields: ['seq','name','phone','area','bags','price_per_bag','weight_per_bag','seedling_total','prepaid','unpaid_seedling','fertilizer_a','fertilizer_b','herbicide','pesticide','mulch','materials_total','materials_paid','materials_unpaid','total_unpaid','notes','paid'] }
 };
 
 // 获取数据
@@ -296,9 +297,8 @@ const PUBLIC_SECTIONS = {
   contracts: { fields: ['date','contract_name','party','amount','status','note'] },
   bankAccounts: { fields: ['bank_name','account_name','account_number','balance','note'] },
   bankFlow: { fields: ['date','income','expense','counterparty_account','counterparty_name','purpose','summary'] },
-  baseExpense: { fields: ["date","base","item","amount","note","invoices"] },,
-  farmerLedger: { fields: ["seq","name","phone","area","bags","price_per_bag","weight_per_bag","seedling_total","prepaid","unpaid_seedling","fertilizer_a","fertilizer_b","herbicide","pesticide","mulch","materials_total","materials_paid","materials_unpaid","total_unpaid","notes","paid"] }
-  farmerLedger: { table: "farmer_ledger", fields: ["seq","name","phone","area","bags","price_per_bag","weight_per_bag","seedling_total","prepaid","unpaid_seedling","fertilizer_a","fertilizer_b","herbicide","pesticide","mulch","materials_total","materials_paid","materials_unpaid","total_unpaid","notes","paid"] }
+  baseExpense: { fields: ["date","base","item","amount","note","invoices"] },
+  farmerLedger: { fields: ["seq","name","phone","area","bags","price_per_bag","weight_per_bag","seedling_total","prepaid","unpaid_seedling","fertilizer_a","fertilizer_b","herbicide","pesticide","mulch","materials_total","materials_paid","materials_unpaid","total_unpaid","notes","paid"] },
 };
 Object.keys(PUBLIC_SECTIONS).forEach(function(key) {
   app.get('/api/public/' + key, function(req, res) {
