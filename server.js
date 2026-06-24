@@ -356,6 +356,7 @@ app.post('/api/public/upload', upload.single('file'), (req, res) => {
   if (req.body.password !== '87700020') return res.status(401).json({ error: '密码错误' });
   if (!req.file) return res.status(400).json({ error: '请选择文件' });
   res.json({ filename: req.file.filename });
+});
 
 // 发票文件预览
 app.get('/uploads/vouchers/:filename', (req, res) => {
