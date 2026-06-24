@@ -1415,8 +1415,8 @@ function enableEditModeUI() {
 function perTableAddRow(bodyId) {
   var section = sectionFromBodyId(bodyId);
   if (!section) return;
-  // 直接从 DataStore 取最新数据，不碰 localStorage（防止空数据覆盖）
-  if (typeof DataStore === 'undefined' || !Array.isArray(DataStore[section]) || DataStore[section].length === 0) {
+  // 直接从 DataStore 取最新数据（允许空表新增）
+  if (typeof DataStore === 'undefined' || !Array.isArray(DataStore[section])) {
     showToast('⏳ 数据加载中，请稍后再试', 'warning');
     return;
   }
