@@ -1418,6 +1418,12 @@ function addFrontRow() {
     }
   }
   try { renderAll(); updateSummary(); } catch(e) { console.error(e); }
+  // 保存到服务器
+  var apiBase = (typeof API_BASE !== 'undefined' ? API_BASE : (window.location.pathname.startsWith('/finance/') ? '/finance' : ''));
+  fetch(apiBase + '/api/public/save/' + section, {
+    method: 'POST', headers: {'Content-Type':'application/json'},
+    body: JSON.stringify({ data: data, password: '87700020' })
+  }).catch(function(){});
   showToast('✅ 已新增一行', 'success');
 }
 
@@ -1451,16 +1457,17 @@ function confirmFrontImport() {
       if (json.length < 2) { alert('Excel数据为空'); return; }
       var section = document.getElementById('frontImportSection').value;
       var existing = JSON.parse(localStorage.getItem('wyx_' + section)) || [];
-      // 中文列名 -> 英文字段名映射
+      // 中文列名 -> 英文字段名映射（支持模糊匹配）
       var FIELD_MAP = {
         '日期':'date','时间':'date','交易时间':'date','领用时间':'date',
         '月份':'month','发放日期':'payDate',
         '人员':'person','姓名':'name','员工':'name',
         '类别':'category','类型':'type','费用类别':'category',
         '金额':'amount','收入金额':'amount','支出金额':'amount','领用金额':'amount','核销金额':'amount',
-        '收入':'income','支出':'expense','收入金额':'income','支出金额':'expense',
+        '收入':'income','支出':'expense',
         '摘要':'summary','说明':'note','备注':'note','事由':'reason',
-        '来源':'account','来源/归处':'account','账户':'account','账号':'account','户名':'accountName','账户名':'accountName',
+        '来源':'account','来源/归处':'account','账户':'account','账号':'account',
+        '户名':'accountName','账户名':'accountName',
         '对方账户':'counterparty_account','对方户名':'counterparty_name','用途':'purpose',
         '凭证':'voucher','发票':'invoices','单据文件':'docs',
         '状态':'status','存放地点':'location','资产名称':'name',
@@ -1468,12 +1475,22 @@ function confirmFrontImport() {
         '出资方式':'method','入账凭据':'voucher'
       };
       var headers = json[0];
+      // 把列名映射成英文字段（自动去空格）
+      var colKeys = [];
+      for (var j = 0; j < headers.length; j++) {
+        var h = String(headers[j]||'').trim();
+        colKeys[j] = FIELD_MAP[h] || h;
+      }
       for (var i = 1; i < json.length; i++) {
         var row = {};
-        for (var j = 0; j < headers.length; j++) {
-          var key = FIELD_MAP[headers[j]] || headers[j];
-          row[key] = json[i][j] || '';
+        var hasData = false;
+        for (var j = 0; j < colKeys.length; j++) {
+          var val = json[i][j];
+          if (val === undefined || val === null) val = '';
+          else { val = String(val).trim(); hasData = true; }
+          row[colKeys[j]] = val;
         }
+        if (!hasData) continue; // 跳过空行
         existing.push(row);
       }
       // 备用金子选项：自动设置人员和类型
