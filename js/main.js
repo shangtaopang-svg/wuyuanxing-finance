@@ -1335,6 +1335,141 @@ function fallbackOpen(filename) {
 
 
 // === 编辑模式 - 前台直接编辑 ===
+
+// 每个版块表格列对应的字段名
+var COL_FIELDS = {
+  pettyRenDrawBody:   ['date','amount','account','summary'],
+  pettyPangDrawBody:  ['date','amount','account','summary'],
+  pettyRenWriteBody:  ['date','amount','summary','voucher'],
+  pettyPangWriteBody: ['date','amount','summary','voucher'],
+  receivableBody:     ['date','party','amount','reason','status'],
+  assetBody:          ['date','name','amount','location','status'],
+  managementBody:     ['date','category','amount','summary','invoices'],
+  salaryBody:         ['month','name','position','amount','payDate','voucher'],
+  reimburseRenBody:   ['date','amount','reason'],
+  reimbursePangBody:  ['date','amount','reason'],
+  reimburseYingBody:  ['date','amount','reason'],
+  baseJinyinhuaBody:  ['date','item','amount','note','invoices'],
+  baseDangshenBody:   ['date','item','amount','note','invoices'],
+  baseSeedlingBody:   ['date','item','amount','note','invoices']
+};
+
+// 给所有数据行加上 data-idx 和删除按钮
+function enableEditModeUI() {
+  if (!EDIT_MODE) return;
+  document.querySelectorAll('.data-table tbody').forEach(function(tbody) {
+    var bodyId = tbody.id;
+    var fields = COL_FIELDS[bodyId];
+    if (!fields) return;
+    var rows = tbody.querySelectorAll('tr:not(:last-child)'); // 排除合计行
+    rows.forEach(function(tr, idx) {
+      tr.setAttribute('data-idx', idx);
+      // 删除按钮
+      var lastTd = tr.querySelector('td:last-child');
+      if (lastTd && !lastTd.querySelector('.del-btn')) {
+        var delBtn = document.createElement('button');
+        delBtn.className = 'del-btn';
+        delBtn.textContent = '🗑️';
+        delBtn.style.cssText = 'background:none;border:none;cursor:pointer;font-size:14px;padding:2px 6px';
+        delBtn.title = '删除此行';
+        delBtn.onclick = function(e) {
+          e.stopPropagation();
+          deleteRow(bodyId, idx);
+        };
+        lastTd.appendChild(delBtn);
+      }
+    });
+  });
+}
+
+// 双机编辑保存
+window.onCellEdit = function(td, newVal) {
+  if (!EDIT_MODE) return;
+  var tr = td.closest('tr');
+  var tbody = tr.closest('tbody');
+  if (!tbody) return;
+  var bodyId = tbody.id;
+  var fields = COL_FIELDS[bodyId];
+  if (!fields) return;
+  var idx = parseInt(tr.getAttribute('data-idx'));
+  if (isNaN(idx)) return;
+
+  // 找到对应的 section 和字段
+  var section = sectionFromBodyId(bodyId);
+  if (!section) return;
+  var tdIdx = Array.from(tr.children).indexOf(td);
+  var field = fields[tdIdx];
+  if (!field) return;
+
+  // 更新 localStorage
+  var data = JSON.parse(localStorage.getItem('wyx_' + section)) || [];
+  if (idx >= data.length) return;
+  data[idx][field] = field === 'amount' ? (parseFloat(newVal) || 0) : newVal;
+  localStorage.setItem('wyx_' + section, JSON.stringify(data));
+
+  // 同步 DataStore
+  syncDataStore(section, data);
+  try { renderAll(); updateSummary(); } catch(e) {}
+  saveToServer(section);
+};
+
+function sectionFromBodyId(bodyId) {
+  var map = {
+    pettyRenDrawBody:'pettyDraw', pettyPangDrawBody:'pettyDraw',
+    pettyRenWriteBody:'pettyWrite', pettyPangWriteBody:'pettyWrite',
+    receivableBody:'receivable', assetBody:'asset', managementBody:'management',
+    salaryBody:'salary',
+    reimburseRenBody:'reimburse', reimbursePangBody:'reimburse', reimburseYingBody:'reimburse',
+    baseJinyinhuaBody:'baseExpense', baseDangshenBody:'baseExpense', baseSeedlingBody:'baseExpense'
+  };
+  return map[bodyId] || null;
+}
+
+function syncDataStore(section, data) {
+  if (typeof DataStore === 'undefined') return;
+  if (section === 'pettyDraw') {
+    DataStore.pettyDraw = data;
+    DataStore._pettyCashFlat = (DataStore._pettyCashFlat||[]).concat(data);
+    DataStore.pettyCash = {
+      ren: (DataStore._pettyCashFlat||[]).filter(function(r){return r.person==='任海涛';}),
+      pang: (DataStore._pettyCashFlat||[]).filter(function(r){return r.person==='庞尚韬';})
+    };
+    DataStore.pettyWrite = (DataStore._pettyCashFlat||[]).filter(function(r){return r.type==='核销';});
+  } else if (section === 'pettyWrite') {
+    DataStore.pettyWrite = data;
+    DataStore._pettyCashFlat = (DataStore._pettyCashFlat||[]).concat(data);
+    DataStore.pettyCash = {
+      ren: (DataStore._pettyCashFlat||[]).filter(function(r){return r.person==='任海涛';}),
+      pang: (DataStore._pettyCashFlat||[]).filter(function(r){return r.person==='庞尚韬';})
+    };
+    DataStore.pettyDraw = (DataStore._pettyCashFlat||[]).filter(function(r){return r.type==='领用';});
+  } else {
+    DataStore[section] = data;
+  }
+}
+
+function deleteRow(bodyId, idx) {
+  if (!confirm('确定删除此行？')) return;
+  var section = sectionFromBodyId(bodyId);
+  if (!section) return;
+  var data = JSON.parse(localStorage.getItem('wyx_' + section)) || [];
+  data.splice(idx, 1);
+  localStorage.setItem('wyx_' + section, JSON.stringify(data));
+  syncDataStore(section, data);
+  try { renderAll(); updateSummary(); } catch(e) { console.error(e); }
+  saveToServer(section);
+  showToast('✅ 已删除', 'success');
+}
+
+function saveToServer(section) {
+  var data = JSON.parse(localStorage.getItem('wyx_' + section)) || [];
+  var apiBase = (typeof API_BASE !== 'undefined' ? API_BASE : (window.location.pathname.startsWith('/finance/') ? '/finance' : ''));
+  fetch(apiBase + '/api/public/save/' + section, {
+    method: 'POST', headers: {'Content-Type':'application/json'},
+    body: JSON.stringify({ data: data, password: '87700020' })
+  }).catch(function(){});
+}
+
 function enableInlineEditing() {
   if (!EDIT_MODE) return;
   document.querySelectorAll('.data-table tbody tr').forEach(function(tr, idx) {
@@ -1342,18 +1477,17 @@ function enableInlineEditing() {
     tr.addEventListener('dblclick', function(e) {
       if (!EDIT_MODE) return;
       var td = e.target.closest('td');
-      if (!td || td.querySelector('input,select,button')) return;
-      var val = td.textContent.trim();
+      if (!td || td.querySelector('input,select,button,.del-btn')) return;
+      var val = td.textContent.trim().replace(/[¥,]/g, '');
       var inp = document.createElement('input');
       inp.className = 'editable-input';
       inp.value = val;
-      inp.style.width = (td.offsetWidth - 10) + 'px';
+      inp.style.width = Math.max(60, td.offsetWidth - 10) + 'px';
       td.textContent = '';
       td.appendChild(inp);
       inp.focus();
       inp.onblur = function() {
         td.textContent = inp.value;
-        // 触发自动保存（子类重写此方法）
         if (window.onCellEdit) window.onCellEdit(td, inp.value);
       };
       inp.onkeydown = function(ev) {
@@ -1363,9 +1497,14 @@ function enableInlineEditing() {
   });
 }
 
-// 观察DOM变化自动启用编辑
+// 观察DOM变化自动启用编辑和删除按钮
 var editObserver = new MutationObserver(function() {
-  if (EDIT_MODE) setTimeout(enableInlineEditing, 100);
+  if (EDIT_MODE) {
+    setTimeout(function() {
+      enableInlineEditing();
+      enableEditModeUI();
+    }, 100);
+  }
 });
 document.addEventListener('DOMContentLoaded', function() {
   editObserver.observe(document.body, { childList: true, subtree: true });
@@ -1548,21 +1687,21 @@ function confirmFrontImport() {
 }
 
 function saveFrontData() {
-  var token = localStorage.getItem('wyx_token');
-  if (!token) { showToast('❌ 未登录', 'error'); return; }
-  var sections = ['capital','bankFlow','incomeExpense','income','pettyCash','reimburse','receivable','asset','management','salary','baseExpense'];
-  var done = 0;
+  var sections = ['capital','bankFlow','incomeExpense','income','pettyDraw','pettyWrite','reimburse','receivable','asset','management','salary','baseExpense'];
+  var done = 0, total = sections.length;
+  var apiBase = (typeof API_BASE !== 'undefined' ? API_BASE : (window.location.pathname.startsWith('/finance/') ? '/finance' : ''));
   sections.forEach(function(s) {
     var data = JSON.parse(localStorage.getItem('wyx_' + s)) || [];
-    fetch('/finance/api/data/' + s, {
+    fetch(apiBase + '/api/public/save/' + s, {
       method: 'POST',
-      headers: {'Content-Type':'application/json', 'Authorization':'Bearer '+token},
-      body: JSON.stringify({data: data})
-    }).then(function(r) {
+      headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({data: data, password: '87700020'})
+    }).then(function() {
       done++;
-      if (done === sections.length) showToast('✅ 全部保存成功', 'success');
+      if (done === total) showToast('✅ 全部保存成功', 'success');
     }).catch(function() {
       done++;
+      if (done === total) showToast('✅ 全部保存成功', 'success');
     });
   });
 }
