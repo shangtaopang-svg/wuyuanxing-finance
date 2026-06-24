@@ -1578,8 +1578,6 @@ function deleteRow(bodyId, idx) {
   showToast('✅ 已删除（点💾保存存到服务器）', 'success');
 }
 
-}
-
 function enableInlineEditing() {
   if (!EDIT_MODE) return;
   document.querySelectorAll('.data-table tbody tr').forEach(function(tr, idx) {
