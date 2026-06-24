@@ -66,10 +66,12 @@ async function initDB() {
     id INTEGER PRIMARY KEY, date TEXT, category TEXT, amount REAL, source TEXT, voucher TEXT DEFAULT ''
   )`);
   db.run(`CREATE TABLE IF NOT EXISTS petty_cash (
-    id INTEGER PRIMARY KEY, date TEXT, person TEXT, type TEXT, amount REAL, summary TEXT, voucher TEXT DEFAULT ''
+    id INTEGER PRIMARY KEY, date TEXT, person TEXT, type TEXT, amount REAL, summary TEXT, voucher TEXT DEFAULT '',
+    account TEXT DEFAULT '', accountName TEXT DEFAULT ''
   )`);
   db.run(`CREATE TABLE IF NOT EXISTS reimburse (
-    id INTEGER PRIMARY KEY, date TEXT, person TEXT, amount REAL, reason TEXT, docs TEXT DEFAULT '[]'
+    id INTEGER PRIMARY KEY, date TEXT, person TEXT, amount REAL, reason TEXT, docs TEXT DEFAULT '[]',
+    created_at TEXT DEFAULT '', reimburse_date TEXT DEFAULT '', batch_id TEXT DEFAULT '', payment_method TEXT DEFAULT ''
   )`);
   db.run(`CREATE TABLE IF NOT EXISTS receivable (
     id INTEGER PRIMARY KEY, date TEXT, party TEXT, amount REAL, reason TEXT, status TEXT DEFAULT '未收回'
