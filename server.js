@@ -364,9 +364,7 @@ initDB().then(() => {
     console.log(`
   🌾 五源兴财务平台
   ─────────────────────────────
-  🌐 前台: http://localhost:${PORT}
-  ⚙️  后台: http://localhost:${PORT}/admin.html
-  🔐 默认账号: admin / admin123
+  🌐 地址: http://localhost:${PORT}
   ─────────────────────────────`);
   });
 });
