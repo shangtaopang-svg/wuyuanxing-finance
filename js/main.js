@@ -59,12 +59,14 @@ function today() {
 }
 
 // === 标签页导航 ===
+var TAB_SECTION_MAP = { tab2:'capital', tab14:'bankFlow', tab4:'pettyDraw', tab5:'reimburse', tab6:'receivable', tab7:'asset', tab8:'management', tab9:'salary', tab10:'baseExpense', tab11:'companyInfo', tab12:'contracts', tab13:'bankAccounts' };
 document.querySelectorAll('.tab-btn').forEach(function(btn) {
   btn.addEventListener('click', function() {
     document.querySelectorAll('.tab-btn').forEach(function(b) { b.classList.remove('active'); });
     document.querySelectorAll('.tab-panel').forEach(function(p) { p.classList.remove('active'); });
     btn.classList.add('active');
     $(btn.dataset.tab).classList.add('active');
+    window.frontSection = TAB_SECTION_MAP[btn.dataset.tab] || 'capital';
     // 触发图表重绘
     setTimeout(function() { renderCharts(); }, 100);
   });
@@ -1382,7 +1384,8 @@ function addFrontRow() {
   var cols = {
     capital: {date:'', name:'', amount:0, method:'银行转账', voucher:''},
     bankFlow: {date:'', income:0, expense:0, counterparty_account:'', counterparty_name:'', purpose:'', summary:''},
-    pettyCash: {date:'', person:'任海涛', type:'领用', amount:0, summary:'', voucher:''},
+    pettyDraw: {date:'', person:'任海涛', type:'领用', amount:0, summary:'', voucher:''},
+    pettyWrite: {date:'', person:'庞尚韬', type:'核销', amount:0, summary:'', voucher:''},
     reimburse: {date:'', person:'任海涛', amount:0, reason:'', docs:[]},
     receivable: {date:'', party:'', amount:0, reason:'', status:'未收回'},
     asset: {date:'', name:'', amount:0, location:'', status:'在用'},
@@ -1392,13 +1395,43 @@ function addFrontRow() {
   };
   data.push(cols[section] || {});
   localStorage.setItem('wyx_' + section, JSON.stringify(data));
-  if (window.renderCurrentTab) renderCurrentTab();
+  // 同步 DataStore 并刷新
+  if (typeof DataStore !== 'undefined') {
+    if (section === 'pettyDraw') {
+      DataStore.pettyDraw = (DataStore.pettyDraw || []).concat(data.slice(-1));
+      DataStore._pettyCashFlat = (DataStore._pettyCashFlat || []).concat(data.slice(-1));
+      DataStore.pettyCash = {
+        ren: (DataStore._pettyCashFlat||[]).filter(function(r){ return r.person === '任海涛'; }),
+        pang: (DataStore._pettyCashFlat||[]).filter(function(r){ return r.person === '庞尚韬'; })
+      };
+      DataStore.pettyWrite = (DataStore._pettyCashFlat||[]).filter(function(r){ return r.type === '核销'; });
+    } else if (section === 'pettyWrite') {
+      DataStore.pettyWrite = (DataStore.pettyWrite || []).concat(data.slice(-1));
+      DataStore._pettyCashFlat = (DataStore._pettyCashFlat || []).concat(data.slice(-1));
+      DataStore.pettyCash = {
+        ren: (DataStore._pettyCashFlat||[]).filter(function(r){ return r.person === '任海涛'; }),
+        pang: (DataStore._pettyCashFlat||[]).filter(function(r){ return r.person === '庞尚韬'; })
+      };
+      DataStore.pettyDraw = (DataStore._pettyCashFlat||[]).filter(function(r){ return r.type === '领用'; });
+    } else {
+      DataStore[section] = data;
+    }
+  }
+  try { renderAll(); updateSummary(); } catch(e) { console.error(e); }
   showToast('✅ 已新增一行', 'success');
 }
 
 function showFrontImport() {
   document.getElementById('importOverlay').style.display = 'block';
   document.getElementById('importModal').style.display = 'block';
+  // 重置人员选择状态
+  var grp = document.getElementById('frontImportPersonGroup');
+  if (grp) grp.style.display = 'none';
+}
+
+function toggleFrontImportPerson() {
+  var sec = document.getElementById('frontImportSection').value;
+  document.getElementById('frontImportPersonGroup').style.display = (sec === 'pettyDraw' || sec === 'pettyWrite') ? 'block' : 'none';
 }
 
 function closeFrontImport() {
@@ -1443,23 +1476,47 @@ function confirmFrontImport() {
         }
         existing.push(row);
       }
+      // 备用金子选项：自动设置人员和类型
+      if (section === 'pettyDraw') {
+        var p = document.getElementById('frontImportPerson').value;
+        existing.forEach(function(r) { r.person = p; r.type = '领用'; });
+      } else if (section === 'pettyWrite') {
+        var p = document.getElementById('frontImportPerson').value;
+        existing.forEach(function(r) { r.person = p; r.type = '核销'; });
+      }
       localStorage.setItem('wyx_' + section, JSON.stringify(existing));
       // 同步到 DataStore 让数据立即显示
       if (typeof DataStore !== 'undefined') {
-        if (section === 'pettyCash') {
-          DataStore._pettyCashFlat = existing;
+        if (section === 'pettyDraw') {
+          // 追加到 DataStore.pettyDraw 同时更新综合的 pettyCash
+          DataStore.pettyDraw = (DataStore.pettyDraw || []).concat(existing);
+          DataStore._pettyCashFlat = (DataStore._pettyCashFlat || []).concat(existing);
           DataStore.pettyCash = {
-            ren: existing.filter(function(r){ return r.person === '任海涛'; }),
-            pang: existing.filter(function(r){ return r.person === '庞尚韬'; })
+            ren: (DataStore._pettyCashFlat||[]).filter(function(r){ return r.person === '任海涛'; }),
+            pang: (DataStore._pettyCashFlat||[]).filter(function(r){ return r.person === '庞尚韬'; })
           };
-          DataStore.pettyDraw = existing.filter(function(r){ return r.type === '领用'; });
-          DataStore.pettyWrite = existing.filter(function(r){ return r.type === '核销'; });
+          DataStore.pettyWrite = (DataStore._pettyCashFlat||[]).filter(function(r){ return r.type === '核销'; });
+        } else if (section === 'pettyWrite') {
+          DataStore.pettyWrite = (DataStore.pettyWrite || []).concat(existing);
+          DataStore._pettyCashFlat = (DataStore._pettyCashFlat || []).concat(existing);
+          DataStore.pettyCash = {
+            ren: (DataStore._pettyCashFlat||[]).filter(function(r){ return r.person === '任海涛'; }),
+            pang: (DataStore._pettyCashFlat||[]).filter(function(r){ return r.person === '庞尚韬'; })
+          };
+          DataStore.pettyDraw = (DataStore._pettyCashFlat||[]).filter(function(r){ return r.type === '领用'; });
         } else {
           DataStore[section] = existing;
         }
       }
       closeFrontImport();
       try { renderAll(); updateSummary(); } catch(e) { console.error(e); }
+      // 保存到服务器（用编辑密码）
+      var apiBase = (typeof API_BASE !== 'undefined' ? API_BASE : (window.location.pathname.startsWith('/finance/') ? '/finance' : ''));
+      fetch(apiBase + '/api/public/save/' + section, {
+        method: 'POST',
+        headers: {'Content-Type':'application/json'},
+        body: JSON.stringify({ data: existing, password: '87700020' })
+      }).catch(function(){});
       showToast('✅ 导入' + (json.length-1) + '条成功', 'success');
     } catch(err) {
       alert('导入失败: ' + err.message);

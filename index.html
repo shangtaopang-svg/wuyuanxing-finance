@@ -504,12 +504,13 @@ function showToast(msg, type) {
   <div class="modal-body">
     <div class="form-group" style="margin-bottom:12px">
       <label style="font-size:0.8rem;font-weight:700;display:block;margin-bottom:4px">导入到哪个版块</label>
-      <select id="frontImportSection" style="width:100%;padding:8px;border:3px solid #000;font-family:inherit;font-weight:700">
+      <select id="frontImportSection" style="width:100%;padding:8px;border:3px solid #000;font-family:inherit;font-weight:700" onchange="toggleFrontImportPerson()">
         <option value="capital">股本金</option>
         <option value="bankFlow">公司基本户收支</option>
         <option value="incomeExpense">基本账户支出</option>
         <option value="income">收入</option>
-        <option value="pettyCash">备用金</option>
+        <option value="pettyDraw">备用金-领用</option>
+        <option value="pettyWrite">备用金-核销</option>
         <option value="reimburse">报销</option>
         <option value="receivable">应收账款</option>
         <option value="asset">固定资产</option>
@@ -517,6 +518,13 @@ function showToast(msg, type) {
         <option value="salary">工资</option>
         <option value="baseExpense">基地支出</option>
       </select>
+      <div id="frontImportPersonGroup" style="margin-top:8px;display:none">
+        <label style="font-size:0.8rem;font-weight:700;display:block;margin-bottom:4px">选择人员</label>
+        <select id="frontImportPerson" style="width:100%;padding:8px;border:3px solid #000;font-family:inherit;font-weight:700">
+          <option value="任海涛">任海涛</option>
+          <option value="庞尚韬">庞尚韬</option>
+        </select>
+      </div>
     </div>
     <div class="form-group" style="margin-bottom:12px">
       <label style="font-size:0.8rem;font-weight:700;display:block;margin-bottom:4px">选择Excel文件（.xlsx / .xls）</label>

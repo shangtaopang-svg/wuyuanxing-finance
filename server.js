@@ -185,8 +185,8 @@ const TABLE_MAP = {
   capital: { table: 'capital', fields: ['date','name','amount','method','voucher'] },
   income: { table: 'income', fields: ['date','category','amount','source','voucher'] },
   pettyCash: { table: 'petty_cash', fields: ['date','person','type','amount','summary','voucher'] },
-  pettyDraw: { table: 'petty_cash', fields: ['date','amount','account','accountName','summary'] },
-  pettyWrite: { table: 'petty_cash', fields: ['date','amount','summary','voucher'] },
+  pettyDraw: { table: 'petty_cash', fields: ['date','person','type','amount','account','accountName','summary'] },
+  pettyWrite: { table: 'petty_cash', fields: ['date','person','type','amount','summary','voucher'] },
   reimburse: { table: 'reimburse', fields: ['date','reimburse_date','person','amount','reason','docs','batch_id','payment_method'] },
   receivable: { table: 'receivable', fields: ['date','party','amount','reason','status'] },
   asset: { table: 'asset', fields: ['date','name','amount','location','status'] },
@@ -305,6 +305,42 @@ Object.keys(PUBLIC_SECTIONS).forEach(function(key) {
       res.json(data);
     } catch(e) { res.json([]); }
   });
+});
+
+// ===== 公开保存API（用编辑密码替代JWT） =====
+app.post('/api/public/save/:section', (req, res) => {
+  if (req.body.password !== '87700020') return res.status(401).json({ error: '密码错误' });
+  const cfg = TABLE_MAP[req.params.section];
+  if (!cfg) return res.status(400).json({ error: '未知版块' });
+  const { data } = req.body;
+  if (!Array.isArray(data)) return res.status(400).json({ error: '数据格式错误' });
+  for (var i = 0; i < data.length; i++) {
+    if (typeof data[i] !== 'object') return res.status(400).json({ error: '第'+(i+1)+'行数据格式错误' });
+  }
+  backupDB();
+  try {
+    var delType = '';
+    if (req.params.section === 'pettyDraw') delType = " WHERE type='领用'";
+    else if (req.params.section === 'pettyWrite') delType = " WHERE type='核销'";
+    run(`DELETE FROM ${cfg.table}${delType}`);
+    var ok = 0, fail = 0;
+    data.forEach(row => {
+      try {
+        const vals = cfg.fields.map(f => {
+          const v = row[f];
+          if (typeof v === 'number' && isNaN(v)) return 0;
+          return Array.isArray(v) ? JSON.stringify(v) : (v !== undefined && v !== null ? v : '');
+        });
+        const placeholders = cfg.fields.map(() => '?').join(',');
+        db.run(`INSERT INTO ${cfg.table} (${cfg.fields.join(',')}) VALUES (${placeholders})`, vals);
+        ok++;
+      } catch(e) { fail++; }
+    });
+    saveDB();
+    res.json({ ok: true, count: ok });
+  } catch(e) {
+    res.status(500).json({ error: '保存失败: ' + e.message });
+  }
 });
 
 // ===== 文件上传 =====
