@@ -242,8 +242,9 @@ function renderPettyCash() {
     if (writes.length === 0) { writeEmpty.style.display = 'block'; } else {
       writeEmpty.style.display = 'none';
       writes.forEach(function(r) {
-        writeBody.innerHTML += '<tr><td>' + (r.date||'') + '</td><td style="color:#27ae60;font-weight:600">' + formatNum(r.amount) + '</td>' +
-          '<td>' + (r.summary||'') + '</td><td>' + (r.voucher||'') + '</td></tr>';
+        var noR = r.voucher === '无票据';
+        writeBody.innerHTML += '<tr style="background:' + (noR?'#fff8f0':'') + '"><td>' + (r.date||'') + '</td><td style="color:#27ae60;font-weight:600">' + formatNum(r.amount) + '</td>' +
+          '<td>' + (r.summary||'') + '</td><td>' + (noR?'<span style="color:#e53e3e;font-size:0.7rem">⚠️ 无票据</span>':(r.voucher||'')) + '</td></tr>';
       });
       writeBody.innerHTML += '<tr style="background:var(--bg);font-weight:700"><td>合计</td><td style="color:#27ae60">' + formatNum(writeTotal) + '</td><td></td><td></td></tr>';
     }
