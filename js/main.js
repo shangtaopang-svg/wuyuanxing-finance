@@ -1348,9 +1348,9 @@ var COL_FIELDS = {
   assetBody:          ['date','name','amount','location','status'],
   managementBody:     ['date','category','amount','summary','invoices'],
   salaryBody:         ['month','name','position','amount','payDate','voucher'],
-  reimburseRenBody:   ['date','amount','reason'],
-  reimbursePangBody:  ['date','amount','reason'],
-  reimburseYingBody:  ['date','amount','reason'],
+  reimburseRenBody:   ['date','amount','reason','_link','docs'],
+  reimbursePangBody:  ['date','amount','reason','_link','docs'],
+  reimburseYingBody:  ['date','amount','reason','_link','docs'],
   baseJinyinhuaBody:  ['date','item','amount','note','invoices'],
   baseDangshenBody:   ['date','item','amount','note','invoices'],
   baseSeedlingBody:   ['date','item','amount','note','invoices'],
@@ -1467,12 +1467,18 @@ window.onCellEdit = function(td, newVal) {
   if (!section) return;
   var tdIdx = Array.from(tr.children).indexOf(td);
   var field = fields[tdIdx];
-  if (!field) return;
+  if (!field || field === '_link') return;
 
   // 更新 localStorage
   var data = JSON.parse(localStorage.getItem('wyx_' + section)) || [];
   if (idx >= data.length) return;
-  data[idx][field] = field === 'amount' ? (parseFloat(newVal) || 0) : newVal;
+  if (field === 'docs') {
+    var arr = Array.isArray(data[idx].docs) ? data[idx].docs : [];
+    if (newVal && arr.indexOf(newVal) < 0) arr.push(newVal);
+    data[idx].docs = arr;
+  } else {
+    data[idx][field] = field === 'amount' ? (parseFloat(newVal) || 0) : newVal;
+  }
   localStorage.setItem('wyx_' + section, JSON.stringify(data));
 
   // 同步 DataStore
