@@ -1465,6 +1465,10 @@ function deleteRow(bodyId, idx) {
 
 function saveToServer(section) {
   var data = JSON.parse(localStorage.getItem('wyx_' + section)) || [];
+  // 安全保护：如果本地数据为空或只有1行空白行，不从服务器拉取最新的再合并（跳过保存，保留服务器数据完整）
+  if (data.length <= 1 && typeof DataStore !== 'undefined' && Array.isArray(DataStore[section]) && DataStore[section].length > 1) {
+    return; // 本地数据明显不完整，跳过保存防止覆盖
+  }
   var apiBase = (typeof API_BASE !== 'undefined' ? API_BASE : (window.location.pathname.startsWith('/finance/') ? '/finance' : ''));
   fetch(apiBase + '/api/public/save/' + section, {
     method: 'POST', headers: {'Content-Type':'application/json'},
@@ -1520,8 +1524,11 @@ function getCurrentSection() {
 
 function addFrontRow() {
   var section = getCurrentSection();
+  // 优先从 localStorage 读取，如果为空则从 DataStore 恢复（防止覆盖服务器数据）
   var data = JSON.parse(localStorage.getItem('wyx_' + section)) || [];
-  var newRow = {};
+  if (data.length === 0 && typeof DataStore !== 'undefined' && Array.isArray(DataStore[section])) {
+    data = DataStore[section].slice();
+  }
   var cols = {
     capital: {date:'', name:'', amount:0, method:'银行转账', voucher:''},
     bankFlow: {date:'', income:0, expense:0, counterparty_account:'', counterparty_name:'', purpose:'', summary:''},
