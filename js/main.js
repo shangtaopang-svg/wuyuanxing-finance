@@ -3,6 +3,33 @@
 // === 工具函数 ===
 function $(id) { return document.getElementById(id); }
 function formatNum(n) { var v = Number(n); if (isNaN(v)) return '¥0.00'; return '¥' + v.toLocaleString('zh-CN', {minimumFractionDigits:2}); }
+
+// 饼图中心文字插件
+if (typeof Chart !== 'undefined') {
+  Chart.register({
+    id: 'centerText',
+    beforeDraw: function(chart) {
+      var opts = chart.options.plugins.centerText;
+      if (!opts || !opts.text) return;
+      if (chart.config.type !== 'doughnut') return;
+      var ctx = chart.ctx;
+      var w = chart.width, h = chart.height;
+      ctx.save();
+      var cx = w / 2, cy = h / 2 - 6;
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.font = 'bold 18px "Courier New",monospace';
+      ctx.fillStyle = '#1a1a1a';
+      ctx.fillText(opts.text, cx, cy - 4);
+      if (opts.sub) {
+        ctx.font = '11px "PingFang SC","Microsoft YaHei",sans-serif';
+        ctx.fillStyle = '#888';
+        ctx.fillText(opts.sub, cx, cy + 18);
+      }
+      ctx.restore();
+    }
+  });
+}
 // === 品牌开场动画 ===
 function hideSplash() {
   var el = document.getElementById('splashScreen');
@@ -1218,15 +1245,21 @@ function renderChart15a() {
     try {
       chart.options.plugins.legend.labels.font = { size: 13, weight: 'bold' };
       chart.options.plugins.datalabels = {
-        display: true,
+        display: 'auto',
         formatter: function(v, ctx){
           var pcts = [pctPaid, pctUnpaid];
           return pcts[ctx.dataIndex] + '%\n¥' + v.toLocaleString();
         },
-        color: '#fff', font: { weight: 'bold', size: 14 },
-        anchor: 'center', align: 'center',
-        offset: 0, textAlign: 'center'
+        color: '#1a1a1a',
+        font: { weight: 'bold', size: 12 },
+        anchor: 'end', align: 'end',
+        offset: 6, textAlign: 'center',
+        backgroundColor: 'rgba(255,255,255,0.9)',
+        borderRadius: 4,
+        padding: { top: 3, bottom: 3, left: 6, right: 6 }
       };
+      // Center total text
+      chart.options.plugins.centerText = { text: '¥' + total.toLocaleString(), sub: '应收总额' };
       chart.update();
     } catch(e){}
   }
@@ -1289,15 +1322,20 @@ function renderChart15c() {
     try {
       chart.options.plugins.legend.labels.font = { size: 13, weight: 'bold' };
       chart.options.plugins.datalabels = {
-        display: true,
+        display: 'auto',
         formatter: function(v, ctx){
           var pcts = [pctPaid, pctUnpaid];
           return pcts[ctx.dataIndex] + '%\n¥' + v.toLocaleString();
         },
-        color: '#fff', font: { weight: 'bold', size: 14 },
-        anchor: 'center', align: 'center',
-        offset: 0, textAlign: 'center'
+        color: '#1a1a1a',
+        font: { weight: 'bold', size: 12 },
+        anchor: 'end', align: 'end',
+        offset: 6, textAlign: 'center',
+        backgroundColor: 'rgba(255,255,255,0.9)',
+        borderRadius: 4,
+        padding: { top: 3, bottom: 3, left: 6, right: 6 }
       };
+      chart.options.plugins.centerText = { text: '¥' + total.toLocaleString(), sub: '应收总额' };
       chart.update();
     } catch(e){}
   }
