@@ -1444,8 +1444,22 @@ function confirmFrontImport() {
         existing.push(row);
       }
       localStorage.setItem('wyx_' + section, JSON.stringify(existing));
+      // 同步到 DataStore 让数据立即显示
+      if (typeof DataStore !== 'undefined') {
+        if (section === 'pettyCash') {
+          DataStore._pettyCashFlat = existing;
+          DataStore.pettyCash = {
+            ren: existing.filter(function(r){ return r.person === '任海涛'; }),
+            pang: existing.filter(function(r){ return r.person === '庞尚韬'; })
+          };
+          DataStore.pettyDraw = existing.filter(function(r){ return r.type === '领用'; });
+          DataStore.pettyWrite = existing.filter(function(r){ return r.type === '核销'; });
+        } else {
+          DataStore[section] = existing;
+        }
+      }
       closeFrontImport();
-      if (window.renderCurrentTab) renderCurrentTab();
+      try { renderAll(); updateSummary(); } catch(e) { console.error(e); }
       showToast('✅ 导入' + (json.length-1) + '条成功', 'success');
     } catch(err) {
       alert('导入失败: ' + err.message);
