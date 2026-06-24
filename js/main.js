@@ -1486,8 +1486,12 @@ window.onCellEdit = function(td, newVal) {
   var field = fields[tdIdx];
   if (!field || field === '_link') return;
 
-  // 更新 localStorage
+  // 更新 localStorage（如果为空则从 DataStore 恢复）
   var data = JSON.parse(localStorage.getItem('wyx_' + section)) || [];
+  if (data.length === 0 && typeof DataStore !== 'undefined' && Array.isArray(DataStore[section])) {
+    data = JSON.parse(JSON.stringify(DataStore[section]));
+    localStorage.setItem('wyx_' + section, JSON.stringify(data));
+  }
   if (idx >= data.length) return;
   if (field === 'docs') {
     var arr = Array.isArray(data[idx].docs) ? data[idx].docs : [];
@@ -1545,6 +1549,9 @@ function deleteRow(bodyId, idx) {
   var section = sectionFromBodyId(bodyId);
   if (!section) return;
   var data = JSON.parse(localStorage.getItem('wyx_' + section)) || [];
+  if (data.length === 0 && typeof DataStore !== 'undefined' && Array.isArray(DataStore[section])) {
+    data = JSON.parse(JSON.stringify(DataStore[section]));
+  }
   data.splice(idx, 1);
   localStorage.setItem('wyx_' + section, JSON.stringify(data));
   syncDataStore(section, data);
@@ -1792,6 +1799,10 @@ function saveFrontData() {
   var apiBase = (typeof API_BASE !== 'undefined' ? API_BASE : (window.location.pathname.startsWith('/finance/') ? '/finance' : ''));
   sections.forEach(function(s) {
     var data = JSON.parse(localStorage.getItem('wyx_' + s)) || [];
+    if (data.length === 0 && typeof DataStore !== 'undefined' && Array.isArray(DataStore[s])) {
+      data = JSON.parse(JSON.stringify(DataStore[s]));
+    }
+    if (data.length === 0) { done++; if (done === total) showToast('✅ 全部保存成功', 'success'); return; }
     fetch(apiBase + '/api/public/save/' + s, {
       method: 'POST',
       headers: {'Content-Type':'application/json'},
