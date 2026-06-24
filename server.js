@@ -244,7 +244,7 @@ app.post('/api/data/:section', authMW, (req, res) => {
           return Array.isArray(v) ? JSON.stringify(v) : (v !== undefined && v !== null ? v : '');
         });
         const placeholders = cfg.fields.map(() => '?').join(',');
-        db.run(`INSERT INTO ${cfg.table} (${cfg.fields.join(',')}) VALUES (${placeholders})`, vals);
+        run(`INSERT INTO ${cfg.table} (${cfg.fields.join(',')}) VALUES (${placeholders})`, vals);
         ok++;
       } catch(e) { fail++; }
     });
@@ -334,7 +334,7 @@ app.post('/api/public/save/:section', (req, res) => {
           return Array.isArray(v) ? JSON.stringify(v) : (v !== undefined && v !== null ? v : '');
         });
         const placeholders = cfg.fields.map(() => '?').join(',');
-        db.run(`INSERT INTO ${cfg.table} (${cfg.fields.join(',')}) VALUES (${placeholders})`, vals);
+        run(`INSERT INTO ${cfg.table} (${cfg.fields.join(',')}) VALUES (${placeholders})`, vals);
         ok++;
       } catch(e) { fail++; }
     });

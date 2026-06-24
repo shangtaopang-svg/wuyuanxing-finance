@@ -200,8 +200,8 @@ function renderPettyCash() {
     var personName = person === 'ren' ? '任海涛' : '庞尚韬';
     var draws = allDraw.filter(function(r){return r.person===personName;});
     var writes = allWrite.filter(function(r){return r.person===personName;});
-    var drawTotal = draws.reduce(function(s,r){return s+(r.amount||0);},0);
-    var writeTotal = writes.reduce(function(s,r){return s+(r.amount||0);},0);
+    var drawTotal = draws.reduce(function(s,r){return s+Number(r.amount||0);},0);
+    var writeTotal = writes.reduce(function(s,r){return s+Number(r.amount||0);},0);
     // 领用表
     var drawBody = $(person === 'ren' ? 'pettyRenDrawBody' : 'pettyPangDrawBody');
     var drawEmpty = $(person === 'ren' ? 'empty4a-draw' : 'empty4b-draw');
@@ -1481,6 +1481,7 @@ function confirmFrontImport() {
         var h = String(headers[j]||'').trim();
         colKeys[j] = FIELD_MAP[h] || h;
       }
+      var NUM_FIELDS = ['amount','income','expense','领用金额','核销金额','收入金额','支出金额','金额'];
       for (var i = 1; i < json.length; i++) {
         var row = {};
         var hasData = false;
@@ -1488,6 +1489,10 @@ function confirmFrontImport() {
           var val = json[i][j];
           if (val === undefined || val === null) val = '';
           else { val = String(val).trim(); hasData = true; }
+          // 金额字段转数字
+          if (NUM_FIELDS.indexOf(colKeys[j]) >= 0 || NUM_FIELDS.indexOf(headers[j]) >= 0) {
+            val = parseFloat(val) || 0;
+          }
           row[colKeys[j]] = val;
         }
         if (!hasData) continue; // 跳过空行
