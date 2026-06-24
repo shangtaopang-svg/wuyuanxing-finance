@@ -2,7 +2,7 @@
 
 // === 工具函数 ===
 function $(id) { return document.getElementById(id); }
-function formatNum(n) { return '¥' + Number(n).toLocaleString('zh-CN', {minimumFractionDigits:2}); }
+function formatNum(n) { var v = Number(n); if (isNaN(v)) return '¥0.00'; return '¥' + v.toLocaleString('zh-CN', {minimumFractionDigits:2}); }
 // === 品牌开场动画 ===
 function hideSplash() {
   var el = document.getElementById('splashScreen');
@@ -210,9 +210,9 @@ function renderPettyCash() {
       drawEmpty.style.display = 'none';
       draws.forEach(function(r) {
         drawBody.innerHTML += '<tr><td>' + (r.date||'') + '</td><td style="color:#D35400;font-weight:600">' + formatNum(r.amount) + '</td>' +
-          '<td>' + (r.account||'') + '</td><td>' + (r.accountName||'') + '</td><td>' + (r.summary||'') + '</td></tr>';
+          '<td>' + (r.account||'') + '</td><td>' + (r.summary||'') + '</td></tr>';
       });
-      drawBody.innerHTML += '<tr style="background:var(--bg);font-weight:700"><td>合计</td><td style="color:#D35400">¥' + formatNum(drawTotal) + '</td><td></td><td></td><td></td></tr>';
+      drawBody.innerHTML += '<tr style="background:var(--bg);font-weight:700"><td>合计</td><td style="color:#D35400">' + formatNum(drawTotal) + '</td><td></td><td></td></tr>';
     }
     // 核销表
     var writeBody = $(person === 'ren' ? 'pettyRenWriteBody' : 'pettyPangWriteBody');
@@ -224,7 +224,7 @@ function renderPettyCash() {
         writeBody.innerHTML += '<tr><td>' + (r.date||'') + '</td><td style="color:#27ae60;font-weight:600">' + formatNum(r.amount) + '</td>' +
           '<td>' + (r.summary||'') + '</td><td>' + (r.voucher||'') + '</td></tr>';
       });
-      writeBody.innerHTML += '<tr style="background:var(--bg);font-weight:700"><td>合计</td><td style="color:#27ae60">¥' + formatNum(writeTotal) + '</td><td></td><td></td></tr>';
+      writeBody.innerHTML += '<tr style="background:var(--bg);font-weight:700"><td>合计</td><td style="color:#27ae60">' + formatNum(writeTotal) + '</td><td></td><td></td></tr>';
     }
   });
 }
@@ -1460,7 +1460,7 @@ function confirmFrontImport() {
         '金额':'amount','收入金额':'amount','支出金额':'amount','领用金额':'amount','核销金额':'amount',
         '收入':'income','支出':'expense','收入金额':'income','支出金额':'expense',
         '摘要':'summary','说明':'note','备注':'note','事由':'reason',
-        '来源':'source','来源/归处':'source','账户':'account','户名':'accountName','账户名':'accountName',
+        '来源':'account','来源/归处':'account','账户':'account','账号':'account','户名':'accountName','账户名':'accountName',
         '对方账户':'counterparty_account','对方户名':'counterparty_name','用途':'purpose',
         '凭证':'voucher','发票':'invoices','单据文件':'docs',
         '状态':'status','存放地点':'location','资产名称':'name',
