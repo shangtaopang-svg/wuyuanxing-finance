@@ -10,10 +10,14 @@ var DB = {
   },
   set: function(key, data, noSync) {
     localStorage.setItem('wyx_' + key, JSON.stringify(data));
-    if (!noSync) { DB.syncToServer(key, data); showSaved(); }
+    if (!noSync) DB.syncToServer(key, data);
+  },
+  _set: function(key, data) {
+    localStorage.setItem('wyx_' + key, JSON.stringify(data));
+    DB.syncToServer(key, data);
   },
   getAll: function() {
-    var sections = ['incomeExpense','capital','bankFlow','income','pettyCash','reimburse','receivable','asset','management','salary','baseExpense','companyInfo','contracts','bankAccounts'];
+    var sections = ['incomeExpense','capital','income','pettyCash','reimburse','receivable','asset','management','salary','baseExpense'];
     var all = {};
     sections.forEach(function(s) { all[s] = DB.get(s); });
     return all;
@@ -21,33 +25,28 @@ var DB = {
   importAll: function(data) {
     for (var k in data) { DB.set(k, data[k]); }
   },
-  // API同步（带状态反馈）
+  // API同步
   syncToServer: function(section, data) {
-    if (!window.API_TOKEN) { console.warn('未登录，无法同步'); return false; }
-    var apiBase = (typeof API_BASE !== 'undefined') ? API_BASE : '';
-    fetch(apiBase + '/api/data/' + section, {
+    if (!window.API_TOKEN) return;
+    fetch(API_BASE + '/api/data/' + section, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + window.API_TOKEN },
       body: JSON.stringify({ data: data })
-    }).then(function(r) {
-      if (r.ok) { console.log('✅ 已同步 ' + section + ' ' + data.length + '条'); return true; }
-      else { console.error('❌ 同步 ' + section + ' 失败:', r.status); return false; }
-    }).catch(function(e) { console.error('❌ 同步 ' + section + ' 网络错误:', e); });
-    return true;
+    }).catch(function() {});
   },
   loadFromServer: function(section, callback) {
     if (!window.API_TOKEN) { if (callback) callback(DB.get(section)); return; }
     fetch(API_BASE + '/api/data/' + section, { headers: { 'Authorization': 'Bearer ' + window.API_TOKEN } })
       .then(function(r) { if (r.ok) return r.json(); throw 'err'; })
       .then(function(data) {
-        if (data.length > 0) localStorage.setItem('wyx_' + section, JSON.stringify(data));
+        localStorage.setItem('wyx_' + section, JSON.stringify(data));
         if (callback) callback(data);
       })
       .catch(function() { if (callback) callback(DB.get(section)); });
   },
   // 批量从服务器加载全部
   loadAllFromServer: function(callback) {
-    var sections = ['incomeExpense','capital','bankFlow','income','pettyCash','reimburse','receivable','asset','management','salary','baseExpense','companyInfo','contracts','bankAccounts'];
+    var sections = ['incomeExpense','capital','income','pettyCash','reimburse','receivable','asset','management','salary','baseExpense'];
     var loaded = 0;
     sections.forEach(function(s) {
       DB.loadFromServer(s, function() {
@@ -76,20 +75,25 @@ var COLUMNS = {
     {key:'method', label:'出资方式', type:'select', options:['银行转账','现金','实物','其他']},
     {key:'voucher', label:'入账凭据', type:'text'}
   ],
-  bankFlow: [
-    {key:'date', label:'交易时间', type:'text'},
-    {key:'income', label:'收入金额', type:'number'},
-    {key:'expense', label:'支出金额', type:'number'},
-    {key:'counterparty_account', label:'对方账号', type:'text'},
-    {key:'counterparty_name', label:'对方户名', type:'text'},
-    {key:'purpose', label:'交易用途', type:'text'},
-    {key:'summary', label:'摘要', type:'text'}
-  ],
   income: [
     {key:'date', label:'日期', type:'date'},
     {key:'category', label:'类别', type:'text'},
     {key:'amount', label:'金额', type:'number'},
     {key:'source', label:'来源/归处', type:'text'},
+    {key:'voucher', label:'凭证', type:'text'}
+  ],
+  pettyDraw: [
+    {key:'person', label:'人员', type:'select', options:['任海涛','庞尚韬']},
+    {key:'date', label:'领用时间', type:'text'},
+    {key:'amount', label:'领用金额', type:'number'},
+    {key:'source', label:'来源', type:'text'},
+    {key:'summary', label:'摘要', type:'text'}
+  ],
+  pettyWrite: [
+    {key:'person', label:'人员', type:'select', options:['任海涛','庞尚韬']},
+    {key:'date', label:'交易时间', type:'text'},
+    {key:'amount', label:'核销金额', type:'number'},
+    {key:'summary', label:'摘要', type:'text'},
     {key:'voucher', label:'凭证', type:'text'}
   ],
   pettyCash: [
@@ -105,8 +109,7 @@ var COLUMNS = {
     {key:'person', label:'人员', type:'select', options:['任海涛','庞尚韬','应红林']},
     {key:'amount', label:'金额', type:'number'},
     {key:'reason', label:'事由', type:'text'},
-    {key:'docs', label:'单据文件', type:'text'},
-    {key:'payment_method', label:'支付方式', type:'select', options:['','公司账户支付','备用金抵扣']}
+    {key:'docs', label:'单据文件', type:'text'}
   ],
   receivable: [
     {key:'date', label:'日期', type:'date'},
@@ -144,32 +147,13 @@ var COLUMNS = {
     {key:'amount', label:'金额', type:'number'},
     {key:'note', label:'说明', type:'text'},
     {key:'invoices', label:'凭证', type:'text'}
-  ],
-  bankAccounts: [
-    {key:'bank_name', label:'银行', type:'text'},
-    {key:'account_name', label:'户名', type:'text'},
-    {key:'account_number', label:'账号', type:'text'},
-    {key:'balance', label:'余额', type:'number'},
-    {key:'note', label:'备注', type:'text'}
-  ],
-  contracts: [
-    {key:'date', label:'日期', type:'date'},
-    {key:'contract_name', label:'合同名称', type:'text'},
-    {key:'party', label:'签约方', type:'text'},
-    {key:'amount', label:'金额', type:'number'},
-    {key:'status', label:'状态', type:'select', options:['进行中','已完成','已终止']},
-    {key:'note', label:'备注', type:'text'}
-  ],
-  companyInfo: [
-    {key:'field_name', label:'项目', type:'text'},
-    {key:'field_value', label:'内容', type:'text'}
   ]
 };
 
 var SECTION_NAMES = {
   incomeExpense:'基本账户收支', capital:'股本金', income:'收入',
-  pettyCash:'备用金', reimburse:'报销', receivable:'应收账款',
-  asset:'固定资产', management:'管理费用', salary:'工资', baseExpense:'基地支出', bankFlow:'公司基本户收支', bankAccounts:'银行账户', contracts:'合同管理', companyInfo:'公司信息'
+  pettyDraw:'领用', pettyWrite:'核销', pettyCash:'备用金', reimburse:'报销', receivable:'应收账款',
+  asset:'固定资产', management:'管理费用', salary:'工资', baseExpense:'基地支出'
 };
 
 var currentSection = 'incomeExpense';
@@ -219,13 +203,61 @@ document.querySelectorAll('.tool-tab').forEach(function(btn) {
 });
 
 function switchSection(section) {
-  // diagnostic removed
   currentSection = section;
   $title('sectionTitle').textContent = SECTION_NAMES[section] || section;
-  renderEditTable(section);
+  if (section === 'pettyCash') { renderPettyCashAdmin(); }
+  else { renderEditTable(section); }
 }
 
+function formatNum(n) { return Number(n).toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ','); }
+
 // === 渲染可编辑表格 ===
+function renderEditTable(section) {
+  var data = DB.get(section);
+  var cols = COLUMNS[section];
+  var wrap = $id('tableEditWrap');
+  $id('recordCount').textContent = data.length + ' 条记录';
+
+  if (!cols) { wrap.innerHTML = '<p style="padding:20px;color:#999">暂未定义此版块</p>'; return; }
+
+  var html = '<table class="edit-table"><thead><tr>';
+  cols.forEach(function(c) { html += '<th>' + c.label + '</th>'; });
+  html += '<th style="width:36px">操作</th></tr></thead><tbody>';
+
+  if (data.length === 0) {
+    html += '<tr><td colspan="' + (cols.length + 1) + '" style="text-align:center;padding:30px;color:#999">暂无数据，点击"＋ 新增一行"添加</td></tr>';
+  } else {
+    data.forEach(function(row, idx) {
+      html += '<tr>';
+      cols.forEach(function(c) {
+        var val = row[c.key] !== undefined && row[c.key] !== null ? row[c.key] : '';
+        if (c.key === 'invoices' || c.key === 'voucher' || c.key === 'docs') {
+          // 数组转字符串显示
+          var display = Array.isArray(val) ? val.join('; ') : val;
+          html += '<td><input type="text" value="' + escHtml(display) + '" data-row="' + idx + '" data-col="' + c.key + '" onchange="editCell(this)" placeholder="多个文件用;分隔"></td>';
+        } else if (c.type === 'select') {
+          html += '<td><select data-row="' + idx + '" data-col="' + c.key + '" onchange="editCell(this)">';
+          c.options.forEach(function(o) {
+            html += '<option value="' + o + '"' + (val === o ? ' selected' : '') + '>' + o + '</option>';
+          });
+          html += '</select></td>';
+        } else if (c.type === 'number') {
+          html += '<td><input type="number" step="0.01" value="' + (val || 0) + '" data-row="' + idx + '" data-col="' + c.key + '" onchange="editCell(this)"></td>';
+        } else if (c.type === 'date') {
+          html += '<td><input type="date" value="' + (val || '') + '" data-row="' + idx + '" data-col="' + c.key + '" onchange="editCell(this)"></td>';
+        } else if (c.type === 'month') {
+          html += '<td><input type="month" value="' + (val || '') + '" data-row="' + idx + '" data-col="' + c.key + '" onchange="editCell(this)"></td>';
+        } else {
+          html += '<td><input type="text" value="' + escHtml(val) + '" data-row="' + idx + '" data-col="' + c.key + '" onchange="editCell(this)"></td>';
+        }
+      });
+      html += '<td><button class="row-del-btn" onclick="deleteRow(' + idx + ')" title="删除此行">✕</button></td></tr>';
+    });
+  }
+  html += '</tbody></table>';
+  wrap.innerHTML = html;
+}
+
 function escHtml(s) {
   return String(s).replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/\n/g,'\\n');
 }
@@ -261,8 +293,6 @@ function addRow() {
     else row[c.key] = '';
   });
   row.date = new Date().toISOString().slice(0,10);
-  row._key = 'k' + Date.now() + Math.random().toString(36).slice(2,6);
-  if (currentSection === 'reimburse') row.reimburse_date = row.date;
 
   var data = DB.get(currentSection);
   data.push(row);
@@ -395,9 +425,19 @@ $id('fileInput').addEventListener('change', function(e) {
   reader.readAsArrayBuffer(file);
 });
 
+function toggleImportPerson() {
+  var sec = $id('importSection').value;
+  $id('importPersonGroup').style.display = (sec === 'pettyDraw' || sec === 'pettyWrite') ? 'block' : 'none';
+}
+
 function confirmImport() {
   if (importedData.length === 0) { alert('请先选择Excel文件并确认数据正确'); return; }
   var section = $id('importSection').value;
+  // 为领用/核销设置人员
+  if (section === 'pettyDraw' || section === 'pettyWrite') {
+    var person = $id('importPerson').value;
+    importedData.forEach(function(r) { r.person = person; });
+  }
   var existing = DB.get(section);
   var merged = existing.concat(importedData);
   DB.set(section, merged);
@@ -440,15 +480,6 @@ function confirmClear() {
 }
 
 // === 更新列名提示 ===
-
-function switchPersonTab(person, btn) {
-  var p = btn.closest('.data-editor');
-  if (p) { p.querySelectorAll('.sub-tab-btn').forEach(function(b){b.classList.remove('active')});p.querySelectorAll('.person-section').forEach(function(s){s.style.display='none'}); }
-  btn.classList.add('active');
-  var sec = document.getElementById('person_' + person);
-  if (sec) sec.style.display = 'block';
-}
-
 function updateColumnGuide() {
   var html = '';
   for (var key in COLUMNS) {
@@ -463,228 +494,17 @@ function $id(id) { return document.getElementById(id); }
 function $title(id) { return document.getElementById(id); }
 
 var saveTimer = null;
-function showToast(msg, type) {
-  var container = document.getElementById('toastContainer');
-  if (!container) return;
-  var t = document.createElement('div');
-  t.className = 'toast-msg ' + (type || 'success');
-  t.textContent = msg;
-  container.appendChild(t);
-  setTimeout(function(){ if(t.parentNode) t.parentNode.removeChild(t); }, 3000);
-}
-
-function showSaved(msg) {
+function showSaved() {
   var el = $id('saveStatus');
   if (!el) return;
-  el.textContent = '💾 ' + (msg || '保存中...');
-  el.style.color = '#f39c12';
-  el.classList.remove('save-flash');
+  el.textContent = '💾 保存中...';
   clearTimeout(saveTimer);
   saveTimer = setTimeout(function() {
-    el.textContent = '✅ ' + (msg || '已保存');
-    el.style.color = '#27ae60';
-    el.classList.add('save-flash');
-  }, msg ? 100 : 300);
+    el.textContent = '✅ 已保存';
+  }, 500);
 }
 
-// === 报销支付方式批量保存（之前遗漏的函数！） ===
-function updateBatchPayment(el) {
-  var date = el.dataset.date;
-  var person = el.dataset.person;
-  var val = el.value;
-  var data = DB.get('reimburse');
-  data.forEach(function(row) {
-    if (row.person === person && row.reimburse_date === date) {
-      row.payment_method = val;
-    }
-  });
-  DB.set('reimburse', data);
-  showSaved();
-}
-
-// === 显式保存按钮 ===
-function saveData() {
-  var data = DB.get(currentSection);
-  DB.set(currentSection, data);
-  showSaved();
-  // 所有保存按钮文字反馈（顶部+底部）
-  var btns = document.querySelectorAll('.btn-save');
-  btns.forEach(function(btn) {
-    btn.textContent = '✅ 已保存';
-    btn.style.background = '#D35400';
-    setTimeout(function() {
-      btn.textContent = '💾 保存数据';
-      btn.style.background = '';
-    }, 1500);
-  });
-}
-
-// === M-IuM-4vM-^XM-iM-uM-^PM-M-dM-^MM-!M-gM-^LM-^M-fM-^MM-^LM-dM-^MM-^M-dM-^M-^XM-dM-^MM-!M-gM-^LM-^M-dM-^MM-;M-fM-^LM-^IM-iM-^RM-. ===
-function uploadDocsFile(fileInput) {
-  if (!fileInput || !fileInput.files || !fileInput.files.length) return;
-  if (!window.API_TOKEN) { alert("请先登录"); return; }
-  // 通过文本输入框的 data-row 定位行
-  var txtInput = fileInput.closest('.upload-inline').querySelector('input[type="text"]');
-  if (!txtInput) { fileInput.closest('.upload-inline').querySelector('button[title="上传文件"]'); txtInput = fileInput.closest('.upload-inline').querySelector('input[type="text"]'); }
-  if (!txtInput) return;
-  var realIdx = parseInt(txtInput.dataset.row);
-  if (isNaN(realIdx) || realIdx < 0) return;
-  var viewBtn = txtInput.parentElement.querySelector('button:last-of-type');
-  var files = Array.prototype.slice.call(fileInput.files);
-  var existingNames = txtInput && txtInput.value && txtInput.value.indexOf("上传") === -1 ? txtInput.value.split(";").map(function(s){return s.trim();}).filter(Boolean) : [];
-  if (txtInput) txtInput.value = "上传中...";
-  var done = 0;
-  files.forEach(function(file, fi) {
-    var fd = new FormData();
-    fd.append("file", file);
-    var xhr = new XMLHttpRequest();
-    var apiBase = (typeof API_BASE !== "undefined") ? API_BASE : "";
-    xhr.open("POST", apiBase + "/api/upload", true);
-    xhr.setRequestHeader("Authorization", "Bearer " + (window.API_TOKEN || ""));
-    xhr.onload = function() {
-      done++;
-      var filename = file.name;
-      if (xhr.status === 200) {
-        try { var resp = JSON.parse(xhr.responseText); filename = resp.filename || resp.path || file.name; } catch(e) {}
-      }
-      existingNames.push(filename);
-      if (done === files.length) {
-        var namesStr = existingNames.join("; ");
-        if (txtInput) txtInput.value = namesStr;
-        // 通过 data-row 索引直接存
-        var data = DB.get(currentSection);
-        var rowFound = false;
-        if (data[realIdx]) {
-          data[realIdx].docs = namesStr;
-          DB.set(currentSection, data);
-          showSaved();
-          rowFound = true;
-        }
-        if (!rowFound) {
-          // 按内容匹配行
-          var rAmt = parseFloat(txtInput.dataset.ramt || "-1");
-          var rPerson = txtInput.dataset.rperson || "";
-          for (var di = 0; di < data.length; di++) {
-            if (data[di].person === rPerson && Math.abs((data[di].amount||0) - rAmt) < 0.01) {
-              data[di].docs = namesStr;
-              DB.set(currentSection, data);
-              showSaved();
-              break;
-            }
-          }
-        }
-        if (viewBtn) {
-          viewBtn.style.display = "";
-          // 找到删除按钮并显示
-          var delBtn = viewBtn.nextElementSibling;
-          if (delBtn && delBtn.tagName === 'BUTTON') delBtn.style.display = '';
-        }
-        fileInput.value = "";
-      }
-    };
-    xhr.onerror = function() { done++; if (done === files.length) fileInput.value = ""; };
-    xhr.send(fd);
-  });
-}// === 删除单据文件 ===
-function clearDocs(rowKey, btn) {
-  var txt = document.getElementById('docsTxt_' + rowKey);
-  if (!txt) return;
-  var realIdx = parseInt(txt.dataset.row);
-  if (!isNaN(realIdx) && realIdx >= 0) {
-    var data = DB.get(currentSection);
-    if (data[realIdx]) {
-      data[realIdx].docs = '';
-      DB.set(currentSection, data);
-      showSaved();
-    }
-
-// 上传按钮事件委托（稳定可靠）
-document.addEventListener("click", function(e) {
-  var btn = e.target.closest("[data-upload]");
-  if (btn) { console.log("Upload btn clicked");
-    var fi = btn.parentElement.querySelector('input[type="file"]');
-    if (fi) fi.click();
-  }
-});
-  }
-  if (txt) txt.value = '';
-  btn.style.display = 'none';
-  var prev = btn.previousElementSibling;
-  if (prev) prev.style.display = 'none';
-}
-
-// === 上传按钮事件绑定（所有版块通用） ===
-function setupUploadEvents(wrap, section) {
-  if (!wrap) return;
-  var data = DB.get(section);
-  wrap.querySelectorAll('.td-upload-cell').forEach(function(td) {
-    var row = parseInt(td.dataset.row);
-    var col = td.dataset.col;
-    var txtInput = td.querySelector('input[type="text"]');
-    var fileInput = td.querySelector('input[type="file"]');
-    var upBtn = td.querySelector('.up-btn');
-    var viewBtn = td.querySelector('.up-view');
-    if (!upBtn || !fileInput) return;
-
-    upBtn.onclick = function() { fileInput.click(); };
-
-    fileInput.onchange = function() {
-      if (!fileInput.files.length) return;
-      var files = fileInput.files;
-      var uploadNext = function(idx) {
-        if (idx >= files.length) return;
-        var file = files[idx];
-        txtInput.value = file.name;
-        if (viewBtn) viewBtn.style.display = '';
-        var fd = new FormData();
-        fd.append('file', file);
-        var xhr = new XMLHttpRequest();
-        var apiBase = (typeof API_BASE !== 'undefined') ? API_BASE : '';
-        xhr.open('POST', apiBase + '/api/upload', true);
-        xhr.setRequestHeader('Authorization', 'Bearer ' + (window.API_TOKEN || ''));
-        xhr.onload = function() {
-          if (xhr.status === 200) {
-            try {
-              var resp = JSON.parse(xhr.responseText);
-              txtInput.value = resp.filename || resp.path || file.name;
-              if (data[row]) {
-                data[row][col] = txtInput.value;
-                DB.set(section, data);
-                showSaved();
-              }
-            } catch(e) {}
-          }
-          uploadNext(idx + 1);
-        };
-        xhr.onerror = function() { uploadNext(idx + 1); };
-        xhr.send(fd);
-      };
-      uploadNext(0);
-      fileInput.value = '';
-    };
-
-    if (viewBtn) {
-      viewBtn.onclick = function() {
-        if (txtInput && txtInput.value) {
-          window.open('/finance/uploads/vouchers/' + txtInput.value, '_blank');
-        }
-      };
-    }
-
-    if (txtInput) {
-      txtInput.onchange = function() {
-        if (data[row]) {
-          data[row][col] = txtInput.value;
-          DB.set(section, data);
-          showSaved();
-        }
-        if (viewBtn) viewBtn.style.display = txtInput.value ? '' : 'none';
-      };
-    }
-  });
-}
-
-// === 强制同步当前版块到服务器 ===
+// === 搜索/筛选 ===
 var _filterKeyword = '';
 function filterTable(keyword) {
   _filterKeyword = keyword.toLowerCase().trim();
@@ -708,8 +528,8 @@ function syncFromServer() {
 
 // === 初始化 - 从服务器加载 ===
 // 修改 renderEditTable 以支持搜索过滤
-window.renderEditTable = function(section) {
-  // diagnostic removed
+var _origRenderEditTable = renderEditTable;
+renderEditTable = function(section) {
   var data = DB.get(section);
   var cols = COLUMNS[section];
   var wrap = $id('tableEditWrap');
@@ -729,88 +549,8 @@ window.renderEditTable = function(section) {
 
   if (!cols) { wrap.innerHTML = '<p style="padding:20px;color:#999">暂未定义此版块</p>'; return; }
 
-
-  if (section === 'reimburse' || section === 'pettyCash') {
-    var persons = section === 'reimburse' ? ['任海涛','庞尚韬','应红林'] : ['任海涛','庞尚韬'];
-    var ph = '<div class="sub-tabs">';
-    persons.forEach(function(p) {
-      var pdata = data.filter(function(r){return r.person===p;});
-      ph += '<button class="sub-tab-btn" data-person="' + p + '" onclick="switchPersonTab(this.dataset.person,this)" style="border-left:3px solid ' + (p==='任海涛'?'#3498db':p==='庞尚韬'?'#e74c3c':'#2ecc71') + '">' + p + '</button>';
-    });
-    ph += '</div>';
-    persons.forEach(function(person) {
-      var pdata = data.filter(function(r){return r.person===person;});
-      var display = person === '任海涛' ? 'block' : 'none';
-      ph += '<div class="person-section" id="person_' + person + '" style="display:' + display + '">';
-      // 按报销日期分组
-      var grps = {};
-      pdata.forEach(function(r) { var rd = r.reimburse_date || '未分组'; if(!grps[rd]) grps[rd] = []; grps[rd].push(r); });
-      var dates = Object.keys(grps).sort();
-      dates.forEach(function(d) {
-        var items = grps[d];
-        var total = items.reduce(function(s,r){return s+(r.amount||0);},0);
-        var pm = items[0].payment_method || '';
-        ph += '<div style="margin:8px 0;border:1px solid #ddd;border-radius:4px;overflow:hidden">';
-        ph += '<div style="background:#e8f4fd;padding:6px 10px;font-weight:700;font-size:0.82rem;border-bottom:1px solid #3498db;display:flex;justify-content:space-between;align-items:center">';
-        ph += '<span>📅 报销日期 ' + d + ' · ' + items.length + '笔 · 合计 ¥' + total.toFixed(2) + '</span>';
-        ph += '<select data-date="' + d + '" data-person="' + person + '" onchange="updateBatchPayment(this)" style="padding:2px 8px;font-size:0.75rem;border:1px solid #3498db;border-radius:3px;background:#fff">';
-        ph += '<option value="">支付方式</option><option value="公司账户支付"' + (pm==='公司账户支付'?' selected':'') + '>公司账户支付</option><option value="备用金抵扣"' + (pm==='备用金抵扣'?' selected':'') + '>备用金抵扣</option>';
-        ph += '</select></div>';
-        ph += '<table class="edit-table" style="border:none"><thead><tr>';
-        cols.forEach(function(c) { 
-          if(c.key==='date') ph += '<th style="width:115px">' + c.label + '</th>';
-          else if(c.key==='amount') ph += '<th style="width:80px">' + c.label + '</th>';
-          else if(c.key==='reason') ph += '<th style="width:150px">' + c.label + '</th>';
-          else if(c.key==='docs') ph += '<th style="width:130px">' + c.label + '</th>';
-          else if(c.key!=='person'&&c.key!=='payment_method'&&c.key!=='reimburse_date') ph += '<th>' + c.label + '</th>';
-        });
-        ph += '<th style="width:36px">操作</th></tr></thead><tbody>';
-        items.forEach(function(row) {
-          var realIdx = data.indexOf(row); var rowKey = row._key || 'k' + Date.now() + Math.random().toString(36).slice(2,6);
-          if (!row._key) row._key = rowKey;
-          ph += '<tr>';
-          cols.forEach(function(c) {
-            if (c.key==='person'||c.key==='payment_method'||c.key==='reimburse_date') return;
-            var val = row[c.key] !== undefined && row[c.key] !== null ? row[c.key] : '';
-            ph += '<td>';
-            if (c.type === 'number') {
-              ph += '<input type="number" step="0.01" value="' + (val||0) + '" data-row="' + realIdx + '" data-col="' + c.key + '" onchange="editCell(this)" style="width:100%;padding:2px 4px;border:1px solid #ccc">';
-            } else if (c.type === 'date') {
-              ph += '<input type="date" value="' + ((val||'').split(' ')[0]||'') + '" data-row="' + realIdx + '" data-col="' + c.key + '" onchange="editCell(this)" style="width:115px;padding:2px 4px;border:1px solid #ccc">';
-            } else if (c.key === 'docs') {
-              var display = Array.isArray(val) ? val.join('; ') : val;
-              ph += '<div class="upload-inline" style="display:flex;gap:2px;align-items:center">';
-              ph += '<input type="text" id="docsTxt_' + rowKey + '" value="' + escHtml(display) + '" data-row="' + realIdx + '" data-col="docs" data-date="' + (row.date||'') + '" data-person="' + (row.person||'') + '" data-amount="' + (row.amount||0) + '" style="flex:1;min-width:40px;padding:2px 4px;border:1px solid #ccc;font-size:0.65rem;font-family:inherit" readonly>';
-              ph += '<button onclick="var v=document.getElementById(\'docsTxt_' + rowKey + '\').value;if(v)window.open(\'/finance/uploads/vouchers/\'+v,\'_blank\')" style="padding:3px 6px;border:1px solid #999;background:#fff;cursor:pointer;font-size:0.75rem' + (display ? '' : ';display:none') + '" title="预览">👁️</button>';
-              ph += '<button onclick="clearDocs(\'' + rowKey + '\',this)" style="padding:3px 6px;border:1px solid #e74c3c;background:#fff;color:#e74c3c;cursor:pointer;font-size:0.75rem' + (display ? '' : ';display:none') + '" title="删除">✖</button>';
-              ph += '<input type="file" accept=".jpg,.jpeg,.png,.gif,.pdf,.ofd,.xls,.xlsx" multiple onchange="uploadDocsFile(this)" style="padding:3px 6px;border:1px solid #999;background:#fff;cursor:pointer;font-size:0.75rem;width:80px" title="上传文件">';
-              ph += '</div>';
-            } else {
-              ph += '<input type="text" value="' + escHtml(val) + '" data-row="' + realIdx + '" data-col="' + c.key + '" onchange="editCell(this)" style="width:100%;padding:2px 4px;border:1px solid #ccc">';
-            }
-            ph += '</td>';
-          });
-          ph += '<td><button class="row-del-btn" onclick="deleteRow(' + realIdx + ')" title="删除此行" style="width:24px;height:24px">✕</button></td></tr>';
-        });
-        ph += '</tbody></table></div>';
-      });
-      ph += '</div>';
-    });
-    // 底部保存条
-    ph += '<div class="save-bar"><span style="font-size:0.75rem;font-weight:600;color:#555">编辑后记得点击保存按钮</span><button class="btn-save" onclick="saveData()">💾 保存数据</button></div>';
-    wrap.innerHTML = ph;
-    setupUploadEvents(wrap, section);
-    return;
-  }
-
   var html = '<table class="edit-table"><thead><tr>';
-  cols.forEach(function(c) { 
-    if(c.key==='date') html += '<th style="width:115px">' + c.label + '</th>';
-    else if(c.key==='amount') html += '<th style="width:80px">' + c.label + '</th>';
-    else if(c.key==='reason') html += '<th style="width:150px">' + c.label + '</th>';
-    else if(c.key==='docs') html += '<th style="width:130px">' + c.label + '</th>';
-    else html += '<th>' + c.label + '</th>';
-  });
+  cols.forEach(function(c) { html += '<th>' + c.label + '</th>'; });
   html += '<th style="width:36px">操作</th></tr></thead><tbody>';
 
   if (data.length === 0) {
@@ -818,8 +558,7 @@ window.renderEditTable = function(section) {
       (_filterKeyword ? '未找到匹配 "' + _filterKeyword + '"' : '暂无数据，点击"＋ 新增一行"添加') + '</td></tr>';
   } else {
     data.forEach(function(row, idx) {
-      var rowBg = section === 'bankFlow' ? (row.income > 0 ? '#f0faf4' : (row.expense > 0 ? '#fef2f2' : '')) : (section === 'capital' && row.name ? {'任海涛':'#e8f4fd','庞尚韬':'#fef2f2','吴生成':'#f0faf4','应红林':'#fdf6e3','陈洪斌':'#f5e6f0'}[row.name] || '' : '');
-      html += '<tr style="background:' + rowBg + '">';
+      html += '<tr>';
       cols.forEach(function(c) {
         var val = row[c.key] !== undefined && row[c.key] !== null ? row[c.key] : '';
         if (c.key === 'invoices' || c.key === 'voucher' || c.key === 'docs') {
@@ -827,9 +566,10 @@ window.renderEditTable = function(section) {
           var isMulti = (c.key === 'invoices' || c.key === 'docs');
           html += '<td class="td-upload-cell" data-row="' + idx + '" data-col="' + c.key + '" data-multi="' + isMulti + '" data-val="' + escHtml(display) + '">';
           html += '<div class="upload-inline" style="display:flex;gap:2px;align-items:center">';
-          html += '<input type="text" value="' + escHtml(display) + '" style="flex:1;min-width:40px;padding:2px 4px;border:1px solid #ccc;font-size:0.65rem;font-family:inherit" readonly>';
+          html += '<input type="text" value="' + escHtml(display) + '" style="flex:1;min-width:60px;padding:3px 4px;border:1px solid #ccc;font-size:0.7rem;font-family:inherit" readonly>';
+          html += '<button class="up-btn" title="上传文件" style="padding:3px 6px;border:1px solid #999;background:#fff;cursor:pointer;font-size:0.75rem">📎</button>';
           html += '<button class="up-view" title="预览" style="padding:3px 6px;border:1px solid #999;background:#fff;cursor:pointer;font-size:0.75rem;' + (display ? '' : 'display:none') + '">👁️</button>';
-          html += '<input type="file" style="padding:3px 6px;border:1px solid #999;background:#fff;cursor:pointer;font-size:0.75rem;width:80px"' + (isMulti ? ' multiple' : '') + '>';
+          html += '<input type="file" accept=".jpg,.jpeg,.png,.gif,.pdf,.ofd,.xls,.xlsx" style="display:none"' + (isMulti ? ' multiple' : '') + '>';
           html += '</div></td>';
         } else if (c.type === 'select') {
           html += '<td><select data-row="' + idx + '" data-col="' + c.key + '" onchange="editCell(this)">';
@@ -838,16 +578,9 @@ window.renderEditTable = function(section) {
           });
           html += '</select></td>';
         } else if (c.type === 'number') {
-          if (section === 'bankAccounts' && c.key === 'balance') {
-            var bfData = DB.get('bankFlow') || [];
-            var calcBal = 0;
-            bfData.forEach(function(br){ calcBal += (br.income||0) - (br.expense||0); });
-            html += '<td><strong style="font-size:1rem;color:#D35400">¥' + calcBal.toFixed(2) + '</strong><input type="hidden" value="' + calcBal + '" data-row="' + idx + '" data-col="balance"></td>';
-          } else {
-            html += '<td><input type="number" step="0.01" value="' + (val || 0) + '" data-row="' + idx + '" data-col="' + c.key + '" onchange="editCell(this)"></td>';
-          }
+          html += '<td><input type="number" step="0.01" value="' + (val || 0) + '" data-row="' + idx + '" data-col="' + c.key + '" onchange="editCell(this)"></td>';
         } else if (c.type === 'date') {
-          html += '<td><input type="date" value="' + ((val||'').split(' ')[0]||'') + '" data-row="' + idx + '" data-col="' + c.key + '" onchange="editCell(this)"></td>';
+          html += '<td><input type="date" value="' + (val || '') + '" data-row="' + idx + '" data-col="' + c.key + '" onchange="editCell(this)"></td>';
         } else if (c.type === 'month') {
           html += '<td><input type="month" value="' + (val || '') + '" data-row="' + idx + '" data-col="' + c.key + '" onchange="editCell(this)"></td>';
         } else {
@@ -858,20 +591,67 @@ window.renderEditTable = function(section) {
     });
   }
   html += '</tbody></table>';
-  // 股本金合计行
-  if (section === 'capital' && data.length > 0) {
-    var ttl = data.reduce(function(s,r){return s+(r.amount||0);},0);
-    html += '<tr style="background:#f5f0e8;font-weight:700"><td colspan="2">合计</td><td style="padding:6px 10px;border-top:3px solid #000;text-align:right">¥' + ttl.toFixed(2) + '</td><td colspan="3" style="border-top:3px solid #000"></td></tr>';
-    html += '</tbody></table>';
-  } else {
-    html += '</tbody></table>';
-  }
-  // 底部保存条
-  html += '<div class="save-bar"><span style="font-size:0.75rem;font-weight:600;color:#555">编辑后记得点击保存按钮</span><button class="btn-save" onclick="saveData()">💾 保存数据</button></div>';
   wrap.innerHTML = html;
 
   // 上传按钮事件
-  setupUploadEvents(wrap, section);
+  wrap.querySelectorAll('.td-upload-cell').forEach(function(td) {
+    var row = parseInt(td.dataset.row);
+    var col = td.dataset.col;
+    var isMulti = td.dataset.multi === 'true';
+    var data = DB.get(section);
+    var txtInput = td.querySelector('input[type="text"]');
+    var fileInput = td.querySelector('input[type="file"]');
+    var upBtn = td.querySelector('.up-btn');
+    var viewBtn = td.querySelector('.up-view');
+
+    upBtn.onclick = function() { fileInput.click(); };
+
+    fileInput.onchange = function() {
+      if (!fileInput.files.length) return;
+      var uploadNext = function(files, idx) {
+        if (idx >= files.length) return;
+        var file = files[idx];
+        txtInput.value = file.name;
+        viewBtn.style.display = '';
+        var fd = new FormData();
+        fd.append('file', file);
+        var xhr = new XMLHttpRequest();
+        var apiBase = (typeof API_BASE !== 'undefined') ? API_BASE : '';
+        xhr.open('POST', apiBase + '/api/upload', true);
+        xhr.setRequestHeader('Authorization', 'Bearer ' + (window.API_TOKEN || ''));
+        xhr.onload = function() {
+          if (xhr.status === 200) {
+            var resp = JSON.parse(xhr.responseText);
+            txtInput.value = resp.filename || resp.path || file.name;
+            // 保存到DB
+            if (data[row]) {
+              data[row][col] = txtInput.value;
+              DB.set(currentSection, data);
+            }
+          }
+          uploadNext(files, idx + 1);
+        };
+        xhr.onerror = function() { uploadNext(files, idx + 1); };
+        xhr.send(fd);
+      };
+      uploadNext(fileInput.files, 0);
+      fileInput.value = '';
+    };
+
+    viewBtn.onclick = function() {
+      if (txtInput.value) {
+        window.open('/uploads/vouchers/' + txtInput.value, '_blank');
+      }
+    };
+
+    txtInput.onchange = function() {
+      if (data[row]) {
+        data[row][col] = txtInput.value;
+        DB.set(currentSection, data);
+      }
+      viewBtn.style.display = txtInput.value ? '' : 'none';
+    };
+  });
 
   wrap.querySelectorAll('.td-upload').forEach(function(td) {
     td.style.cssText = 'cursor:pointer;padding:2px';
@@ -929,3 +709,93 @@ document.addEventListener('DOMContentLoaded', function() {
     });
   }
 });
+
+
+// 备用金分人管理
+function renderPettyCashAdmin() {
+  var persons = ['任海涛','庞尚韬'];
+  var html = '<div style="display:flex;gap:6px;margin-bottom:12px">';
+  persons.forEach(function(p,i){ html += '<button class="tb-btn' + (i===0?' active':'') + '" onclick="switchPettyPerson(\'' + p + '\')">' + p + '</button>'; });
+  html += '</div>';
+  persons.forEach(function(person, pi){
+    var draws = (DB.get('pettyDraw')||[]).filter(function(r){return r.person===person;});
+    var writes = (DB.get('pettyWrite')||[]).filter(function(r){return r.person===person;});
+    var drawTotal = draws.reduce(function(s,r){return s+(r.amount||0);},0);
+    var writeTotal = writes.reduce(function(s,r){return s+(r.amount||0);},0);
+    var st = pi===0 ? '' : ' style="display:none"';
+    html += '<div class="pc-person"' + st + ' data-person="' + person + '">';
+    html += '<h4 style="margin:12px 0 6px;font-size:0.85rem;color:#D35400">📤 领用记录 \u00b7 ' + person + '</h4>';
+    html += '<table class="edit-table"><thead><tr><th>领用时间</th><th>领用金额</th><th>来源</th><th>摘要</th><th>操作</th></tr></thead><tbody>';
+    if (!draws.length) { html += '<tr><td colspan="5" style="text-align:center;color:#999">暂无领用记录</td></tr>'; }
+    else { draws.forEach(function(r,i){
+      html += '<tr><td><input class="editable" data-sec="pettyDraw" data-idx="' + i + '" data-per="' + person + '" data-key="date" value="' + escHtml(r.date||'') + '" onchange="editPC(this)"></td>';
+      html += '<td><input class="editable" data-sec="pettyDraw" data-idx="' + i + '" data-per="' + person + '" data-key="amount" value="' + escHtml(r.amount||'') + '" onchange="editPC(this)"></td>';
+      html += '<td><input class="editable" data-sec="pettyDraw" data-idx="' + i + '" data-per="' + person + '" data-key="source" value="' + escHtml(r.account||'') + '" onchange="editPC(this)"></td>';
+      html += '<td><input class="editable" data-sec="pettyDraw" data-idx="' + i + '" data-per="' + person + '" data-key="accountName" value="' + escHtml(r.accountName||'') + '" onchange="editPC(this)"></td>';
+      html += '<td><input class="editable" data-sec="pettyDraw" data-idx="' + i + '" data-per="' + person + '" data-key="summary" value="' + escHtml(r.summary||'') + '" onchange="editPC(this)"></td>';
+      html += '<td><button class="tb-btn" onclick="delPCRow(\'' + 'pettyDraw' + '\',' + i + ',\'' + person + '\')" style="font-size:0.65rem;padding:2px 6px">\ud83d\uddd1\ufe0f</button></td></tr>';
+    }); }
+    html += '<tr style="background:var(--bg);font-weight:700"><td>合计</td><td style="color:#D35400">\xa5' + formatNum(drawTotal) + '</td><td></td><td></td><td></td></tr>';
+    html += '</tbody></table>';
+    html += '<button class="btn-add-row" onclick="addPCRow(\'' + 'pettyDraw' + '\',\'' + person + '\')" style="margin:4px 0 12px">＋ 新增领用</button>';
+    html += '<h4 style="margin:0 0 6px;font-size:0.85rem;color:#27ae60">📥 核销记录 \u00b7 ' + person + '</h4>';
+    html += '<table class="edit-table"><thead><tr><th>交易时间</th><th>核销金额</th><th>摘要</th><th>凭证</th><th>操作</th></tr></thead><tbody>';
+    if (!writes.length) { html += '<tr><td colspan="5" style="text-align:center;color:#999">暂无核销记录</td></tr>'; }
+    else { writes.forEach(function(r,i){
+      html += '<tr><td><input class="editable" data-sec="pettyWrite" data-idx="' + i + '" data-per="' + person + '" data-key="date" value="' + escHtml(r.date||'') + '" onchange="editPC(this)"></td>';
+      html += '<td><input class="editable" data-sec="pettyWrite" data-idx="' + i + '" data-per="' + person + '" data-key="amount" value="' + escHtml(r.amount||'') + '" onchange="editPC(this)"></td>';
+      html += '<td><input class="editable" data-sec="pettyWrite" data-idx="' + i + '" data-per="' + person + '" data-key="summary" value="' + escHtml(r.summary||'') + '" onchange="editPC(this)"></td>';
+      html += '<td><input class="editable" data-sec="pettyWrite" data-idx="' + i + '" data-per="' + person + '" data-key="voucher" value="' + escHtml(r.voucher||'') + '" onchange="editPC(this)"></td>';
+      html += '<td><button class="tb-btn" onclick="delPCRow(\'' + 'pettyWrite' + '\',' + i + ',\'' + person + '\')" style="font-size:0.65rem;padding:2px 6px">\ud83d\uddd1\ufe0f</button></td></tr>';
+    }); }
+    html += '<tr style="background:var(--bg);font-weight:700"><td>合计</td><td style="color:#27ae60">\xa5' + formatNum(writeTotal) + '</td><td></td><td></td></tr>';
+    html += '</tbody></table>';
+    html += '<button class="btn-add-row" onclick="addPCRow(\'' + 'pettyWrite' + '\',\'' + person + '\')" style="margin:4px 0 12px">＋ 新增核销</button>';
+    html += '</div>';
+  });
+  html += '<button class="btn-save" onclick="savePCData()" style="margin-top:8px">\u{1f4be} 保存数据</button>';
+  document.getElementById('dataEditor').innerHTML = html;
+  document.getElementById('recordCount').textContent = ((DB.get('pettyDraw')||[]).length + (DB.get('pettyWrite')||[]).length) + ' \u6761\u8bb0\u5f55';
+}
+
+function switchPettyPerson(n) {
+  document.querySelectorAll('.pc-person').forEach(function(e){ e.style.display='none'; });
+  var t = document.querySelector('.pc-person[data-person="' + n + '"]');
+  if (t) t.style.display = 'block';
+}
+
+function editPC(el) {
+  var sec = el.dataset.sec, idx = parseInt(el.dataset.idx), key = el.dataset.key, per = el.dataset.per;
+  var data = DB.get(sec);
+  var realIdx = -1, cnt = 0;
+  for (var i = 0; i < data.length; i++) { if (data[i].person === per) { if (cnt === idx) { realIdx = i; break; } cnt++; } }
+  if (realIdx >= 0) { data[realIdx][key] = el.value; DB.set(sec, data, true); }
+}
+
+function addPCRow(sec, person) {
+  var data = DB.get(sec) || [];
+  var tmpl = sec === 'pettyDraw' ? {person:person, date:'', amount:0, source:'', summary:''} : {person:person, date:'', amount:0, summary:'', voucher:''};
+  data.push(tmpl); DB.set(sec, data, true); renderPettyCashAdmin();
+}
+
+function delPCRow(sec, idx, person) {
+  var data = DB.get(sec) || [];
+  var realIdx = -1, cnt = 0;
+  for (var i = 0; i < data.length; i++) { if (data[i].person === person) { if (cnt === idx) { realIdx = i; break; } cnt++; } }
+  if (realIdx >= 0) { data.splice(realIdx, 1); DB.set(sec, data, true); renderPettyCashAdmin(); }
+}
+
+function savePCData() {
+  if (window.API_TOKEN) { DB.syncToServer('pettyDraw', DB.get('pettyDraw')); DB.syncToServer('pettyWrite', DB.get('pettyWrite')); }
+  showSaved();
+}
+// 从服务器恢复全部数据
+function forceRefresh() {
+  if (!confirm('确定要从服务器重新加载全部数据？')) return;
+  var sections = Object.keys(COLUMNS);
+  sections.forEach(function(s) {
+    localStorage.removeItem('wyx_' + s);
+    DB.loadFromServer(s, function(){});
+  });
+  setTimeout(function(){ location.reload(); }, 2000);
+}

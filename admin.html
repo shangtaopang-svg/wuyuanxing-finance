@@ -59,7 +59,15 @@
         <button class="tb-btn tb-sync" onclick="syncFromServer()" title="从服务器同步">🔄 同步</button>
         <button class="tb-btn tb-import" onclick="showImportModal()">📥 导入Excel</button>
         <button class="tb-btn tb-export" onclick="exportData()">📤 导出</button>
-        <button class="tb-btn tb-clear" onclick="confirmClear()">🗑️ 清空</button>
+        <button class="tb-btn tb-clear" onclick="confirmClear()">🗑️ 清空</button><button class="tb-btn" onclick="forceRefresh()" style="background:#e53e3e;color:#fff">🔄 恢复数据</button>
+      </div>
+      <div id="pettyFilters" style="display:none;gap:4px;margin-top:6px">
+        <span style="font-size:0.72rem;font-weight:600;color:#666;margin-right:4px">备用金筛选:</span>
+        <button class="tb-btn" onclick="setPettyFilter('')" style="background:#000;color:#fff">全部</button>
+        <button class="tb-btn" onclick="setPettyFilter('领用')">📤 领用</button>
+        <button class="tb-btn" onclick="setPettyFilter('核销')">📥 核销</button>
+        <button class="tb-btn" onclick="setPettyFilter('任海涛')">👤 任海涛</button>
+        <button class="tb-btn" onclick="setPettyFilter('庞尚韬')">👤 庞尚韬</button>
       </div>
     </div>
   </div>
@@ -116,12 +124,14 @@
     <div class="modal-body">
       <div class="form-group">
         <label>选择导入到哪个版块</label>
-        <select id="importSection" style="width:100%;padding:8px;border:3px solid #000;font-family:inherit;font-weight:700;">
+        <select id="importSection" style="width:100%;padding:8px;border:3px solid #000;font-family:inherit;font-weight:700;" onchange="toggleImportPerson()">
           <option value="incomeExpense">① 基本账户支出</option>
           <option value="capital">② 股本金</option>
           <option value="income">③ 收入</option>
-          <option value="pettyCash">④ 备用金</option>
-          <option value="reimburse">⑤ 报销</option>
+          <option value="pettyCash">④ 备用金（合并）</option>
+          <option value="pettyDraw">⑤ 领用</option>
+          <option value="pettyWrite">⑥ 核销</option>
+          <option value="reimburse">⑦ 报销</option>
           <option value="receivable">⑥ 应收账款</option>
           <option value="asset">⑦ 固定资产</option>
           <option value="management">⑧ 管理费用</option>
@@ -131,6 +141,13 @@
           <option value="companyInfo">⑫ 公司信息</option>
           <option value="contracts">⑬ 合同管理</option>
           <option value="bankAccounts">⑭ 银行账户</option>
+        </select>
+      </div>
+      <div class="form-group" id="importPersonGroup" style="display:none">
+        <label>选择人员</label>
+        <select id="importPerson" style="width:100%;padding:8px;border:3px solid #000;font-family:inherit;font-weight:700;">
+          <option value="任海涛">任海涛</option>
+          <option value="庞尚韬">庞尚韬</option>
         </select>
       </div>
       <div class="form-group">
@@ -166,7 +183,7 @@
   document.body.setAttribute('data-style', ss);
   </script>
   <script src="/finance/js/upload.js"></script>
-  <script src="/finance/js/admin.js?v=20260711"></script>
+  <script src="/finance/js/admin.js?v=20260624"></script>
 
 <script>
 // 合计行 - 内联版

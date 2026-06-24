@@ -9,9 +9,90 @@
   <meta http-equiv="cache-control" content="no-cache">
   <meta http-equiv="expires" content="0">
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.2.0/dist/chartjs-plugin-datalabels.min.js"></script>
+<script>
+// 编辑模式密码保护
+var EDIT_MODE = false;
+var EDIT_PWD = '87700020';
+function checkEditPw() {
+  var p = prompt('请输入编辑密码：');
+  if (p === EDIT_PWD) {
+    enterEditMode();
+    showToast('✅ 已进入编辑模式', 'success');
+  } else if (p !== null) {
+    showToast('❌ 密码错误', 'error');
+  }
+}
+function toggleEditMode() {
+  if (EDIT_MODE) {
+    EDIT_MODE = false;
+    document.body.classList.remove('edit-mode');
+    document.getElementById('editToolbar').style.display = 'none';
+    if (window.renderCurrentTab) renderCurrentTab();
+    showToast('已退出编辑模式');
+  } else {
+    checkEditPw();
+  }
+}
+function enterEditMode() {
+  EDIT_MODE = true;
+  document.body.classList.add('edit-mode');
+  document.getElementById('editToolbar').style.display = 'flex';
+  if (window.renderCurrentTab) renderCurrentTab();
+}
+// 连点5次标题解锁
+var clickCount = 0;
+document.addEventListener('DOMContentLoaded', function(){
+  var title = document.querySelector('h1') || document.querySelector('.logo');
+  if (title) {
+    title.addEventListener('click', function(){
+      clickCount++;
+      if (clickCount >= 5) { clickCount = 0; checkEditPw(); }
+      setTimeout(function(){ clickCount = 0; }, 2000);
+    });
+  }
+});
+// Toast提示
+function showToast(msg, type) {
+  var t = document.createElement('div');
+  t.style.cssText = 'position:fixed;bottom:20px;left:50%;transform:translateX(-50%);padding:10px 20px;border-radius:8px;font-size:0.85rem;font-weight:600;z-index:9999;transition:all 0.3s;background:'+(type==='success'?'#27ae60':type==='error'?'#e53e3e':'#333')+';color:#fff';
+  t.textContent = msg;
+  document.body.appendChild(t);
+  setTimeout(function(){ t.style.opacity = '0'; setTimeout(function(){ t.remove(); }, 300); }, 2000);
+}
+</script>
 </head>
 <body>
+  <!-- ===== 密码门 ===== -->
+  <div id="pwGate" style="position:fixed;inset:0;z-index:999999;background:linear-gradient(135deg,#1a1a2e,#16213e);display:flex;align-items:center;justify-content:center;flex-direction:column;gap:16px;">
+    <div style="font-size:48px;margin-bottom:4px">🌾</div>
+    <h2 style="color:#d4af5a;font-size:18px;font-weight:600;letter-spacing:1px;margin:0">五源兴财务系统</h2>
+    <p style="color:rgba(255,255,255,0.5);font-size:12px;margin:0">请输入访问密码</p>
+    <div style="display:flex;gap:8px;align-items:center">
+      <input id="pwInput" type="password" placeholder="输入密码" style="padding:10px 16px;border:2px solid rgba(255,255,255,0.15);border-radius:8px;background:rgba(255,255,255,0.06);color:#fff;font-size:15px;width:200px;outline:none;font-family:inherit" onkeydown="if(event.key==='Enter')checkPw()">
+      <button onclick="checkPw()" style="padding:10px 20px;border:none;border-radius:8px;background:#d4af5a;color:#1a1a2e;font-size:14px;font-weight:700;cursor:pointer">进入</button>
+    </div>
+    <p id="pwErr" style="color:#e74c3c;font-size:12px;margin:0;display:none">密码错误，请重试</p>
+  </div>
+  <script>
+  function checkPw() {
+    var p = document.getElementById('pwInput').value;
+    if (p === '87700020') {
+      document.getElementById('pwGate').style.display = 'none';
+      document.getElementById('pwErr').style.display = 'none';
+      try { localStorage.setItem('wyx_auth', '1'); } catch(e) {}
+    } else {
+      document.getElementById('pwErr').style.display = 'block';
+    }
+  }
+  // 检查是否已验证
+  try {
+    if (localStorage.getItem('wyx_auth') === '1') {
+      document.getElementById('pwGate').style.display = 'none';
+    }
+  } catch(e) {}
+  </script>
   <!-- 顶部导航 -->
   <header class="top-bar">
     <div class="top-inner">
@@ -35,7 +116,7 @@
           <option value="zh">中文</option>
           <option value="en">EN</option>
         </select>
-        <a href="admin.html" class="top-link" data-lk="admin">⚙️ 管理</a><a href="javascript:localStorage.clear();location.reload()" style="color:#e74c3c;font-size:0.7rem;border:1px solid #e74c3c;padding:2px 8px;border-radius:3px;text-decoration:none">🔄 刷新数据</a>
+        <a href="javascript:localStorage.clear();location.reload()" style="color:#e74c3c;font-size:0.7rem;border:1px solid #e74c3c;padding:2px 8px;border-radius:3px;text-decoration:none">🔄 刷新数据</a>
         <a href="report.html" class="top-link" data-lk="report">📄 报告</a>
         <a href="statements.html" class="top-link">📊 报表</a>
         <span style="font-size:0.55rem;opacity:0.3;letter-spacing:0.1em">v2.2</span>
@@ -50,6 +131,16 @@
     <span style="font-size:1rem">⚠️</span>
     <span id="valText" style="font-size:0.78rem;font-weight:600;color:#856404;margin-left:8px"></span>
     <span style="float:right;font-size:0.7rem;color:#856404">点击关闭</span>
+  </div>
+  
+  <!-- 编辑工具栏（仅在编辑模式显示） -->
+  <div id="editToolbar" style="display:none;margin:8px 20px;padding:10px 16px;background:#e8f4fd;border:2px solid #22d3ee;border-radius:8px;align-items:center;gap:10px;flex-wrap:wrap">
+    <span style="font-size:0.78rem;font-weight:700;color:#0c7a9e">✏️ 编辑模式</span>
+    <span style="flex:1"></span>
+    <button class="tb-btn" onclick="addFrontRow()" style="background:#22d3ee;color:#fff;border:none">＋ 新增一行</button>
+    <button class="tb-btn" onclick="showFrontImport()" style="background:#22d3ee;color:#fff;border:none">📥 导入Excel</button>
+    <button class="tb-btn" onclick="saveFrontData()" style="background:#27ae60;color:#fff;border:none">💾 保存</button>
+    <button class="tb-btn" onclick="toggleEditMode()" style="background:#e53e3e;color:#fff;border:none">✕ 退出</button>
   </div>
 
   <!-- 汇总横幅 -->
@@ -166,14 +257,20 @@
         <button class="sub-tab-btn" data-sub="sub4b">庞尚韬</button>
       </div>
       <div class="sub-panel active" id="sub4a">
-        <h3 style="margin:12px 0 8px;font-size:0.95rem">任海涛 · 备用金</h3>
-        <table class="data-table"><thead><tr><th>日期</th><th>类型</th><th>金额</th><th>摘要</th><th>凭证</th></tr></thead><tbody id="pettyRenBody"></tbody></table>
-        <p class="table-empty" id="empty4a">暂无数据</p>
+        <h3 style="margin:12px 0 8px;font-size:0.95rem;color:#D35400">📤 任海涛 · 领用记录</h3>
+        <table class="data-table"><thead><tr><th>领用时间</th><th>领用金额</th><th>来源</th><th>摘要</th></tr></thead><tbody id="pettyRenDrawBody"></tbody></table>
+        <p class="table-empty" id="empty4a-draw">暂无领用记录</p>
+        <h3 style="margin:16px 0 8px;font-size:0.95rem;color:#27ae60">📥 任海涛 · 核销记录</h3>
+        <table class="data-table"><thead><tr><th>交易时间</th><th>核销金额</th><th>摘要</th><th>凭证</th></tr></thead><tbody id="pettyRenWriteBody"></tbody></table>
+        <p class="table-empty" id="empty4a-write">暂无核销记录</p>
       </div>
       <div class="sub-panel" id="sub4b">
-        <h3 style="margin:12px 0 8px;font-size:0.95rem">庞尚韬 · 备用金</h3>
-        <table class="data-table"><thead><tr><th>日期</th><th>类型</th><th>金额</th><th>摘要</th><th>凭证</th></tr></thead><tbody id="pettyPangBody"></tbody></table>
-        <p class="table-empty" id="empty4b">暂无数据</p>
+        <h3 style="margin:12px 0 8px;font-size:0.95rem;color:#D35400">📤 庞尚韬 · 领用记录</h3>
+        <table class="data-table"><thead><tr><th>领用时间</th><th>领用金额</th><th>来源</th><th>摘要</th></tr></thead><tbody id="pettyPangDrawBody"></tbody></table>
+        <p class="table-empty" id="empty4b-draw">暂无领用记录</p>
+        <h3 style="margin:16px 0 8px;font-size:0.95rem;color:#27ae60">📥 庞尚韬 · 核销记录</h3>
+        <table class="data-table"><thead><tr><th>交易时间</th><th>核销金额</th><th>摘要</th><th>凭证</th></tr></thead><tbody id="pettyPangWriteBody"></tbody></table>
+        <p class="table-empty" id="empty4b-write">暂无核销记录</p>
       </div>
     </section>
 
@@ -394,6 +491,40 @@
   </script>
   <!-- 再次确保移除收入/支出类别图 -->
   <script>document.addEventListener('DOMContentLoaded',function(){['chart14c','chart14d'].forEach(function(id){var e=document.getElementById(id);if(e&&e.parentElement){var card=e.closest('.chart-card');if(card)card.remove()}})});</script>
+
+<button class="edit-mode-btn" onclick="toggleEditMode()">✏️ 编辑</button>
+
+<!-- 导入弹窗 -->
+<div class="modal-overlay" id="importOverlay" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:9999" onclick="closeFrontImport()"></div>
+<div class="admin-modal" id="importModal" style="display:none;position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);z-index:10000;background:#fff;border:3px solid #000;padding:20px;min-width:400px;max-width:90vw">
+  <div class="modal-header" style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
+    <h3 style="margin:0">📥 导入Excel数据</h3>
+    <button onclick="closeFrontImport()" style="background:none;border:none;font-size:1.2rem;cursor:pointer">✕</button>
+  </div>
+  <div class="modal-body">
+    <div class="form-group" style="margin-bottom:12px">
+      <label style="font-size:0.8rem;font-weight:700;display:block;margin-bottom:4px">导入到哪个版块</label>
+      <select id="frontImportSection" style="width:100%;padding:8px;border:3px solid #000;font-family:inherit;font-weight:700">
+        <option value="capital">股本金</option>
+        <option value="bankFlow">公司基本户收支</option>
+        <option value="incomeExpense">基本账户支出</option>
+        <option value="income">收入</option>
+        <option value="reimburse">报销</option>
+        <option value="receivable">应收账款</option>
+        <option value="asset">固定资产</option>
+        <option value="management">管理费用</option>
+        <option value="salary">工资</option>
+        <option value="baseExpense">基地支出</option>
+      </select>
+    </div>
+    <div class="form-group" style="margin-bottom:12px">
+      <label style="font-size:0.8rem;font-weight:700;display:block;margin-bottom:4px">选择Excel文件（.xlsx / .xls）</label>
+      <input type="file" id="frontFileInput" accept=".xlsx,.xls" style="width:100%;padding:8px;border:3px solid #000">
+    </div>
+    <button class="tb-btn" onclick="confirmFrontImport()" style="background:#27ae60;color:#fff;border:none">✅ 确认导入</button>
+    <div id="frontImportPreview" style="margin-top:8px;font-size:0.8rem"></div>
+  </div>
+</div>
 
 </body>
 </html>

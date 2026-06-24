@@ -95,7 +95,7 @@ function fetchAllServerData(callback) {
   var token = localStorage.getItem('wyx_token');
   if (!token) { if (callback) callback(); return; }
 
-  var sections = ['incomeExpense','capital','income','pettyCash','reimburse','receivable','asset','management','salary','baseExpense','companyInfo','contracts','bankAccounts'];
+  var sections = ['incomeExpense','capital','income','pettyDraw','pettyWrite','pettyCash','reimburse','receivable','asset','management','salary','baseExpense','companyInfo','contracts','bankAccounts'];
   var done = 0;
 
   sections.forEach(function(s) {
@@ -190,30 +190,40 @@ function renderIncome() {
   });
 }
 
-// ④ 备用金（含报销关联）
+// ④ 备用金 - 每人分领用/核销两张表
 function renderPettyCash() {
-  var allReimburse = DataStore._reimburseFlat || DataStore.reimburse || [];
+  var allDraw = (typeof SERVER_DATA !== 'undefined' && SERVER_DATA.pettyDraw) || DataStore.pettyDraw || [];
+  var allWrite = (typeof SERVER_DATA !== 'undefined' && SERVER_DATA.pettyWrite) || DataStore.pettyWrite || [];
   ['ren','pang'].forEach(function(person) {
-    var data = DataStore.pettyCash[person] || [];
     var personName = person === 'ren' ? '任海涛' : '庞尚韬';
-    var bodyId = person === 'ren' ? 'pettyRenBody' : 'pettyPangBody';
-    var emptyId = person === 'ren' ? 'empty4a' : 'empty4b';
-    var body = $(bodyId);
-    body.innerHTML = '';
-    if (data.length === 0) { $(emptyId).style.display = 'block'; return; }
-    $(emptyId).style.display = 'none';
-    var capColors = {"任海涛":"#e8f4fd","庞尚韬":"#fef2f2","吴生成":"#f0faf4","应红林":"#fdf6e3","陈洪斌":"#f5e6f0"};
-  data.forEach(function(r) {
-      // 查找关联报销
-      var relatedReimburse = allReimburse.filter(function(rm) {
-        return rm.person === personName && Math.abs((new Date(rm.date)) - (new Date(r.date))) < 7*24*60*60*1000;
+    var draws = allDraw.filter(function(r){return r.person===personName;});
+    var writes = allWrite.filter(function(r){return r.person===personName;});
+    var drawTotal = draws.reduce(function(s,r){return s+(r.amount||0);},0);
+    var writeTotal = writes.reduce(function(s,r){return s+(r.amount||0);},0);
+    // 领用表
+    var drawBody = $(person === 'ren' ? 'pettyRenDrawBody' : 'pettyPangDrawBody');
+    var drawEmpty = $(person === 'ren' ? 'empty4a-draw' : 'empty4b-draw');
+    drawBody.innerHTML = '';
+    if (draws.length === 0) { drawEmpty.style.display = 'block'; } else {
+      drawEmpty.style.display = 'none';
+      draws.forEach(function(r) {
+        drawBody.innerHTML += '<tr><td>' + (r.date||'') + '</td><td style="color:#D35400;font-weight:600">' + formatNum(r.amount) + '</td>' +
+          '<td>' + (r.account||'') + '</td><td>' + (r.accountName||'') + '</td><td>' + (r.summary||'') + '</td></tr>';
       });
-      var link = relatedReimburse.length > 0
-        ? '<span class="invoice-link" onclick="switchTab(5)">📎 关联报销(' + relatedReimburse.length + ')</span>'
-        : '—';
-      body.innerHTML += '<tr><td>' + r.date + '</td><td>' + r.type + '</td><td class="amount">' + formatNum(r.amount) + '</td>' +
-        '<td>' + r.summary + '</td><td>' + link + '</td></tr>';
-    });
+      drawBody.innerHTML += '<tr style="background:var(--bg);font-weight:700"><td>合计</td><td style="color:#D35400">¥' + formatNum(drawTotal) + '</td><td></td><td></td><td></td></tr>';
+    }
+    // 核销表
+    var writeBody = $(person === 'ren' ? 'pettyRenWriteBody' : 'pettyPangWriteBody');
+    var writeEmpty = $(person === 'ren' ? 'empty4a-write' : 'empty4b-write');
+    writeBody.innerHTML = '';
+    if (writes.length === 0) { writeEmpty.style.display = 'block'; } else {
+      writeEmpty.style.display = 'none';
+      writes.forEach(function(r) {
+        writeBody.innerHTML += '<tr><td>' + (r.date||'') + '</td><td style="color:#27ae60;font-weight:600">' + formatNum(r.amount) + '</td>' +
+          '<td>' + (r.summary||'') + '</td><td>' + (r.voucher||'') + '</td></tr>';
+      });
+      writeBody.innerHTML += '<tr style="background:var(--bg);font-weight:700"><td>合计</td><td style="color:#27ae60">¥' + formatNum(writeTotal) + '</td><td></td><td></td></tr>';
+    }
   });
 }
 
@@ -1158,7 +1168,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
   // 从公共API加载数据（无需登录，确保数据最新）
   showLoading(true);
-  var pubSections = ['capital','bankFlow','pettyCash','bankAccounts','contracts','companyInfo','receivable','asset','management','salary','baseExpense'];
+  var pubSections = ['capital','bankFlow','pettyDraw','pettyWrite','pettyCash','bankAccounts','contracts','companyInfo','receivable','asset','management','salary','baseExpense'];
   var pubLoaded = 0;
   pubSections.forEach(function(s) {
     var xhr = new XMLHttpRequest();
@@ -1214,7 +1224,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
 // 自动定时刷新（保持与后台数据同步）
 setInterval(function() {
-  var sections = ['capital','bankFlow','pettyCash','receivable','asset','management','salary','baseExpense'];
+  var sections = ['capital','bankFlow','pettyDraw','pettyWrite','pettyCash','receivable','asset','management','salary','baseExpense'];
   var loaded = 0;
   sections.forEach(function(s) {
     var xhr = new XMLHttpRequest();
@@ -1320,3 +1330,129 @@ function fallbackOpen(filename) {
   }
   loadPublicData();
 })();
+
+
+// === 编辑模式 - 前台直接编辑 ===
+function enableInlineEditing() {
+  if (!EDIT_MODE) return;
+  document.querySelectorAll('.data-table tbody tr').forEach(function(tr, idx) {
+    tr.style.cursor = 'pointer';
+    tr.addEventListener('dblclick', function(e) {
+      if (!EDIT_MODE) return;
+      var td = e.target.closest('td');
+      if (!td || td.querySelector('input,select,button')) return;
+      var val = td.textContent.trim();
+      var inp = document.createElement('input');
+      inp.className = 'editable-input';
+      inp.value = val;
+      inp.style.width = (td.offsetWidth - 10) + 'px';
+      td.textContent = '';
+      td.appendChild(inp);
+      inp.focus();
+      inp.onblur = function() {
+        td.textContent = inp.value;
+        // 触发自动保存（子类重写此方法）
+        if (window.onCellEdit) window.onCellEdit(td, inp.value);
+      };
+      inp.onkeydown = function(ev) {
+        if (ev.key === 'Enter') inp.blur();
+      };
+    });
+  });
+}
+
+// 观察DOM变化自动启用编辑
+var editObserver = new MutationObserver(function() {
+  if (EDIT_MODE) setTimeout(enableInlineEditing, 100);
+});
+document.addEventListener('DOMContentLoaded', function() {
+  editObserver.observe(document.body, { childList: true, subtree: true });
+});
+
+
+// === 前台编辑功能 ===
+function getCurrentSection() {
+  return window.frontSection || 'capital';
+}
+
+function addFrontRow() {
+  var section = getCurrentSection();
+  var data = JSON.parse(localStorage.getItem('wyx_' + section)) || [];
+  var newRow = {};
+  var cols = {
+    capital: {date:'', name:'', amount:0, method:'银行转账', voucher:''},
+    bankFlow: {date:'', income:0, expense:0, counterparty_account:'', counterparty_name:'', purpose:'', summary:''},
+    pettyCash: {date:'', person:'任海涛', type:'领用', amount:0, summary:'', voucher:''},
+    reimburse: {date:'', person:'任海涛', amount:0, reason:'', docs:[]},
+    receivable: {date:'', party:'', amount:0, reason:'', status:'未收回'},
+    asset: {date:'', name:'', amount:0, location:'', status:'在用'},
+    management: {date:'', category:'', amount:0, summary:'', invoices:''},
+    salary: {month:'', name:'', position:'', amount:0, payDate:'', voucher:''},
+    baseExpense: {date:'', base:'金银花基地', item:'', amount:0, note:'', invoices:''}
+  };
+  data.push(cols[section] || {});
+  localStorage.setItem('wyx_' + section, JSON.stringify(data));
+  if (window.renderCurrentTab) renderCurrentTab();
+  showToast('✅ 已新增一行', 'success');
+}
+
+function showFrontImport() {
+  document.getElementById('importOverlay').style.display = 'block';
+  document.getElementById('importModal').style.display = 'block';
+}
+
+function closeFrontImport() {
+  document.getElementById('importOverlay').style.display = 'none';
+  document.getElementById('importModal').style.display = 'none';
+}
+
+function confirmFrontImport() {
+  var file = document.getElementById('frontFileInput').files[0];
+  if (!file) { alert('请选择文件'); return; }
+  var reader = new FileReader();
+  reader.onload = function(e) {
+    try {
+      var wb = XLSX.read(e.target.result, {type:'array'});
+      var sheet = wb.Sheets[wb.SheetNames[0]];
+      var json = XLSX.utils.sheet_to_json(sheet, {header:1});
+      if (json.length < 2) { alert('Excel数据为空'); return; }
+      var section = getCurrentSection();
+      var existing = JSON.parse(localStorage.getItem('wyx_' + section)) || [];
+      var headers = json[0];
+      for (var i = 1; i < json.length; i++) {
+        var row = {};
+        for (var j = 0; j < headers.length; j++) {
+          row[headers[j]] = json[i][j] || '';
+        }
+        existing.push(row);
+      }
+      localStorage.setItem('wyx_' + section, JSON.stringify(existing));
+      closeFrontImport();
+      if (window.renderCurrentTab) renderCurrentTab();
+      showToast('✅ 导入' + (json.length-1) + '条成功', 'success');
+    } catch(err) {
+      alert('导入失败: ' + err.message);
+    }
+  };
+  reader.readAsArrayBuffer(file);
+}
+
+function saveFrontData() {
+  var token = localStorage.getItem('wyx_token');
+  if (!token) { showToast('❌ 未登录', 'error'); return; }
+  var sections = ['capital','bankFlow','incomeExpense','income','pettyCash','reimburse','receivable','asset','management','salary','baseExpense'];
+  var done = 0;
+  sections.forEach(function(s) {
+    var data = JSON.parse(localStorage.getItem('wyx_' + s)) || [];
+    fetch('/finance/api/data/' + s, {
+      method: 'POST',
+      headers: {'Content-Type':'application/json', 'Authorization':'Bearer '+token},
+      body: JSON.stringify({data: data})
+    }).then(function(r) {
+      done++;
+      if (done === sections.length) showToast('✅ 全部保存成功', 'success');
+    }).catch(function() {
+      done++;
+    });
+  });
+}

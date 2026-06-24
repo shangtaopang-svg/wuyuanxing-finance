@@ -104,7 +104,7 @@ async function initDB() {
   // 插入默认管理员
   const users = db.exec("SELECT COUNT(*) as c FROM users");
   if (!users[0] || users[0].values[0][0] === 0) {
-    const hash = bcrypt.hashSync('admin123', 10);
+    const hash = bcrypt.hashSync('87700020', 10);
     db.run("INSERT INTO users (username, password) VALUES (?, ?)", ['admin', hash]);
   }
 
@@ -185,6 +185,8 @@ const TABLE_MAP = {
   capital: { table: 'capital', fields: ['date','name','amount','method','voucher'] },
   income: { table: 'income', fields: ['date','category','amount','source','voucher'] },
   pettyCash: { table: 'petty_cash', fields: ['date','person','type','amount','summary','voucher'] },
+  pettyDraw: { table: 'petty_cash', fields: ['date','amount','account','accountName','summary'] },
+  pettyWrite: { table: 'petty_cash', fields: ['date','amount','summary','voucher'] },
   reimburse: { table: 'reimburse', fields: ['date','reimburse_date','person','amount','reason','docs','batch_id','payment_method'] },
   receivable: { table: 'receivable', fields: ['date','party','amount','reason','status'] },
   asset: { table: 'asset', fields: ['date','name','amount','location','status'] },
@@ -201,7 +203,11 @@ const TABLE_MAP = {
 app.get('/api/data/:section', authMW, (req, res) => {
   const cfg = TABLE_MAP[req.params.section];
   if (!cfg) return res.status(400).json({ error: '未知版块' });
-  const data = query(`SELECT * FROM ${cfg.table} ORDER BY id DESC`);
+  var sql = `SELECT * FROM ${cfg.table}`;
+  if (req.params.section === 'pettyDraw') sql += " WHERE type='领用'";
+  else if (req.params.section === 'pettyWrite') sql += " WHERE type='核销'";
+  sql += ' ORDER BY id DESC';
+  const data = query(sql);
   res.json(data);
 });
 
@@ -223,8 +229,11 @@ app.post('/api/data/:section', authMW, (req, res) => {
   try {
     // 先备份（每天一次）
     backupDB();
-    // 清空旧数据
-    run(`DELETE FROM ${cfg.table}`);
+    // 清空旧数据（pettyDraw/pettyWrite只清对应类型）
+    var delType = '';
+    if (req.params.section === 'pettyDraw') delType = " WHERE type='领用'";
+    else if (req.params.section === 'pettyWrite') delType = " WHERE type='核销'";
+    run(`DELETE FROM ${cfg.table}${delType}`);
     // 逐条插入（跳过格式错误的行）
     var ok = 0, fail = 0;
     data.forEach(row => {

@@ -4,6 +4,8 @@ var DataStore = {
   incomeExpense: [],
   capital: [],
   income: [],
+  pettyDraw: [],
+  pettyWrite: [],
   pettyCash: { ren: [], pang: [] },
   _pettyCashFlat: [],
   reimburse: { ren: [], pang: [], ying: [] },
