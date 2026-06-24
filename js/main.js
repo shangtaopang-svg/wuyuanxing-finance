@@ -1416,7 +1416,7 @@ function confirmFrontImport() {
       var sheet = wb.Sheets[wb.SheetNames[0]];
       var json = XLSX.utils.sheet_to_json(sheet, {header:1});
       if (json.length < 2) { alert('Excel数据为空'); return; }
-      var section = getCurrentSection();
+      var section = document.getElementById('frontImportSection').value;
       var existing = JSON.parse(localStorage.getItem('wyx_' + section)) || [];
       var headers = json[0];
       for (var i = 1; i < json.length; i++) {
