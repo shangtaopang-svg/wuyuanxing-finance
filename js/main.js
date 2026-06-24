@@ -900,9 +900,9 @@ function renderBankFlow() {
   if (data.length === 0) { var e = $('empty14'); if(e) e.style.display = 'block'; return; }
   var e = $('empty14'); if(e) e.style.display = 'none';
   var capColors = {"任海涛":"#e8f4fd","庞尚韬":"#fef2f2","吴生成":"#f0faf4","应红林":"#fdf6e3","陈洪斌":"#f5e6f0"};
-  data.forEach(function(r) {
+  data.forEach(function(r, idx) {
     var bg = r.income > 0 ? "#f0faf4" : (r.expense > 0 ? "#fef2f2" : "");
-    body.innerHTML += '<tr style="background:' + bg + '"><td>' + (r.date||"") + '</td>' +
+    body.innerHTML += '<tr style="background:' + bg + '"><td style="text-align:center;color:#999;font-size:0.72rem">' + (idx+1) + '</td><td>' + (r.date||"") + '</td>' +
       '<td class="amount" style="color:#27ae60;font-weight:700">' + (r.income > 0 ? formatNum(r.income) : "") + '</td>' +
       '<td class="amount" style="color:#e53e3e;font-weight:700">' + (r.expense > 0 ? formatNum(r.expense) : "") + '</td>' +
       '<td>' + (r.counterparty_account||"") + '</td>' +
@@ -1353,7 +1353,7 @@ function fallbackOpen(filename) {
 // 每个版块表格列对应的字段名
 var COL_FIELDS = {
   capitalBody:        ['date','name','amount','method'],
-  bankFlowBody:       ['date','income','expense','counterparty_account','counterparty_name','purpose','summary'],
+  bankFlowBody:       ['_seq','date','income','expense','counterparty_account','counterparty_name','purpose','summary'],
   pettyRenDrawBody:   ['date','amount','account','summary'],
   pettyPangDrawBody:  ['date','amount','account','summary'],
   pettyRenWriteBody:  ['date','amount','summary','voucher'],
