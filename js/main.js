@@ -1365,29 +1365,29 @@ function enableEditModeUI() {
   document.querySelectorAll('.data-table tbody').forEach(function(tbody) {
     var bodyId = tbody.id;
     if (!COL_FIELDS[bodyId]) return;
-    if (tbody.getAttribute('data-editor-ready')) return;
-    tbody.setAttribute('data-editor-ready', '1');
-
+    // 清理旧的 data-idx，重新编号
     var rows = tbody.querySelectorAll('tr:not(:last-child)');
     rows.forEach(function(tr, idx) {
       tr.setAttribute('data-idx', idx);
       var lastTd = tr.querySelector('td:last-child');
-      if (lastTd && !lastTd.querySelector('.del-btn')) {
-        var delBtn = document.createElement('button');
-        delBtn.className = 'del-btn';
-        delBtn.textContent = '🗑️';
-        delBtn.style.cssText = 'background:none;border:none;cursor:pointer;font-size:14px;padding:2px 6px;opacity:0.6';
-        delBtn.title = '删除此行';
-        delBtn.onclick = function(e) { e.stopPropagation(); deleteRow(bodyId, idx); };
-        lastTd.appendChild(delBtn);
+      if (lastTd) {
+        if (!lastTd.querySelector('.del-btn')) {
+          var delBtn = document.createElement('button');
+          delBtn.className = 'del-btn';
+          delBtn.textContent = '🗑️';
+          delBtn.style.cssText = 'background:none;border:none;cursor:pointer;font-size:14px;padding:2px 6px;opacity:0.6;margin-left:4px';
+          delBtn.title = '删除此行';
+          delBtn.onclick = function(e) { e.stopPropagation(); deleteRow(bodyId, idx); };
+          lastTd.appendChild(delBtn);
+        }
       }
     });
-
-    // 表格下方加"新增"按钮
+    // 表格下方加"新增"按钮（不重复）
     var table = tbody.closest('table');
-    if (table && (!table.nextElementSibling || !table.nextElementSibling.classList.contains('add-row-bar'))) {
+    if (table && !table.parentNode.querySelector('.add-row-bar[data-body="' + bodyId + '"]')) {
       var addBar = document.createElement('div');
       addBar.className = 'add-row-bar';
+      addBar.setAttribute('data-body', bodyId);
       addBar.style.cssText = 'margin:4px 0 12px;text-align:left';
       var addBtn = document.createElement('button');
       addBtn.className = 'tb-btn';
@@ -1404,10 +1404,12 @@ function enableEditModeUI() {
 function perTableAddRow(bodyId) {
   var section = sectionFromBodyId(bodyId);
   if (!section) return;
-  var data = JSON.parse(localStorage.getItem('wyx_' + section)) || [];
-  if (data.length === 0 && typeof DataStore !== 'undefined' && Array.isArray(DataStore[section])) {
-    data = DataStore[section].slice();
+  // 直接从 DataStore 取最新数据，不碰 localStorage（防止空数据覆盖）
+  if (typeof DataStore === 'undefined' || !Array.isArray(DataStore[section]) || DataStore[section].length === 0) {
+    showToast('⏳ 数据加载中，请稍后再试', 'warning');
+    return;
   }
+  var data = JSON.parse(JSON.stringify(DataStore[section]));
   // 根据 bodyId 确定默认值
   var defaults = {date:'', amount:0, summary:''};
   if (bodyId === 'capitalBody') defaults = {date:'', name:'', amount:0, method:'银行转账', voucher:''};
@@ -1433,7 +1435,7 @@ function perTableAddRow(bodyId) {
   localStorage.setItem('wyx_' + section, JSON.stringify(data));
   syncDataStore(section, data);
   try { renderAll(); updateSummary(); } catch(e) { console.error(e); }
-  saveToServer(section);
+  if (EDIT_MODE) setTimeout(enableEditModeUI, 50);
   showToast('✅ 已新增一行', 'success');
 }
 
@@ -1465,7 +1467,6 @@ window.onCellEdit = function(td, newVal) {
   // 同步 DataStore
   syncDataStore(section, data);
   try { renderAll(); updateSummary(); } catch(e) {}
-  saveToServer(section);
 };
 
 function sectionFromBodyId(bodyId) {
@@ -1621,12 +1622,6 @@ function addFrontRow() {
     }
   }
   try { renderAll(); updateSummary(); } catch(e) { console.error(e); }
-  // 保存到服务器
-  var apiBase = (typeof API_BASE !== 'undefined' ? API_BASE : (window.location.pathname.startsWith('/finance/') ? '/finance' : ''));
-  fetch(apiBase + '/api/public/save/' + section, {
-    method: 'POST', headers: {'Content-Type':'application/json'},
-    body: JSON.stringify({ data: data, password: '87700020' })
-  }).catch(function(){});
   showToast('✅ 已新增一行', 'success');
 }
 
