@@ -1362,38 +1362,47 @@ var COL_FIELDS = {
 // 给所有数据行加上 data-idx 和删除按钮，以及表下方的"新增"按钮
 function enableEditModeUI() {
   if (!EDIT_MODE) return;
-  document.querySelectorAll('.data-table tbody').forEach(function(tbody) {
-    var bodyId = tbody.id;
-    if (!COL_FIELDS[bodyId]) return;
-    // 清理旧的 data-idx，重新编号
+  document.querySelectorAll('.data-table').forEach(function(table) {
+    var tbody = table.querySelector('tbody');
+    if (!tbody || !COL_FIELDS[tbody.id]) return;
+    // 添加"操作"表头（仅一次）
+    var thead = table.querySelector('thead');
+    if (thead && !thead.querySelector('.op-head')) {
+      var th = document.createElement('th');
+      th.className = 'op-head';
+      th.textContent = '操作';
+      th.style.cssText = 'width:50px;text-align:center';
+      thead.querySelector('tr').appendChild(th);
+    }
+    // 给每行加独立"操作"列
     var rows = tbody.querySelectorAll('tr:not(:last-child)');
     rows.forEach(function(tr, idx) {
       tr.setAttribute('data-idx', idx);
-      var lastTd = tr.querySelector('td:last-child');
-      if (lastTd) {
-        if (!lastTd.querySelector('.del-btn')) {
-          var delBtn = document.createElement('button');
-          delBtn.className = 'del-btn';
-          delBtn.textContent = '🗑️';
-          delBtn.style.cssText = 'background:none;border:none;cursor:pointer;font-size:14px;padding:2px 6px;opacity:0.6;margin-left:4px';
-          delBtn.title = '删除此行';
-          delBtn.onclick = function(e) { e.stopPropagation(); deleteRow(bodyId, idx); };
-          lastTd.appendChild(delBtn);
-        }
+      if (!tr.querySelector('.op-cell')) {
+        var opTd = document.createElement('td');
+        opTd.className = 'op-cell';
+        opTd.style.cssText = 'text-align:center;white-space:nowrap';
+        var delBtn = document.createElement('button');
+        delBtn.className = 'del-btn';
+        delBtn.textContent = '🗑️';
+        delBtn.style.cssText = 'background:none;border:none;cursor:pointer;font-size:14px;padding:2px 6px;opacity:0.6';
+        delBtn.title = '删除此行';
+        delBtn.onclick = function(e) { e.stopPropagation(); deleteRow(tbody.id, idx); };
+        opTd.appendChild(delBtn);
+        tr.appendChild(opTd);
       }
     });
-    // 表格下方加"新增"按钮（不重复）
-    var table = tbody.closest('table');
-    if (table && !table.parentNode.querySelector('.add-row-bar[data-body="' + bodyId + '"]')) {
+    // 表格下方"新增"按钮
+    if (!table.parentNode.querySelector('.add-row-bar[data-body="' + tbody.id + '"]')) {
       var addBar = document.createElement('div');
       addBar.className = 'add-row-bar';
-      addBar.setAttribute('data-body', bodyId);
+      addBar.setAttribute('data-body', tbody.id);
       addBar.style.cssText = 'margin:4px 0 12px;text-align:left';
       var addBtn = document.createElement('button');
       addBtn.className = 'tb-btn';
       addBtn.innerHTML = '＋ 新增';
       addBtn.style.cssText = 'background:#22d3ee;color:#fff;border:none;font-size:0.72rem;padding:4px 10px;cursor:pointer;border-radius:3px';
-      addBtn.onclick = function() { perTableAddRow(bodyId); };
+      addBtn.onclick = function() { perTableAddRow(tbody.id); };
       addBar.appendChild(addBtn);
       table.parentNode.insertBefore(addBar, table.nextSibling);
     }
