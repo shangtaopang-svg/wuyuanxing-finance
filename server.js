@@ -285,6 +285,8 @@ const PUBLIC_SECTIONS = {
   capital: { fields: ['date','name','amount','method','voucher'] },
   incomeExpense: { fields: ['date','type','summary','income','expense','balance','invoices'] },
   income: { fields: ['date','category','amount','source','voucher'] },
+  pettyDraw: { fields: ['date','person','type','amount','account','accountName','summary'] },
+  pettyWrite: { fields: ['date','person','type','amount','summary','voucher'] },
   pettyCash: { fields: ['date','person','type','amount','summary','voucher'] },
   receivable: { fields: ['date','party','amount','reason','status'] },
   asset: { fields: ['date','name','amount','location','status'] },
@@ -301,7 +303,7 @@ Object.keys(PUBLIC_SECTIONS).forEach(function(key) {
     try {
       var cfg = PUBLIC_SECTIONS[key];
       var table = key === 'incomeExpense' ? 'income_expense' : key === 'pettyCash' ? 'petty_cash' : key === "baseExpense" ? "base_expense" : key === "bankFlow" ? "bank_flow" : key === "companyInfo" ? "company_info" : key === "bankAccounts" ? "bank_accounts" : key;
-      var data = query("SELECT " + cfg.fields.join(',') + " FROM " + table + " ORDER BY id");
+      var sql = "SELECT " + cfg.fields.join(',') + " FROM " + table; if (key === 'pettyDraw') sql += " WHERE type='领用'"; else if (key === 'pettyWrite') sql += " WHERE type='核销'"; var data = query(sql + " ORDER BY id");
       res.json(data);
     } catch(e) { res.json([]); }
   });
