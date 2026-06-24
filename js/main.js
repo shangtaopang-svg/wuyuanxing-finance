@@ -616,11 +616,15 @@ function renderChart3b() {
 
 // ④ 备用金图表
 function renderChart4a() {
-  var data = DataStore.pettyCash || DataStore._pettyCashFlat || [];
-  var draw = data.filter(function(r){return r.type==='领用'}).reduce(function(s,r){return s+(r.amount||0);},0);
-  var wo = data.filter(function(r){return r.type==='核销'}).reduce(function(s,r){return s+(r.amount||0);},0);
-  makeChart('chart4a', 'bar', ['领用','核销'], [
-    { data: [draw, wo], backgroundColor: ['#f39c12','#27ae60'], borderColor: '#000', borderWidth: 2 }
+  var allDr = DataStore.pettyDraw||[], allWr = DataStore.pettyWrite||[];
+  var ps = ['任海涛','庞尚韬'];
+  var dr = ps.map(function(p){return allDr.filter(function(r){return r.person===p;}).reduce(function(s,r){return s+Number(r.amount||0);},0);});
+  var wr = ps.map(function(p){return allWr.filter(function(r){return r.person===p;}).reduce(function(s,r){return s+Number(r.amount||0);},0);});
+  var bl = dr.map(function(d,i){return d-wr[i];});
+  makeChart('chart4a', 'bar', ps, [
+    {label:'领用金额',data:dr,backgroundColor:'#D35400',borderColor:'#000',borderWidth:2},
+    {label:'核销金额',data:wr,backgroundColor:'#27ae60',borderColor:'#000',borderWidth:2},
+    {label:'退补金额',data:bl,backgroundColor:'#3498db',borderColor:'#000',borderWidth:2}
   ]);
 }
 function renderChart4b() {
