@@ -1179,17 +1179,14 @@ document.addEventListener('DOMContentLoaded', function() {
       try {
         var d = JSON.parse(xhr.responseText) || [];
         if (typeof DataStore === 'undefined') { pubLoaded++; return; }
-        var localData = JSON.parse(localStorage.getItem('wyx_' + s)) || [];
-        var useData = localData.length > 0 ? localData : d;
+        // 初始加载始终用服务器数据
         if (s === 'pettyCash') {
-          DataStore.pettyCash = { ren: useData.filter(function(x){return x.person==='任海涛';}), pang: useData.filter(function(x){return x.person==='庞尚韬';}) };
-          DataStore._pettyCashFlat = useData;
+          DataStore.pettyCash = { ren: d.filter(function(x){return x.person==='任海涛';}), pang: d.filter(function(x){return x.person==='庞尚韬';}) };
+          DataStore._pettyCashFlat = d;
         } else {
-          DataStore[s] = useData;
+          DataStore[s] = d;
         }
-        if (localData.length === 0 && d.length > 0) {
-          localStorage.setItem('wyx_' + s, JSON.stringify(d));
-        }
+        if (d.length > 0) localStorage.setItem('wyx_' + s, JSON.stringify(d));
       } catch(e) {}
       pubLoaded++;
       if (pubLoaded === pubSections.length) { try { renderAll(); } catch(e) { console.error(e); } updateSummary(); showLoading(false); setTimeout(animateSummaryNumbers, 400); setTimeout(renderCharts, 100); }
