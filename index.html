@@ -412,10 +412,11 @@ function showToast(msg, type) {
       <div class="panel-header"><h2>👨‍🌾 坪坝村农户种苗/农资台账</h2></div>
       <div class="table-empty" id="empty15" style="display:none"><span class="empty-icon">📭</span><span class="empty-text">暂无数据</span></div>
 
-      <!-- 图表 -->
+      <!-- ====== 🌱 种苗图表 ====== -->
+      <h3 style="font-size:0.9rem;color:#2d5a27;margin:8px 0 4px;border-left:4px solid #2d5a27;padding-left:10px">🌱 党参种苗</h3>
       <div class="chart-row">
-        <div class="chart-card"><h4>🌱 种苗：应收/已收/未收</h4><div class="chart-box"><canvas id="chart15a"></canvas></div></div>
-        <div class="chart-card"><h4>🧪 农资：应收/已收/未收</h4><div class="chart-box"><canvas id="chart15b"></canvas></div></div>
+        <div class="chart-card"><h4>📊 种苗收款状态</h4><div class="chart-box"><canvas id="chart15a"></canvas></div></div>
+        <div class="chart-card"><h4>📈 各农户种苗应收/已收/未收</h4><div class="chart-box"><canvas id="chart15b"></canvas></div></div>
       </div>
 
       <!-- ====== 党参种苗账单 ====== -->
@@ -434,6 +435,13 @@ function showToast(msg, type) {
           </tr></thead>
           <tbody id="seedlingBody"></tbody>
         </table>
+      </div>
+
+      <!-- ====== 🧪 农资图表 ====== -->
+      <h3 style="font-size:0.9rem;color:#b8860b;margin:16px 0 4px;border-left:4px solid #b8860b;padding-left:10px">🧪 党参农资</h3>
+      <div class="chart-row">
+        <div class="chart-card"><h4>📊 农资收款状态</h4><div class="chart-box"><canvas id="chart15c"></canvas></div></div>
+        <div class="chart-card"><h4>📈 各农户农资应收/已收/未收</h4><div class="chart-box"><canvas id="chart15d"></canvas></div></div>
       </div>
 
       <!-- ====== 党参农资账单 ====== -->

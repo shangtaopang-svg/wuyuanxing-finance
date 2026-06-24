@@ -385,7 +385,7 @@ function renderCharts() {
   else if (id === 'tab8') { renderChart8a(); renderChart8b(); }
   else if (id === 'tab9') { renderChart9a(); renderChart9b(); }
   else if (id === "tab14") { renderChart14a(); renderChart14b(); }
-  else if (id === "tab15") { renderChart15a(); renderChart15b(); }
+  else if (id === "tab15") { renderChart15a(); renderChart15b(); renderChart15c(); renderChart15d(); }
 }
 
 function makeChart(id, type, labels, datasets, opts) {
@@ -1202,31 +1202,105 @@ function renderFarmer() {
 }
 function renderChart15a() {
   var data = DataStore.seedlingBill || [];
-  if (!data.length) return;
-  var total = 0, prepaid = 0, unpaid = 0;
-  data.forEach(function(r){
-    if (r.is_total) return;
-    total += r.total_amount || 0;
-    prepaid += r.prepaid || 0;
-    unpaid += r.unpaid || 0;
-  });
-  makeChart('chart15a', 'doughnut', ['已收(预付款)','未收'], [
+  var items = data.filter(function(r){ return !r.is_total && !r.is_subtotal; });
+  if (!items.length) return;
+  var prepaid = 0, unpaid = 0;
+  items.forEach(function(r){ prepaid += r.prepaid||0; unpaid += r.unpaid||0; });
+  makeChart('chart15a', 'doughnut', ['✅ 已收(预付款)','❌ 未收'], [
     { data: [prepaid, unpaid], backgroundColor: ['#27ae60','#e53e3e'], borderColor: '#fff', borderWidth: 2 }
   ]);
 }
 function renderChart15b() {
-  var data = DataStore.materialsBill || [];
-  if (!data.length) return;
-  var total = 0, paid = 0, unpaid = 0;
-  data.forEach(function(r){
-    if (r.is_total) return;
-    total += r.total_amount || 0;
-    paid += r.paid || 0;
-    unpaid += r.unpaid || 0;
+  var data = DataStore.seedlingBill || [];
+  var items = data.filter(function(r){ return !r.is_total && !r.is_subtotal; });
+  if (!items.length) return;
+  var labels = [], paid = [], unpaid = [];
+  // Use first 15 farmers max
+  items.slice(0, 15).forEach(function(r){
+    labels.push(r.name || r.seq || '?');
+    paid.push(r.prepaid || 0);
+    unpaid.push(r.unpaid || 0);
   });
-  makeChart('chart15b', 'doughnut', ['已收款','未收款'], [
+  var pctData = paid.map(function(p,i){ return p + unpaid[i] > 0 ? (p / (p+unpaid[i]) * 100).toFixed(0) : 0; });
+  var mixData = labels.map(function(l,i){
+    return { x: l, paid: paid[i], unpaid: unpaid[i], pct: pctData[i] };
+  });
+  makeChart('chart15b', 'bar', labels, [
+    { label: '已收(预付款)', data: paid, backgroundColor: '#27ae60' },
+    { label: '未收', data: unpaid, backgroundColor: '#e53e3e' }
+  ], {
+    plugins: {
+      tooltip: { callbacks: { label: function(ctx){
+        var idx = ctx.dataIndex;
+        return ctx.dataset.label + ': ¥' + (ctx.raw||0).toLocaleString() + ' (' + pctData[idx] + '%)';
+      }}}
+    },
+    scales: {
+      x: { stacked: false, grid: { display: false }, ticks: { font: { size: 8 } } },
+      y: { stacked: false, ticks: { callback: function(v){ return '¥' + (v/1000).toFixed(0) + 'k'; }, font: { size: 8 } } }
+    }
+  });
+  // Add percentage labels on top via datalabels plugin
+  var chart = charts.chart15b;
+  if (chart) {
+    // Check if datalabels plugin is available
+    try {
+      chart.options.plugins.datalabels = {
+        display: function(ctx){ return ctx.datasetIndex === 0; },
+        formatter: function(v, ctx){ var i=ctx.dataIndex; return paid[i]+unpaid[i]>0 ? (paid[i]/(paid[i]+unpaid[i])*100).toFixed(0)+'%' : ''; },
+        color: '#1a1a1a', font: { weight: 'bold', size: 9 }, anchor: 'end', align: 'end'
+      };
+      chart.update();
+    } catch(e){}
+  }
+}
+function renderChart15c() {
+  var data = DataStore.materialsBill || [];
+  var items = data.filter(function(r){ return !r.is_total && !r.is_subtotal; });
+  if (!items.length) return;
+  var paid = 0, unpaid = 0;
+  items.forEach(function(r){ paid += r.paid||0; unpaid += r.unpaid||0; });
+  makeChart('chart15c', 'doughnut', ['✅ 已收款','❌ 未收款'], [
     { data: [paid, unpaid], backgroundColor: ['#2980b9','#e67e22'], borderColor: '#fff', borderWidth: 2 }
   ]);
+}
+function renderChart15d() {
+  var data = DataStore.materialsBill || [];
+  var items = data.filter(function(r){ return !r.is_total && !r.is_subtotal; });
+  if (!items.length) return;
+  var labels = [], paid = [], unpaid = [];
+  items.slice(0, 15).forEach(function(r){
+    labels.push(r.name || r.seq || '?');
+    paid.push(r.paid || 0);
+    unpaid.push(r.unpaid || 0);
+  });
+  var pctData = paid.map(function(p,i){ return p + unpaid[i] > 0 ? (p / (p+unpaid[i]) * 100).toFixed(0) : 0; });
+  makeChart('chart15d', 'bar', labels, [
+    { label: '已收款', data: paid, backgroundColor: '#2980b9' },
+    { label: '未收款', data: unpaid, backgroundColor: '#e67e22' }
+  ], {
+    plugins: {
+      tooltip: { callbacks: { label: function(ctx){
+        var idx = ctx.dataIndex;
+        return ctx.dataset.label + ': ¥' + (ctx.raw||0).toLocaleString() + ' (' + pctData[idx] + '%)';
+      }}}
+    },
+    scales: {
+      x: { stacked: false, grid: { display: false }, ticks: { font: { size: 8 } } },
+      y: { stacked: false, ticks: { callback: function(v){ return '¥' + (v/1000).toFixed(0) + 'k'; }, font: { size: 8 } } }
+    }
+  });
+  var chart = charts.chart15d;
+  if (chart) {
+    try {
+      chart.options.plugins.datalabels = {
+        display: function(ctx){ return ctx.datasetIndex === 0; },
+        formatter: function(v, ctx){ var i=ctx.dataIndex; return paid[i]+unpaid[i]>0 ? (paid[i]/(paid[i]+unpaid[i])*100).toFixed(0)+'%' : ''; },
+        color: '#1a1a1a', font: { weight: 'bold', size: 9 }, anchor: 'end', align: 'end'
+      };
+      chart.update();
+    } catch(e){}
+  }
 }
 function renderSeedlingBill() {
   var data = DataStore.seedlingBill || [];
