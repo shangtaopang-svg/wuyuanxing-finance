@@ -254,6 +254,13 @@ function showToast(msg, type) {
         <div class="chart-card"><h4>📊 领用 vs 核销</h4><div class="chart-box"><canvas id="chart4a"></canvas></div></div>
         <div class="chart-card"><h4>👤 人员占比</h4><div class="chart-box"><canvas id="chart4b"></canvas></div></div>
       </div>
+      <!-- 领用/核销汇总表 -->
+      <div style="margin:10px 0;overflow-x:auto">
+        <table class="data-table" style="min-width:400px">
+          <thead><tr><th>人员</th><th>领用金额</th><th>核销金额</th><th>退补金额</th><th>退补日期</th></tr></thead>
+          <tbody id="pettySummaryBody"></tbody>
+        </table>
+      </div>
       <div class="sub-tabs">
         <button class="sub-tab-btn active" data-sub="sub4a">任海涛</button>
         <button class="sub-tab-btn" data-sub="sub4b">庞尚韬</button>

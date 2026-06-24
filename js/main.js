@@ -196,6 +196,27 @@ function renderIncome() {
 function renderPettyCash() {
   var allDraw = (typeof SERVER_DATA !== 'undefined' && SERVER_DATA.pettyDraw) || DataStore.pettyDraw || [];
   var allWrite = (typeof SERVER_DATA !== 'undefined' && SERVER_DATA.pettyWrite) || DataStore.pettyWrite || [];
+
+  // === 领用/核销汇总表 ===
+  var summaryBody = $('pettySummaryBody');
+  if (summaryBody) {
+    summaryBody.innerHTML = '';
+    var persons = [{key:'ren',name:'任海涛'},{key:'pang',name:'庞尚韬'}];
+    var gd=0,gw=0;
+    persons.forEach(function(p){
+      var draws=allDraw.filter(function(r){return r.person===p.name;});
+      var writes=allWrite.filter(function(r){return r.person===p.name;});
+      var dt=draws.reduce(function(s,r){return s+Number(r.amount||0);},0);
+      var wt=writes.reduce(function(s,r){return s+Number(r.amount||0);},0);
+      gd+=dt;gw+=wt;
+      var allDt=draws.concat(writes).map(function(r){return r.date;}).filter(Boolean).sort();
+      var bd=allDt.length>0?allDt[allDt.length-1].slice(0,10):'—';
+      summaryBody.innerHTML+='<tr><td><strong>'+p.name+'</strong></td><td style="color:#D35400;font-weight:700">'+formatNum(dt)+'</td><td style="color:#27ae60;font-weight:700">'+formatNum(wt)+'</td><td style="color:'+(dt>=wt?'#e53e3e':'#3182ce')+';font-weight:700">'+formatNum(Math.abs(dt-wt))+'</td><td>'+bd+'</td></tr>';
+    });
+    summaryBody.innerHTML+='<tr style="background:var(--bg);font-weight:800"><td>合计</td><td>'+formatNum(gd)+'</td><td>'+formatNum(gw)+'</td><td>'+formatNum(gd-gw)+'</td><td></td></tr>';
+  }
+
+  // === 明细表 ===
   ['ren','pang'].forEach(function(person) {
     var personName = person === 'ren' ? '任海涛' : '庞尚韬';
     var draws = allDraw.filter(function(r){return r.person===personName;});
