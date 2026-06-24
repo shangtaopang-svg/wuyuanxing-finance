@@ -1556,11 +1556,17 @@ function enableInlineEditing() {
     tr.addEventListener('dblclick', function(e) {
       if (!EDIT_MODE) return;
       var td = e.target.closest('td');
-      if (!td || td.querySelector('input,select,button,.del-btn')) return;
+      if (!td || td.querySelector('input,select,button,.del-btn,.op-cell')) return;
       var val = td.textContent.trim().replace(/[¥,]/g, '');
+      // 检测是否是日期字段，自动用日期选择器
+      var trEl = td.closest('tr'), tbody = trEl.closest('tbody');
+      var fields = window.COL_FIELDS && window.COL_FIELDS[tbody.id];
+      var tdIdx = Array.from(trEl.children).indexOf(td);
+      var isDate = fields && fields[tdIdx] && (fields[tdIdx].indexOf('date') >= 0 || fields[tdIdx] === 'month' || fields[tdIdx] === 'payDate');
       var inp = document.createElement('input');
       inp.className = 'editable-input';
-      inp.value = val;
+      inp.type = isDate ? 'date' : 'text';
+      inp.value = isDate ? val.replace(/(\d{4})-(\d{1,2})-(\d{1,2}).*$/, '$1-$2-$3') : val;
       inp.style.width = Math.max(60, td.offsetWidth - 10) + 'px';
       td.textContent = '';
       td.appendChild(inp);
