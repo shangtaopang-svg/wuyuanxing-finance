@@ -1418,11 +1418,28 @@ function confirmFrontImport() {
       if (json.length < 2) { alert('Excel数据为空'); return; }
       var section = document.getElementById('frontImportSection').value;
       var existing = JSON.parse(localStorage.getItem('wyx_' + section)) || [];
+      // 中文列名 -> 英文字段名映射
+      var FIELD_MAP = {
+        '日期':'date','时间':'date','交易时间':'date','领用时间':'date',
+        '月份':'month','发放日期':'payDate',
+        '人员':'person','姓名':'name','员工':'name',
+        '类别':'category','类型':'type','费用类别':'category',
+        '金额':'amount','收入金额':'amount','支出金额':'amount','领用金额':'amount','核销金额':'amount',
+        '收入':'income','支出':'expense','收入金额':'income','支出金额':'expense',
+        '摘要':'summary','说明':'note','备注':'note','事由':'reason',
+        '来源':'source','来源/归处':'source','账户':'account','户名':'accountName','账户名':'accountName',
+        '对方账户':'counterparty_account','对方户名':'counterparty_name','用途':'purpose',
+        '凭证':'voucher','发票':'invoices','单据文件':'docs',
+        '状态':'status','存放地点':'location','资产名称':'name',
+        '欠款方':'party','岗位':'position','基地':'base','支出项目':'item',
+        '出资方式':'method','入账凭据':'voucher'
+      };
       var headers = json[0];
       for (var i = 1; i < json.length; i++) {
         var row = {};
         for (var j = 0; j < headers.length; j++) {
-          row[headers[j]] = json[i][j] || '';
+          var key = FIELD_MAP[headers[j]] || headers[j];
+          row[key] = json[i][j] || '';
         }
         existing.push(row);
       }
