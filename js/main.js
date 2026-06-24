@@ -1206,9 +1206,28 @@ function renderChart15a() {
   if (!items.length) return;
   var total = 0, prepaid = 0, unpaid = 0;
   items.forEach(function(r){ total += r.total_amount||0; prepaid += r.prepaid||0; unpaid += r.unpaid||0; });
-  makeChart('chart15a', 'doughnut', ['✅ 已收(预付款)','❌ 未收'], [
-    { data: [prepaid, unpaid], backgroundColor: ['#27ae60','#e53e3e'], borderColor: '#fff', borderWidth: 2 }
+  var pctPaid = total > 0 ? (prepaid/total*100).toFixed(1) : 0;
+  var pctUnpaid = total > 0 ? (unpaid/total*100).toFixed(1) : 0;
+  makeChart('chart15a', 'doughnut', ['✅ 已收 ¥' + prepaid.toLocaleString(), '❌ 未收 ¥' + unpaid.toLocaleString()], [
+    { data: [prepaid, unpaid], backgroundColor: ['#27ae60','#e53e3e'], borderColor: '#fff', borderWidth: 3 }
   ]);
+  var chart = charts.chart15a;
+  if (chart) {
+    try {
+      chart.options.plugins.legend.labels.font = { size: 13, weight: 'bold' };
+      chart.options.plugins.datalabels = {
+        display: true,
+        formatter: function(v, ctx){
+          var pcts = [pctPaid, pctUnpaid];
+          return pcts[ctx.dataIndex] + '%\n¥' + v.toLocaleString();
+        },
+        color: '#fff', font: { weight: 'bold', size: 14 },
+        anchor: 'center', align: 'center',
+        offset: 0, textAlign: 'center'
+      };
+      chart.update();
+    } catch(e){}
+  }
 }
 function renderChart15b() {
   var data = DataStore.seedlingBill || [];
@@ -1219,9 +1238,9 @@ function renderChart15b() {
   var pctPaid = total > 0 ? (prepaid/total*100).toFixed(1) : 0;
   var pctUnpaid = total > 0 ? (unpaid/total*100).toFixed(1) : 0;
   makeChart('chart15b', 'bar', ['种苗'], [
-    { label: '应收(总金额)', data: [total], backgroundColor: '#f39c12' },
-    { label: '已收(预付款)', data: [prepaid], backgroundColor: '#27ae60' },
-    { label: '未收', data: [unpaid], backgroundColor: '#e53e3e' }
+    { label: '应收(总金额)', data: [total], backgroundColor: '#f39c12', borderColor: '#e67e00', borderWidth: 1 },
+    { label: '已收(预付款)', data: [prepaid], backgroundColor: '#27ae60', borderColor: '#1e8449', borderWidth: 1 },
+    { label: '未收', data: [unpaid], backgroundColor: '#e53e3e', borderColor: '#c0392b', borderWidth: 1 }
   ], {
     plugins: {
       tooltip: { callbacks: { label: function(ctx){ return ctx.dataset.label + ': ¥' + (ctx.raw||0).toLocaleString(); }}}
@@ -1241,10 +1260,10 @@ function renderChart15b() {
           return vals[ctx.datasetIndex] > 0;
         },
         formatter: function(v, ctx){
-          var pcts = [100, pctPaid, pctUnpaid];
-          return pcts[ctx.datasetIndex] + '%';
+          var pcts = ['100%', pctPaid+'%', pctUnpaid+'%'];
+          return pcts[ctx.datasetIndex] + '\n¥' + v.toLocaleString();
         },
-        color: '#fff', font: { weight: 'bold', size: 11 }, anchor: 'center', align: 'center'
+        color: '#fff', font: { weight: 'bold', size: 12 }, anchor: 'center', align: 'center', textAlign: 'center'
       };
       chart.update();
     } catch(e){}
@@ -1256,9 +1275,28 @@ function renderChart15c() {
   if (!items.length) return;
   var total = 0, paid = 0, unpaid = 0;
   items.forEach(function(r){ total += r.total_amount||0; paid += r.paid||0; unpaid += r.unpaid||0; });
-  makeChart('chart15c', 'doughnut', ['✅ 已收款','❌ 未收款'], [
-    { data: [paid, unpaid], backgroundColor: ['#2980b9','#e67e22'], borderColor: '#fff', borderWidth: 2 }
+  var pctPaid = total > 0 ? (paid/total*100).toFixed(1) : 0;
+  var pctUnpaid = total > 0 ? (unpaid/total*100).toFixed(1) : 0;
+  makeChart('chart15c', 'doughnut', ['✅ 已收款 ¥' + paid.toLocaleString(), '❌ 未收款 ¥' + unpaid.toLocaleString()], [
+    { data: [paid, unpaid], backgroundColor: ['#2980b9','#e67e22'], borderColor: '#fff', borderWidth: 3 }
   ]);
+  var chart = charts.chart15c;
+  if (chart) {
+    try {
+      chart.options.plugins.legend.labels.font = { size: 13, weight: 'bold' };
+      chart.options.plugins.datalabels = {
+        display: true,
+        formatter: function(v, ctx){
+          var pcts = [pctPaid, pctUnpaid];
+          return pcts[ctx.dataIndex] + '%\n¥' + v.toLocaleString();
+        },
+        color: '#fff', font: { weight: 'bold', size: 14 },
+        anchor: 'center', align: 'center',
+        offset: 0, textAlign: 'center'
+      };
+      chart.update();
+    } catch(e){}
+  }
 }
 function renderChart15d() {
   var data = DataStore.materialsBill || [];
@@ -1269,9 +1307,9 @@ function renderChart15d() {
   var pctPaid = total > 0 ? (paid/total*100).toFixed(1) : 0;
   var pctUnpaid = total > 0 ? (unpaid/total*100).toFixed(1) : 0;
   makeChart('chart15d', 'bar', ['农资'], [
-    { label: '应收(总金额)', data: [total], backgroundColor: '#f39c12' },
-    { label: '已收款', data: [paid], backgroundColor: '#2980b9' },
-    { label: '未收款', data: [unpaid], backgroundColor: '#e67e22' }
+    { label: '应收(总金额)', data: [total], backgroundColor: '#f39c12', borderColor: '#e67e00', borderWidth: 1 },
+    { label: '已收款', data: [paid], backgroundColor: '#2980b9', borderColor: '#1a5276', borderWidth: 1 },
+    { label: '未收款', data: [unpaid], backgroundColor: '#e67e22', borderColor: '#ca6f1e', borderWidth: 1 }
   ], {
     plugins: {
       tooltip: { callbacks: { label: function(ctx){ return ctx.dataset.label + ': ¥' + (ctx.raw||0).toLocaleString(); }}}
@@ -1290,10 +1328,10 @@ function renderChart15d() {
           return vals[ctx.datasetIndex] > 0;
         },
         formatter: function(v, ctx){
-          var pcts = [100, pctPaid, pctUnpaid];
-          return pcts[ctx.datasetIndex] + '%';
+          var pcts = ['100%', pctPaid+'%', pctUnpaid+'%'];
+          return pcts[ctx.datasetIndex] + '\n¥' + v.toLocaleString();
         },
-        color: '#fff', font: { weight: 'bold', size: 11 }, anchor: 'center', align: 'center'
+        color: '#fff', font: { weight: 'bold', size: 12 }, anchor: 'center', align: 'center', textAlign: 'center'
       };
       chart.update();
     } catch(e){}
