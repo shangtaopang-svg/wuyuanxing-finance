@@ -302,7 +302,7 @@ Object.keys(PUBLIC_SECTIONS).forEach(function(key) {
   app.get('/api/public/' + key, function(req, res) {
     try {
       var cfg = PUBLIC_SECTIONS[key];
-      var table = key === 'incomeExpense' ? 'income_expense' : key === 'pettyCash' ? 'petty_cash' : key === "baseExpense" ? "base_expense" : key === "bankFlow" ? "bank_flow" : key === "companyInfo" ? "company_info" : key === "bankAccounts" ? "bank_accounts" : key;
+      var table = key === 'incomeExpense' ? 'income_expense' : key === 'pettyCash' || key === 'pettyDraw' || key === 'pettyWrite' ? 'petty_cash' : key === "baseExpense" ? "base_expense" : key === "bankFlow" ? "bank_flow" : key === "companyInfo" ? "company_info" : key === "bankAccounts" ? "bank_accounts" : key;
       var sql = "SELECT " + cfg.fields.join(',') + " FROM " + table; if (key === 'pettyDraw') sql += " WHERE type='领用'"; else if (key === 'pettyWrite') sql += " WHERE type='核销'"; var data = query(sql + " ORDER BY id");
       res.json(data);
     } catch(e) { res.json([]); }
