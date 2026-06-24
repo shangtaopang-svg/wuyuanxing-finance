@@ -1559,21 +1559,9 @@ function deleteRow(bodyId, idx) {
   localStorage.setItem('wyx_' + section, JSON.stringify(data));
   syncDataStore(section, data);
   try { renderAll(); updateSummary(); } catch(e) { console.error(e); }
-  saveToServer(section);
-  showToast('✅ 已删除', 'success');
+  showToast('✅ 已删除（点💾保存存到服务器）', 'success');
 }
 
-function saveToServer(section) {
-  var data = JSON.parse(localStorage.getItem('wyx_' + section)) || [];
-  // 安全保护：如果本地数据为空或只有1行空白行，不从服务器拉取最新的再合并（跳过保存，保留服务器数据完整）
-  if (data.length <= 1 && typeof DataStore !== 'undefined' && Array.isArray(DataStore[section]) && DataStore[section].length > 1) {
-    return; // 本地数据明显不完整，跳过保存防止覆盖
-  }
-  var apiBase = (typeof API_BASE !== 'undefined' ? API_BASE : (window.location.pathname.startsWith('/finance/') ? '/finance' : ''));
-  fetch(apiBase + '/api/public/save/' + section, {
-    method: 'POST', headers: {'Content-Type':'application/json'},
-    body: JSON.stringify({ data: data, password: '87700020' })
-  }).catch(function(){});
 }
 
 function enableInlineEditing() {
@@ -1779,22 +1767,6 @@ function confirmFrontImport() {
       }
       closeFrontImport();
       try { renderAll(); updateSummary(); } catch(e) { console.error(e); }
-      // 保存到服务器（合并 DataStore 数据，避免覆盖）
-      var saveData = existing;
-      if (saveData.length === json.length - 1 && typeof DataStore !== 'undefined' && Array.isArray(DataStore[section]) && DataStore[section].length > saveData.length) {
-        saveData = JSON.parse(JSON.stringify(DataStore[section]));
-        existing.forEach(function(r) {
-          var dup = saveData.some(function(sr) { return JSON.stringify(sr) === JSON.stringify(r); });
-          if (!dup) saveData.push(r);
-        });
-      }
-      var apiBase = (typeof API_BASE !== 'undefined' ? API_BASE : (window.location.pathname.startsWith('/finance/') ? '/finance' : ''));
-      fetch(apiBase + '/api/public/save/' + section, {
-        method: 'POST',
-        headers: {'Content-Type':'application/json'},
-        body: JSON.stringify({ data: saveData, password: '87700020' })
-      }).catch(function(){});
-      showToast('✅ 导入' + (json.length-1) + '条成功', 'success');
     } catch(err) {
       alert('导入失败: ' + err.message);
     }
