@@ -562,6 +562,21 @@ function openBaseFull(base, color, total, itemsJson) {
     ]);
   }, 100);
 }
+function openAgentFull(data, total) {
+  var modal = document.getElementById('baseFullModal');
+  var overlay = document.getElementById('baseFullOverlay');
+  var title = document.getElementById('baseFullTitle');
+  var body = document.getElementById('baseFullBody');
+  if (!modal || !body) return;
+  title.textContent = '👤 杨德彪经手账单 · ' + formatNum(total);
+  var rows = data.map(function(r, idx){
+    return '<tr'+(idx%2===0?' style="background:#fafafa"':'')+'><td style="padding:4px 8px;font-size:0.7rem">'+(r.item||'')+'</td><td style="padding:4px 8px;font-size:0.68rem">'+(r.quantity||'')+'</td><td style="padding:4px 8px;font-size:0.68rem">¥'+(r.unit_price||0).toFixed(2)+'</td><td class="amount" style="padding:4px 8px;font-size:0.72rem;text-align:right">'+(r.amount?formatNum(r.amount):'—')+'</td><td class="amount" style="padding:4px 8px;font-size:0.72rem;text-align:right;font-weight:700;color:#8e44ad">'+(r.subtotal?formatNum(r.subtotal):'—')+'</td><td style="padding:4px 8px;font-size:0.6rem;color:#888">'+(r.notes||'')+'</td></tr>';
+  }).join('');
+  body.innerHTML = '<h4 style="font-size:0.9rem;color:#8e44ad;margin:0 0 12px">👤 杨德彪经手账单 · 合计'+formatNum(total)+'</h4>' +
+    '<div style="overflow-x:auto"><table class="data-table" style="font-size:0.7rem;min-width:500px"><thead><tr><th>项目</th><th>数量(kg)</th><th>单价</th><th>金额</th><th>小计</th><th>备注</th></tr></thead><tbody>' + rows + '</tbody></table></div>';
+  modal.style.display = 'block';
+  overlay.style.display = 'block';
+}
 function closeBaseFull() {
   document.getElementById('baseFullModal').style.display = 'none';
   document.getElementById('baseFullOverlay').style.display = 'none';
@@ -704,12 +719,18 @@ function renderBaseExpense() {
     var card = e.target.closest('.base-card');
     if (!card) return;
     var base = card.getAttribute('data-base');
-    var color = card.getAttribute('data-color');
-    var total = parseFloat(card.getAttribute('data-total') || '0');
-    var items = [];
-    var baseName = base || '';
-    allData.forEach(function(r){ if (r.base === baseName) items.push({date:r.date,category:r.category,item:r.item,amount:r.amount,note:r.note,invoices:r.invoices}); });
-    openBaseFull(base, color, total, items);
+    if (base) {
+      var color = card.getAttribute('data-color');
+      var total = parseFloat(card.getAttribute('data-total') || '0');
+      var items = [];
+      allData.forEach(function(r){ if (r.base === base) items.push({date:r.date,category:r.category,item:r.item,amount:r.amount,note:r.note,invoices:r.invoices}); });
+      openBaseFull(base, color, total, items);
+    } else {
+      // 杨德彪卡片
+      var ad = DataStore.agentExpenses || [];
+      var total2 = ad.reduce(function(s,r){return s+(r.amount||0);},0);
+      openAgentFull(ad, total2);
+    }
   };
 }
 
