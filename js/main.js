@@ -96,7 +96,10 @@ document.querySelectorAll('.tab-btn').forEach(function(btn) {
     $(btn.dataset.tab).classList.add('active');
     window.frontSection = TAB_SECTION_MAP[btn.dataset.tab] || 'capital';
     // 触发图表重绘
-    setTimeout(function() { renderCharts(); }, 100);
+    setTimeout(function() {
+      renderCharts();
+      if (id === 'tab10') renderBaseExpense();
+    }, 100);
   });
 });
 
@@ -801,6 +804,7 @@ function renderCharts() {
   else if (id === 'tab7') { renderChart7a(); renderChart7b(); }
   else if (id === 'tab8') { renderChart8a(); renderChart8b(); }
   else if (id === 'tab9') { renderChart9a(); renderChart9b(); }
+  else if (id === 'tab10') { }
   else if (id === "tab14") { renderChart14a(); renderChart14b(); }
   else if (id === "tab15") { renderChart15a(); renderChart15b(); renderChart15c(); renderChart15d(); }
 }
