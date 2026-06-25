@@ -563,6 +563,23 @@ function openBaseFull(base, color, total, itemsJson) {
     ]);
   }, 100);
 }
+function openCatDetail(cat, color, total, itemsJson, baseName) {
+  var items = JSON.parse(decodeURIComponent(itemsJson));
+  var modal = document.getElementById('baseFullModal');
+  var overlay = document.getElementById('baseFullOverlay');
+  var title = document.getElementById('baseFullTitle');
+  var body = document.getElementById('baseFullBody');
+  if (!modal || !body) return;
+  title.textContent = cat + ' · ' + baseName + ' · ' + formatNum(total);
+  var rows = items.map(function(r, i){
+    var n = (r.note||'').replace(/公司账户/g,'🏦').replace(/庞尚韬备用金/g,'💰').replace(/任海涛/g,'👤');
+    return '<tr'+(i%2===0?' style="background:#fafafa"':'')+'><td style="padding:5px 8px;font-size:0.72rem">'+(r.date||'')+'</td><td style="padding:5px 8px;font-size:0.72rem">'+(r.item||'')+'</td><td class="amount" style="padding:5px 8px;font-size:0.75rem;text-align:right">'+formatNum(r.amount)+'</td><td style="padding:5px 8px;font-size:0.65rem;color:#888">'+n+'</td></tr>';
+  }).join('');
+  body.innerHTML = '<h4 style="font-size:0.9rem;color:'+color+';margin:0 0 12px">'+cat+' · '+baseName+' · 合计'+formatNum(total)+'</h4>' +
+    '<div style="overflow-x:auto"><table class="data-table" style="font-size:0.72rem;width:100%"><thead><tr><th style="width:80px">日期</th><th>项目</th><th style="width:80px">金额</th><th>说明</th></tr></thead><tbody>' + rows + '</tbody></table></div>';
+  modal.style.display = 'block';
+  overlay.style.display = 'block';
+}
 function openAgentFull(data, total) {
   var modal = document.getElementById('baseFullModal');
   var overlay = document.getElementById('baseFullOverlay');
@@ -638,7 +655,7 @@ function renderBaseExpense() {
       '<div style="font-size:0.55rem;opacity:0.6;margin-top:10px;border-top:1px solid rgba(255,255,255,0.2);padding-top:6px;width:80%">hover 查看详情 →</div>' +
     '</div>';
 
-    // 分类封面方块（悬浮展开详情）
+    // 分类卡片（8个独立封面，点击进入详情）
     var catTileHtml = '';
     categories.forEach(function(cat){
       var catItems = items.filter(function(r){ return (r.category||'其他') === cat; });
@@ -646,31 +663,19 @@ function renderBaseExpense() {
       var catAmt = catItems.reduce(function(s,r){return s+(r.amount||0);},0);
       var catPct = total > 0 ? (catAmt/total*100).toFixed(1) : 0;
       var bg = catColors[cat] || '#95a5a6';
-      var tileId = 'tile_'+bi+'_'+cat.replace(/[^0-9a-z]/gi,'_');
+      var catLabel = cat;
+      var catIcon = {'土地流转':'🏞️','土地处理':'🚜','种苗采购':'🌱','种苗运输':'🚛','农资':'🧪','人工费用':'👷','其他':'📦'}[cat] || '📋';
+      var jsonItems = encodeURIComponent(JSON.stringify(catItems.map(function(r){return {date:r.date,item:r.item,amount:r.amount,note:r.note,invoices:r.invoices};})));
 
-      var detailRows = catItems.map(function(r){
-        var note = (r.note||'').replace(/公司账户/g,'🏦').replace(/庞尚韬备用金/g,'💰').replace(/任海涛/g,'👤');
-        return '<div style="display:flex;align-items:center;padding:2px 4px;border-bottom:1px solid rgba(255,255,255,0.06);font-size:0.5rem;gap:4px">' +
-          '<span style="min-width:44px;color:#aaa">'+(r.date||'')+'</span>' +
-          '<span style="flex:1;color:#fff">'+(r.item||'')+'</span>' +
-          '<span style="min-width:40px;text-align:right;color:'+bg+';font-weight:700">'+formatNum(r.amount)+'</span>' +
-          '<span style="min-width:24px;font-size:0.4rem;color:#888">'+note+'</span></div>';
-      }).join('');
-
-      catTileHtml += '<div style="position:relative;overflow:hidden;border-radius:6px;cursor:pointer;background:'+bg+'22;border:1px solid '+bg+'44" ' +
-        'onmouseenter="this.querySelector(\'.tile-cover\').style.transform=\'translateX(-100%)\';this.querySelector(\'.tile-detail\').style.transform=\'translateX(0)\'" ' +
-        'onmouseleave="this.querySelector(\'.tile-cover\').style.transform=\'translateX(0)\';this.querySelector(\'.tile-detail\').style.transform=\'translateX(100%)\'">' +
-        '<div class="tile-cover" style="transition:transform 0.3s;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:6px 2px;text-align:center">' +
-          '<div style="font-size:0.6rem;font-weight:700;color:'+bg+'">'+cat.replace('及运输','')+'</div>' +
-          '<div style="font-size:0.75rem;font-weight:800;color:#fff;margin-top:2px">'+formatNum(catAmt)+'</div>' +
-          '<div style="font-size:0.45rem;color:#888">'+catItems.length+'笔 · '+catPct+'%</div>' +
-        '</div>' +
-        '<div class="tile-detail" style="position:absolute;inset:0;transition:transform 0.3s;transform:translateX(100%);overflow:hidden;background:'+bg+'22;padding:4px">' +
-          '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:2px">' +
-            '<span style="font-size:0.55rem;font-weight:700;color:'+bg+'">'+cat+'</span>' +
-            '<span style="font-size:0.5rem;color:#888">'+formatNum(catAmt)+'</span>' +
-          '</div>' +
-          '<div style="overflow-y:auto;max-height:120px">'+detailRows+'</div>' +
+      catTileHtml += '<div style="background:'+bg+'11;border:1px solid '+bg+'44;border-radius:8px;overflow:hidden;cursor:pointer;transition:all 0.2s" ' +
+        'onclick="openCatDetail(\''+catLabel+'\',\''+bg+'\','+catAmt+',\''+jsonItems+'\',\''+base+'\')" ' +
+        'onmouseover="this.style.transform=\'translateY(-2px)\';this.style.boxShadow=\'0 4px 12px '+bg+'33\'" ' +
+        'onmouseout="this.style.transform=\'\';this.style.boxShadow=\'\'">' +
+        '<div style="display:flex;flex-direction:column;align-items:center;justify-content:center;padding:8px 4px;text-align:center">' +
+          '<div style="font-size:1.1rem">'+catIcon+'</div>' +
+          '<div style="font-size:0.6rem;font-weight:700;color:'+bg+';margin-top:2px">'+catLabel+'</div>' +
+          '<div style="font-size:0.72rem;font-weight:800;color:#fff;margin-top:2px">'+formatNum(catAmt)+'</div>' +
+          '<div style="font-size:0.45rem;color:#888;margin-top:1px">'+catItems.length+'笔 · '+catPct+'%</div>' +
         '</div></div>';
     });
 
