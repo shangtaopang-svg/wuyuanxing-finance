@@ -497,6 +497,60 @@ function closeFullModal() {
   var modal = document.getElementById('fullTableModal');
   if (modal) modal.style.display = 'none';
 }
+// 基地全屏查看
+function openBaseFull(base, color, total, itemsJson) {
+  var items = typeof itemsJson === 'string' ? JSON.parse(itemsJson) : itemsJson;
+  var modal = document.getElementById('baseFullModal');
+  var overlay = document.getElementById('baseFullOverlay');
+  var title = document.getElementById('baseFullTitle');
+  var body = document.getElementById('baseFullBody');
+  if (!modal || !body) return;
+  title.textContent = '🌿 ' + base + ' · ' + formatNum(total);
+
+  // Build categories from items
+  var cats = ['土地流转','土地处理','种苗采购','种苗运输','化肥农药','人工费用','其他'];
+  var catColors = {'土地流转':'#8B4513','土地处理':'#D2691E','种苗采购':'#27ae60','种苗运输':'#2ecc71','化肥农药':'#f39c12','人工费用':'#e74c3c','其他':'#95a5a6'};
+  var catTotals = {};
+  cats.forEach(function(c){ catTotals[c] = 0; });
+  items.forEach(function(r){ var cat=r.category||'其他'; if(catTotals[cat]!==undefined) catTotals[cat]+=r.amount||0; });
+
+  var catRows = cats.filter(function(c){return catTotals[c]>0;}).map(function(c){
+    return '<tr><td style="padding:6px 12px;font-size:0.8rem;border-bottom:1px solid #f0ede8"><span style="display:inline-block;width:10px;height:10px;border-radius:2px;background:'+(catColors[c]||'#95a5a6')+';margin-right:8px"></span>'+c+'</td><td class="amount" style="padding:6px 12px;font-size:0.85rem;text-align:right;border-bottom:1px solid #f0ede8">'+formatNum(catTotals[c])+'</td><td style="padding:6px 12px;font-size:0.75rem;text-align:center;color:#888;border-bottom:1px solid #f0ede8">'+(total>0?(catTotals[c]/total*100).toFixed(1)+'%':'')+'</td></tr>';
+  }).join('');
+
+  var detailRows = items.map(function(r, i){
+    return '<tr'+(i%2===0?' style="background:#fafafa"':'')+'><td style="padding:5px 8px;font-size:0.72rem">'+(r.date||'')+'</td><td style="padding:5px 8px;font-size:0.68rem;color:'+(catColors[r.category]||'#666')+'">'+(r.category||'')+'</td><td style="padding:5px 8px;font-size:0.72rem">'+(r.item||'')+'</td><td class="amount" style="padding:5px 8px;font-size:0.75rem;text-align:right">'+formatNum(r.amount)+'</td><td style="padding:5px 8px;font-size:0.65rem;color:#888">'+(r.note||'')+'</td></tr>';
+  }).join('');
+
+  body.innerHTML = '<div style="display:flex;gap:20px;flex-wrap:wrap;margin-bottom:24px">' +
+    '<div style="flex:1;min-width:250px;height:250px"><canvas id="baseFullChart"></canvas></div>' +
+    '<div style="flex:1;min-width:250px"><h4 style="font-size:0.85rem;color:'+color+';margin:0 0 8px">📊 成本构成</h4>' +
+      '<table style="width:100%;border-collapse:collapse">' +
+        '<thead><tr style="border-bottom:2px solid '+color+'"><th style="padding:6px 12px;font-size:0.75rem;color:'+color+';text-align:left">类别</th><th style="padding:6px 12px;font-size:0.75rem;color:'+color+';text-align:right">金额</th><th style="padding:6px 12px;font-size:0.75rem;color:'+color+';text-align:center">占比</th></tr></thead>' +
+        '<tbody>' + catRows + '<tr style="font-weight:700;background:'+color+'22"><td style="padding:6px 12px;font-size:0.8rem">合计</td><td class="amount" style="padding:6px 12px;font-size:0.85rem;text-align:right">'+formatNum(total)+'</td><td style="padding:6px 12px;font-size:0.8rem;text-align:center">100%</td></tr></tbody>' +
+      '</table>' +
+    '</div></div>' +
+    '<h4 style="font-size:0.85rem;color:'+color+';margin:0 0 8px">📋 支出明细</h4>' +
+    '<div style="overflow-x:auto"><table class="data-table" style="font-size:0.72rem;min-width:500px"><thead><tr><th>日期</th><th>类别</th><th>项目</th><th>金额</th><th>说明</th></tr></thead><tbody>' + detailRows + '</tbody></table></div>';
+
+  modal.style.display = 'block';
+  overlay.style.display = 'block';
+
+  // Render chart
+  setTimeout(function(){
+    var actCats = Object.keys(catTotals).filter(function(c){ return catTotals[c] > 0; });
+    if (!actCats.length) return;
+    var chart = charts['baseFullChart'];
+    if (chart) chart.destroy();
+    makeChart('baseFullChart', 'doughnut', actCats.map(function(c){ return c; }), [
+      { data: actCats.map(function(c){ return catTotals[c]; }), backgroundColor: actCats.map(function(c){ return catColors[c]||'#95a5a6'; }), borderColor: '#fff', borderWidth: 3 }
+    ]);
+  }, 100);
+}
+function closeBaseFull() {
+  document.getElementById('baseFullModal').style.display = 'none';
+  document.getElementById('baseFullOverlay').style.display = 'none';
+}
 function renderBaseExpense() {
   var allData = DataStore.baseExpense || [];
   var baseNames = ['金银花基地','党参基地','党参育苗基地'];
@@ -561,7 +615,7 @@ function renderBaseExpense() {
       '</div>' +
     '</div>';
 
-    html += '<div class="base-card" style="border:1px solid '+cc+'22;box-shadow:0 2px 8px '+cc+'11">' +
+    html += '<div class="base-card" data-base="'+base+'" data-color="'+cc+'" data-total="'+total+'" style="border:1px solid '+cc+'22;box-shadow:0 2px 8px '+cc+'11">' +
       coverHtml + detailHtml +
     '</div>';
 
@@ -576,6 +630,18 @@ function renderBaseExpense() {
   });
 
   container.innerHTML = html;
+  // 点击卡片全屏查看
+  container.onclick = function(e) {
+    var card = e.target.closest('.base-card');
+    if (!card) return;
+    var base = card.getAttribute('data-base');
+    var color = card.getAttribute('data-color');
+    var total = parseFloat(card.getAttribute('data-total') || '0');
+    var items = [];
+    var baseName = base || '';
+    allData.forEach(function(r){ if (r.base === baseName) items.push({date:r.date,category:r.category,item:r.item,amount:r.amount,note:r.note}); });
+    openBaseFull(base, color, total, items);
+  };
 }
 
 // === 汇总数字更新 ===
