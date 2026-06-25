@@ -684,53 +684,18 @@ function renderBaseExpense() {
     }, 200, 'baseChart_'+bi, catTotals, total);
   });
 
-  // 第四个卡片：杨德彪经手账单
-  var agentData = DataStore.agentExpenses || [];
-  if (agentData.length) {
-    var agentAccent = '#8e44ad';
-    var agentRows = agentData.map(function(r, idx){
-      return '<tr'+(idx%2===0?' style="background:#fafafa"':'')+'><td style="padding:4px 8px;font-size:0.68rem">'+(r.item||'')+'</td><td style="padding:4px 8px;font-size:0.65rem">'+(r.quantity||'')+'</td><td style="padding:4px 8px;font-size:0.65rem">¥'+(r.unit_price||0).toFixed(2)+'</td><td class="amount" style="padding:4px 8px;font-size:0.7rem;text-align:right">'+(r.amount?formatNum(r.amount):'—')+'</td><td class="amount" style="padding:4px 8px;font-size:0.7rem;text-align:right;font-weight:700;color:'+agentAccent+'">'+(r.subtotal?formatNum(r.subtotal):'—')+'</td><td style="padding:4px 8px;font-size:0.58rem;color:#888">'+(r.notes||'')+'</td></tr>';
-    }).join('');
-    var agentTotal = agentData.reduce(function(s,r){return s+(r.subtotal||0);},0);
-    html += '<div class="base-card" style="border:1px solid '+agentAccent+'44;box-shadow:0 2px 8px '+agentAccent+'11">' +
-      '<div class="cover" style="background:linear-gradient(135deg,'+agentAccent+','+agentAccent+'cc);color:#fff;justify-content:flex-start;padding:20px">' +
-        '<div style="font-size:2rem;margin-bottom:6px">👤</div>' +
-        '<div style="font-size:0.9rem;font-weight:700">杨德彪</div>' +
-        '<div style="font-size:0.6rem;opacity:0.7;margin-top:2px">经手费用 · '+agentData.length+'笔</div>' +
-        '<div style="font-size:1.2rem;font-weight:800;margin-top:6px">'+formatNum(agentTotal)+'</div>' +
-        '<div style="font-size:0.55rem;opacity:0.6;margin-top:10px;border-top:1px solid rgba(255,255,255,0.2);padding-top:6px;width:80%">hover 查看详情 →</div>' +
-      '</div>' +
-      '<div class="detail" style="background:#1a1a2e;color:#fff">' +
-        '<div class="detail-inner" style="padding:10px">' +
-          '<div style="display:flex;align-items:center;gap:8px;margin-bottom:8px">' +
-            '<span style="font-size:1.2rem">👤</span>' +
-            '<span style="font-size:0.78rem;font-weight:700">杨德彪经手账单</span>' +
-            '<span style="margin-left:auto;font-size:0.7rem;color:'+agentAccent+'">'+formatNum(agentTotal)+'</span>' +
-          '</div>' +
-          '<div style="overflow-x:auto"><table style="width:100%;border-collapse:collapse;font-size:0.6rem"><thead><tr style="border-bottom:1px solid '+agentAccent+'44"><th style="padding:3px 6px;color:#888">项目</th><th style="padding:3px 6px;color:#888">数量(kg)</th><th style="padding:3px 6px;color:#888">单价</th><th style="padding:3px 6px;color:#888;text-align:right">金额</th><th style="padding:3px 6px;color:#888;text-align:right">小计</th><th style="padding:3px 6px;color:#888">备注</th></tr></thead><tbody>'+agentRows+'</tbody></table></div>' +
-        '</div>' +
-      '</div>' +
-    '</div>';
-  }
-
   container.innerHTML = html;
   // 点击卡片全屏查看
   container.onclick = function(e) {
     var card = e.target.closest('.base-card');
     if (!card) return;
     var base = card.getAttribute('data-base');
-    if (base) {
-      var color = card.getAttribute('data-color');
-      var total = parseFloat(card.getAttribute('data-total') || '0');
-      var items = [];
-      allData.forEach(function(r){ if (r.base === base) items.push({date:r.date,category:r.category,item:r.item,amount:r.amount,note:r.note,invoices:r.invoices}); });
-      openBaseFull(base, color, total, items);
-    } else {
-      // 杨德彪卡片
-      var ad = DataStore.agentExpenses || [];
-      var total2 = ad.reduce(function(s,r){return s+(r.amount||0);},0);
-      openAgentFull(ad, total2);
-    }
+    if (!base) return;
+    var color = card.getAttribute('data-color');
+    var total = parseFloat(card.getAttribute('data-total') || '0');
+    var items = [];
+    allData.forEach(function(r){ if (r.base === base) items.push({date:r.date,category:r.category,item:r.item,amount:r.amount,note:r.note,invoices:r.invoices}); });
+    openBaseFull(base, color, total, items);
   };
 }
 
