@@ -502,93 +502,77 @@ function renderBaseExpense() {
   var baseNames = ['金银花基地','党参基地','党参育苗基地'];
   var categories = ['土地流转','土地处理','种苗采购','种苗运输','化肥农药','人工费用','其他'];
   var catColors = {'土地流转':'#8B4513','土地处理':'#D2691E','种苗采购':'#27ae60','种苗运输':'#2ecc71','化肥农药':'#f39c12','人工费用':'#e74c3c','其他':'#95a5a6'};
+  var coverColors = ['#27ae60','#3498db','#e67e22'];
+  var emojis = ['🌿','🌱','🌰'];
 
   var container = $('baseCards');
   var emptyEl = $('empty10');
   if (!container) return;
+  if (!allData.length) { container.innerHTML = ''; if(emptyEl) emptyEl.style.display='block'; return; }
+  if(emptyEl) emptyEl.style.display='none';
 
-  if (!allData.length) {
-    container.innerHTML = '';
-    if (emptyEl) emptyEl.style.display = 'block';
-    return;
-  }
-  if (emptyEl) emptyEl.style.display = 'none';
-
-  // 每个基地打包
   var baseMap = {};
-  baseNames.forEach(function(b){ baseMap[b] = []; });
-  allData.forEach(function(r){
-    var n = r.base || '';
-    if (baseMap[n]) baseMap[n].push(r);
-  });
+  baseNames.forEach(function(b){ baseMap[b]=[]; });
+  allData.forEach(function(r){ var n=r.base||''; if(baseMap[n]) baseMap[n].push(r); });
 
   var html = '';
   baseNames.forEach(function(base, bi){
     var items = baseMap[base] || [];
-    var colors = ['#27ae60','#3498db','#f39c12'];
-    var color = colors[bi % 3];
-
-    // 按类别汇总
+    var cc = coverColors[bi % 3];
+    var total = items.reduce(function(s,r){return s+(r.amount||0);},0);
     var catTotals = {};
-    categories.forEach(function(c){ catTotals[c] = 0; });
-    var baseTotal = 0;
-    items.forEach(function(r){
-      var cat = r.category || '其他';
-      if (catTotals[cat] !== undefined) catTotals[cat] += r.amount||0;
-      baseTotal += r.amount||0;
-    });
+    categories.forEach(function(c){ catTotals[c]=0; });
+    items.forEach(function(r){ var cat=r.category||'其他'; if(catTotals[cat]!==undefined) catTotals[cat]+=r.amount||0; });
 
-    // 表格行
-    var tableRows = '';
-    categories.forEach(function(cat){
-      if (catTotals[cat] > 0) {
-        tableRows += '<tr><td style="padding:3px 6px;font-size:0.65rem;color:#666">' + cat + '</td><td class="amount" style="text-align:right;padding:3px 8px;font-size:0.7rem">' + formatNum(catTotals[cat]) + '</td><td style="text-align:center;font-size:0.6rem;color:#888">' + (baseTotal>0?(catTotals[cat]/baseTotal*100).toFixed(1)+'%':'') + '</td></tr>';
-      }
-    });
-    tableRows += '<tr style="background:#f5f0e8;font-weight:700"><td style="padding:3px 6px">合计</td><td class="amount" style="text-align:right;padding:3px 8px">' + formatNum(baseTotal) + '</td><td style="text-align:center">100%</td></tr>';
+    // Cover content
+    var coverHtml = '<div class="cover" style="background:linear-gradient(135deg,'+cc+','+cc+'cc);color:#fff">' +
+      '<div style="font-size:2rem;margin-bottom:6px">'+emojis[bi]+'</div>' +
+      '<div style="font-size:0.9rem;font-weight:700">'+base+'</div>' +
+      '<div style="font-size:0.6rem;opacity:0.7;margin-top:2px">'+items.length+'笔支出</div>' +
+      '<div style="font-size:1.2rem;font-weight:800;margin-top:6px;letter-spacing:1px">'+formatNum(total)+'</div>' +
+      '<div style="font-size:0.55rem;opacity:0.6;margin-top:10px;border-top:1px solid rgba(255,255,255,0.2);padding-top:6px;width:80%">hover 查看详情 →</div>' +
+    '</div>';
 
-    var chartId = 'baseChart_' + bi;
-    var hasData = items.length > 0;
+    // Detail content
+    var catRows = categories.filter(function(c){return catTotals[c]>0;}).map(function(c){
+      return '<tr><td style="padding:2px 6px;font-size:0.6rem;color:'+cc+'">'+c+'</td><td class="amount" style="text-align:right;padding:2px 8px;font-size:0.65rem">'+formatNum(catTotals[c])+'</td><td style="text-align:center;font-size:0.55rem;color:#888">'+(total>0?(catTotals[c]/total*100).toFixed(1)+'%':'')+'</td></tr>';
+    }).join('');
+    catRows += '<tr style="background:rgba(255,255,255,0.05);font-weight:700"><td style="padding:2px 6px;font-size:0.6rem;color:#fff">合计</td><td class="amount" style="text-align:right;padding:2px 8px;font-size:0.7rem;color:#fff">'+formatNum(total)+'</td><td style="text-align:center;font-size:0.6rem;color:#fff">100%</td></tr>';
 
-    html += '<div style="border:2px solid ' + color + ';border-radius:10px;overflow:hidden;background:#fefcf5">' +
-      '<div style="background:' + color + ';color:#fff;padding:8px 14px;font-size:0.9rem;font-weight:700;display:flex;align-items:center;justify-content:space-between">' +
-        '<span>' + (bi===0?'🌿':bi===1?'🌱':'🌰') + ' ' + base + '</span>' +
-        '<span style="font-size:0.7rem;font-weight:400;opacity:0.9">' + items.length + '笔 · ' + formatNum(baseTotal) + '</span>' +
-      '</div>' +
-      '<div style="padding:10px;display:flex;gap:14px;flex-wrap:wrap">' +
-        // 图表
-        '<div style="flex:1;min-width:200px;height:180px">' +
-          '<canvas id="' + chartId + '"></canvas>' +
+    var detailRows = items.length ? items.map(function(r){
+      return '<tr><td style="padding:2px 6px;font-size:0.58rem">'+(r.date||'')+'</td><td style="padding:2px 6px;font-size:0.55rem;color:'+cc+'">'+(r.category||'')+'</td><td style="padding:2px 6px;font-size:0.58rem">'+(r.item||'')+'</td><td class="amount" style="text-align:right;padding:2px 8px;font-size:0.6rem">'+formatNum(r.amount)+'</td><td style="padding:2px 6px;font-size:0.5rem;color:#888">'+(r.note||'')+'</td></tr>';
+    }).join('') : '<tr><td colspan="5" style="text-align:center;color:#999;padding:10px;font-size:0.6rem">暂无</td></tr>';
+
+    var detailHtml = '<div class="detail" style="background:#1a1a2e;color:#fff">' +
+      '<div class="detail-inner" style="padding:6px">' +
+        '<div style="display:flex;align-items:center;gap:8px;margin-bottom:6px">' +
+          '<span style="font-size:1.2rem">'+emojis[bi]+'</span>' +
+          '<span style="font-size:0.72rem;font-weight:700">'+base+'</span>' +
+          '<span style="margin-left:auto;font-size:0.65rem;color:'+cc+'">'+formatNum(total)+'</span>' +
         '</div>' +
-        // 分类表
-        '<div style="flex:1;min-width:200px">' +
-          '<table style="width:100%;border-collapse:collapse">' +
-            '<thead><tr style="border-bottom:2px solid ' + color + '"><th style="padding:3px 6px;font-size:0.65rem;font-weight:700;color:' + color + ';text-align:left">类别</th><th style="padding:3px 8px;font-size:0.65rem;font-weight:700;color:' + color + ';text-align:right">金额</th><th style="padding:3px 6px;font-size:0.65rem;font-weight:700;color:' + color + ';text-align:center">占比</th></tr></thead>' +
-            '<tbody>' + tableRows + '</tbody>' +
-          '</table>' +
+        '<div style="display:flex;gap:8px">' +
+          '<div style="flex:1;min-width:0;height:80px"><canvas id="baseChart_'+bi+'"></canvas></div>' +
+          '<div style="flex:1;min-width:0"><table style="width:100%;border-collapse:collapse">' +
+            '<thead><tr style="border-bottom:1px solid rgba(255,255,255,0.1)"><th style="padding:2px 6px;font-size:0.55rem;color:'+cc+';text-align:left">类别</th><th style="padding:2px 6px;font-size:0.55rem;color:'+cc+';text-align:right">金额</th><th style="padding:2px 6px;font-size:0.55rem;color:'+cc+';text-align:center">%</th></tr></thead><tbody>'+catRows+'</tbody></table></div>' +
         '</div>' +
-      '</div>' +
-      // 明细表
-      '<div style="border-top:1px solid #e8e5e0">' +
-        '<div style="padding:6px 10px;font-size:0.7rem;font-weight:600;color:#666;background:#fafafa">📋 支出明细</div>' +
-        '<div style="overflow-x:auto;padding:0 6px 6px">' +
-          '<table class="data-table" style="font-size:0.65rem;min-width:500px"><thead><tr><th>日期</th><th>类别</th><th>支出项目</th><th>金额</th><th>说明</th></tr></thead><tbody>' +
-            (items.length ? items.map(function(r){
-              return '<tr><td>' + (r.date||'') + '</td><td>' + (r.category||'') + '</td><td>' + (r.item||'') + '</td><td class="amount expense">' + formatNum(r.amount) + '</td><td>' + (r.note||'') + '</td></tr>';
-            }).join('') : '<tr><td colspan="5" style="text-align:center;color:#999;padding:16px">暂无明细</td></tr>') +
-          '</tbody></table>' +
+        '<div style="margin-top:6px;overflow-x:auto">' +
+          '<table style="width:100%;border-collapse:collapse;font-size:0.55rem"><thead><tr style="border-bottom:1px solid rgba(255,255,255,0.1)"><th style="padding:2px 4px;color:#888">日期</th><th style="padding:2px 4px;color:#888">类别</th><th style="padding:2px 4px;color:#888">项目</th><th style="padding:2px 4px;color:#888;text-align:right">金额</th><th style="padding:2px 4px;color:#888">说明</th></tr></thead><tbody>'+detailRows+'</tbody></table>' +
         '</div>' +
       '</div>' +
     '</div>';
 
-    // 延迟渲染图表
+    html += '<div class="base-card" style="border:1px solid '+cc+'22;box-shadow:0 2px 8px '+cc+'11">' +
+      coverHtml + detailHtml +
+    '</div>';
+
+    // Chart render
     setTimeout(function(id, ct, bt){
       var cats = Object.keys(ct).filter(function(c){ return ct[c] > 0; });
       if (!cats.length) return;
-      makeChart(id, 'doughnut', cats.map(function(c){ return c + ' ' + (bt>0?(ct[c]/bt*100).toFixed(1)+'%':''); }), [
-        { data: cats.map(function(c){ return ct[c]; }), backgroundColor: cats.map(function(c){ return catColors[c]||'#95a5a6'; }), borderColor: '#fff', borderWidth: 2 }
+      makeChart(id, 'doughnut', cats.map(function(c){ return c; }), [
+        { data: cats.map(function(c){ return ct[c]; }), backgroundColor: cats.map(function(c){ return catColors[c]||'#95a5a6'; }), borderColor: '#1a1a2e', borderWidth: 1 }
       ]);
-    }, 100, chartId, catTotals, baseTotal);
+    }, 200, 'baseChart_'+bi, catTotals, total);
   });
 
   container.innerHTML = html;

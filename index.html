@@ -375,9 +375,21 @@ function showToast(msg, type) {
     <section class="tab-panel" id="tab10">
       <div class="panel-header"><h2>🌿 基地支出成本分析</h2></div>
 
-      <!-- 基地卡片容器 -->
-      <div id="baseCards" style="display:flex;flex-direction:column;gap:20px;"></div>
+      <style>
+        .base-card-wrap { display:grid; grid-template-columns:repeat(3,1fr); gap:12px; }
+        .base-card { position:relative; border-radius:12px; overflow:hidden; cursor:pointer; transition:all 0.35s cubic-bezier(0.22,1,0.36,1); min-height:140px; }
+        .base-card .cover { position:absolute; inset:0; display:flex; flex-direction:column; align-items:center; justify-content:center; z-index:2; transition:opacity 0.3s; padding:16px; text-align:center; }
+        .base-card:hover .cover { opacity:0; pointer-events:none; }
+        .base-card .detail { position:absolute; inset:0; z-index:1; opacity:0; transition:opacity 0.35s; overflow:hidden; padding:10px; }
+        .base-card:hover .detail { opacity:1; z-index:3; }
+        .base-card:hover { min-height:340px; box-shadow:0 8px 40px rgba(0,0,0,0.12); }
+        .base-card .detail-inner { height:100%; overflow-y:auto; }
+        .base-card .detail-inner::-webkit-scrollbar { width:3px; }
+        .base-card .detail-inner::-webkit-scrollbar-thumb { background:rgba(255,255,255,0.3); border-radius:2px; }
+        @media (max-width:600px) { .base-card-wrap { grid-template-columns:1fr; } }
+      </style>
 
+      <div id="baseCards" class="base-card-wrap"></div>
       <div class="table-empty" id="empty10" style="display:none"><span class="empty-icon">📭</span><span class="empty-text">暂无数据</span></div>
     </section>
 
