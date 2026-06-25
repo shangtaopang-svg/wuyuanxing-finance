@@ -430,110 +430,54 @@ function renderSalary() {
   renderTempMonthCards();
 }
 
+
 function renderTempMonthCards() {
   var workers = DataStore.tempWorkers || [];
   var labor = DataStore.tempLabor || [];
-  var container = $('tempMonthCards');
+  var container = $("tempMonthCards");
   if (!container) return;
-
-  // 按月份分组工资明细
-  var months = {};
-  workers.forEach(function(r){
-    var m = r.month || '';
-    if (!months[m]) months[m] = {workers: [], labor: []};
-    months[m].workers.push(r);
-  });
-  // 按月份分组劳务
-  labor.forEach(function(r){
-    var m = (r.month || r.date || '').substring(0, 7);
-    if (!months[m]) months[m] = {workers: [], labor: []};
-    months[m].labor.push(r);
-  });
-
-  var monthKeys = Object.keys(months).sort();
-
-  if (!monthKeys.length) {
-    container.innerHTML = '<div style="text-align:center;padding:30px;color:#999">暂无数据</div>';
-    return;
+  var md = {};
+  workers.forEach(function(r){ var m = r.month||""; if(!md[m]) md[m]={w:[],l:[]}; md[m].w.push(r); });
+  labor.forEach(function(r){ var m=(r.month||r.date||"").substring(0,7); if(!md[m]) md[m]={w:[],l:[]}; md[m].l.push(r); });
+  var keys = Object.keys(md).sort();
+  if (!keys.length) { container.innerHTML="<div style=\"text-align:center;padding:40px;color:#999\">\u6682\u65e0\u6570\u636e</div>"; return; }
+  var tabs = [];
+  if (md["2026-03"] && md["2026-04"]) {
+    tabs.push({label:"2026\u5e743-4\u6708", d:{w:md["2026-03"].w.concat(md["2026-04"].w), l:md["2026-03"].l.concat(md["2026-04"].l)}});
+    keys = keys.filter(function(k){ return k!=="2026-03"&&k!=="2026-04"; });
   }
-
-  container.style.display = 'grid'; container.style.gridTemplateColumns = 'repeat(auto-fill, minmax(180px, 1fr))'; container.style.gap = '10px'; container.innerHTML = monthKeys.map(function(m, mi){
-    var info = months[m];
-    var mLabel = m.replace('-', '年') + '月';
-    // Special: combine 3月 and 4月
-    if (m === '2026-03' && months['2026-04']) return ''; // skip, handled below
-    if (m === '2026-04') {
-      if (months['2026-03']) {
-        var m3 = months['2026-03'];
-        var combined = m3.workers.concat(info.workers);
-        var combinedLabor = m3.labor.concat(info.labor);
-        return buildMonthCard('2026年3-4月', combined, combinedLabor);
-      }
-      return buildMonthCard(mLabel, info.workers, info.labor);
-    }
-    return buildMonthCard(mLabel, info.workers, info.labor);
-  }).filter(Boolean).join('');
+  keys.forEach(function(k){ tabs.push({label:k.replace("-","\u5e74")+"\u6708", d:md[k]}); });
+  var h = "<div style=\"display:flex;gap:4px;margin-bottom:10px;flex-wrap:wrap;border-bottom:2px solid #e8e5e0;padding-bottom:4px;\">";
+  tabs.forEach(function(t,i){ h += "<button class=\"cat-tab\" onclick=\"switchTempTab("+i+")\""+(i===0?" style=\"background:#b8860b;color:#fff;border-color:#b8860b\"":"")+">"+t.label+"</button>"; });
+  h += "</div><div id=\"tempTabContent\">"+buildTabContent(tabs[0].d,tabs[0].label)+"</div>";
+  container.innerHTML = h;
+  container._tabs = tabs;
+}
+function switchTempTab(idx) {
+  var c = $("tempMonthCards"); var tabs = c._tabs; if(!tabs||!tabs[idx]) return;
+  c.querySelectorAll("button").forEach(function(b,i){ if(i===idx){ b.style.background="#b8860b"; b.style.color="#fff"; b.style.borderColor="#b8860b"; } else { b.style.background=""; b.style.color=""; b.style.borderColor=""; }});
+  $("tempTabContent").innerHTML = buildTabContent(tabs[idx].d, tabs[idx].label);
+}
+function buildTabContent(d, label) {
+  var w = d.w || [], l = d.l || [];
+  var total = 0, wm = {};
+  w.forEach(function(r){ total += r.amount||0; if(!wm[r.name]) wm[r.name]={name:r.name,card:r.id_card||"",total:0}; wm[r.name].total += r.amount||0; });
+  var wk = Object.keys(wm);
+  var wr = wk.map(function(k,i){ var p=wm[k]; return "<tr><td>"+(i+1)+"</td><td>"+p.name+"</td><td style=\"font-family:monospace;font-size:0.6rem\">"+p.card+"</td><td class=\"amount\" style=\"text-align:center\">"+formatNum(p.total)+"</td></tr>"; }).join("");
+  var la = 0; l.forEach(function(r){ la += r.amount||0; });
+  var lr = l.length ? l.map(function(r){ return "<tr><td>"+(r.date||"")+"</td><td>"+(r.headcount||"")+"</td><td>"+(r.work_content||"")+"</td><td class=\"amount\">"+formatNum(r.amount)+"</td><td>"+(r.notes||"")+"</td></tr>"; }).join("") : "<tr><td colspan=\"5\" style=\"text-align:center;color:#999;padding:20px\">\u6682\u65e0\u8bb0\u5f55</td></tr>";
+  return "<div style=\"border:1px solid #b8860b;border-radius:8px;overflow:hidden;background:#fefcf5\">" +
+    "<div style=\"background:#b8860b;color:#fff;padding:6px 12px;font-size:0.78rem;font-weight:600\">\u{1f4c5} "+label+"</div>" +
+    "<div style=\"padding:8px 10px 4px\">" +
+      "<div style=\"display:flex;align-items:center;justify-content:space-between;margin-bottom:4px\"><span style=\"font-size:0.72rem;font-weight:600;color:#b8860b\">\u{1f4c4} \u5de5\u8d44\u5355</span><span style=\"font-size:0.65rem;color:#999\">"+wk.length+"\u4eba \u00b7 \u5408\u8ba1"+formatNum(total)+"</span></div>" +
+      "<div style=\"overflow-x:auto;max-height:300px;overflow-y:auto;border:1px solid #e8e5e0;border-radius:6px\"><table class=\"data-table\" style=\"font-size:0.68rem;min-width:450px\"><thead><tr><th style=\"width:35px\">\u5e8f\u53f7</th><th>\u59d3\u540d</th><th>\u8eab\u4efd\u8bc1\u53f7\u7801</th><th style=\"width:80px\">\u91d1\u989d</th></tr></thead><tbody>"+wr+"</tbody></table></div>" +
+    "</div>" +
+    "<div style=\"padding:8px 10px 10px\">" +
+      "<div style=\"display:flex;align-items:center;justify-content:space-between;margin-bottom:4px\"><span style=\"font-size:0.72rem;font-weight:600;color:#b8860b\">\u{1f4cb} \u52b3\u52a1\u6e05\u5355</span><span style=\"font-size:0.65rem;color:#999\">\u5408\u8ba1"+formatNum(la)+"</span></div>" +
+      "<div style=\"overflow-x:auto;max-height:200px;overflow-y:auto;border:1px solid #e8e5e0;border-radius:6px\"><table class=\"data-table\" style=\"font-size:0.68rem;min-width:450px\"><thead><tr><th>\u65e5\u671f</th><th>\u4eba\u6570</th><th>\u5de5\u4f5c\u5185\u5bb9</th><th>\u91d1\u989d</th><th>\u5907\u6ce8</th></tr></thead><tbody>"+lr+"</tbody></table></div>" +
+    "</div></div>";
 }
 
-function buildMonthCard(label, workers, labor) {
-  var totalAmt = 0;
-  var workerMap = {};
-  workers.forEach(function(r){
-    totalAmt += r.amount || 0;
-    if (!workerMap[r.name]) workerMap[r.name] = {name: r.name, id_card: r.id_card || '', total: 0};
-    workerMap[r.name].total += r.amount || 0;
-  });
-  var workerCount = Object.keys(workerMap).length;
-  var idx = 0;
-  var workerRows = Object.keys(workerMap).map(function(k){
-    idx++;
-    var p = workerMap[k];
-    return '<tr><td>' + idx + '</td><td>' + p.name + '</td><td style="font-size:0.55rem;font-family:monospace">' + p.id_card + '</td><td class="amount" style="text-align:center">' + formatNum(p.total) + '</td></tr>';
-  }).join('');
-
-  var laborAmt = 0, laborCount = 0;
-  labor.forEach(function(r){
-    laborAmt += r.amount || 0;
-    laborCount += r.headcount || 0;
-  });
-
-  var uid = "mc_" + label.replace(/[^0-9a-zA-Z一-鿿]/g, "_");
-
-  var payRows = workerRows || '<tr><td colspan="4" style="text-align:center;color:#999;padding:10px">暂无</td></tr>';
-  var laborRows = labor.length ? labor.map(function(r){
-    return '<tr><td>' + (r.date||"") + '</td><td>' + (r.headcount||"") + '</td><td>' + (r.work_content||"") + '</td><td class="amount">' + formatNum(r.amount) + '</td><td>' + (r.notes||"") + '</td></tr>';
-  }).join("") : '<tr><td colspan="5" style="text-align:center;color:#999;padding:10px">暂无记录</td></tr>';
-
-  // Full tables for modal
-  var fullPayTable = '<table class="data-table" style="font-size:0.7rem;min-width:450px"><thead><tr><th>序号</th><th>姓名</th><th>身份证号码</th><th>金额</th></tr></thead><tbody>' + payRows + '</tbody></table>';
-  var fullLaborTable = '<table class="data-table" style="font-size:0.72rem;min-width:500px"><thead><tr><th>日期</th><th>人数</th><th>工作内容</th><th>金额</th><th>备注</th></tr></thead><tbody>' + laborRows + '</tbody></table>';
-
-  return '<div style="border:1px solid #b8860b;border-radius:8px;overflow:hidden;background:#fefcf5">' +
-    '<div style="background:#b8860b;color:#fff;padding:4px 8px;font-size:0.68rem;font-weight:600">📅 ' + label + '</div>' +
-    '<div style="padding:6px;display:flex;flex-direction:column;gap:6px">' +
-      '<div style="background:#fff;border:1px solid #e8e5e0;border-radius:6px;padding:4px;overflow-x:auto;cursor:pointer" onclick="showFullModal(\'' + uid + '_pay\',\'' + label + ' · 工资单\')">' +
-        '<div style="display:flex;align-items:center;justify-content:space-between;padding:2px 4px 4px">' +
-          '<span style="font-size:0.6rem;font-weight:600;color:#b8860b">📄 工资单</span>' +
-          '<span style="font-size:0.55rem;color:#999">' + workerCount + '人 · ' + formatNum(totalAmt) + '</span>' +
-        '</div>' +
-        '<div style="max-height:100px;overflow:hidden">' +
-          '<table class="data-table" style="font-size:0.55rem"><thead><tr><th>#</th><th>姓名</th><th>身份证</th><th>金额</th></tr></thead><tbody>' + payRows + '</tbody></table>' +
-        '</div>' +
-      '</div>' +
-      '<div style="background:#fff;border:1px solid #e8e5e0;border-radius:6px;padding:4px;overflow-x:auto;cursor:pointer" onclick="showFullModal(\'' + uid + '_labor\',\'' + label + ' · 劳务清单\')">' +
-        '<div style="display:flex;align-items:center;justify-content:space-between;padding:2px 4px 4px">' +
-          '<span style="font-size:0.6rem;font-weight:600;color:#b8860b">📋 劳务清单</span>' +
-          '<span style="font-size:0.55rem;color:#999">' + laborCount + '人次 · ' + formatNum(laborAmt) + '</span>' +
-        '</div>' +
-        '<div style="max-height:100px;overflow:hidden">' +
-          '<table class="data-table" style="font-size:0.55rem"><thead><tr><th>日期</th><th>人数</th><th>工作内容</th><th>金额</th><th>备注</th></tr></thead><tbody>' + laborRows + '</tbody></table>' +
-        '</div>' +
-      '</div>' +
-    '</div>' +
-    '<div id="' + uid + '_pay" style="display:none">' + fullPayTable + '</div>' +
-    '<div id="' + uid + '_labor" style="display:none">' + fullLaborTable + '</div>' +
-  '</div>';
-}
 function showFullModal(cid, title) {
   var el = document.getElementById(cid);
   if (!el) return;
