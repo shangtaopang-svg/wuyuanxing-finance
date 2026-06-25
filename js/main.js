@@ -550,10 +550,13 @@ function makeChart(id, type, labels, datasets, opts) {
   if (charts[id]) charts[id].destroy();
   var defaults = {
     responsive: true, maintainAspectRatio: false,
-    plugins: { legend: { labels: { font: { size: 13, weight: 'bold' }, boxWidth: 16, padding: 12, usePointStyle: true }, position: 'bottom' } },
+    plugins: {
+      legend: { labels: { font: { size: 14, weight: 'bold' }, boxWidth: 20, padding: 14, usePointStyle: true }, position: 'bottom' },
+      datalabels: { display: false }
+    },
     scales: type !== 'doughnut' && type !== 'pie' ? {
-      x: { grid: { display: false }, ticks: { font: { size: 9 } } },
-      y: { ticks: { callback: function(v) { return '¥' + (v/1000).toFixed(0) + 'k'; }, font: { size: 9 } } }
+      x: { grid: { display: false }, ticks: { font: { size: 11, weight: 'bold' } } },
+      y: { ticks: { callback: function(v) { return '¥' + (v/1000).toFixed(0) + 'k'; }, font: { size: 11, weight: 'bold' } } }
     } : undefined
   };
   var config = JSON.parse(JSON.stringify(defaults));
