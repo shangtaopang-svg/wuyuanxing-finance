@@ -353,8 +353,8 @@ function renderManagement() {
 // ⑨ 工资
 function renderSalary() {
   var data = DataStore.salary || [];
-  var regular = data.filter(function(r){ return r.name === '任海涛' || r.name === '庞尚韬' || r.name === '施前华'; });
-  var temp = data.filter(function(r){ return r.name !== '任海涛' && r.name !== '庞尚韬' && r.name !== '施前华'; });
+  var regular = data.filter(function(r){ return r.name === '任海涛' || r.name === '庞尚韬'; });
+  var temp = data.filter(function(r){ return r.name === '施前华'; });
 
   // 正式员工
   var rb = $('salaryRegularBody');
@@ -1824,6 +1824,7 @@ function perTableAddRow(bodyId) {
   else if (bodyId === 'assetBody') defaults = {date:'', name:'', amount:0, location:'', status:'在用'};
   else if (bodyId === 'managementBody') defaults = {date:'', category:'', amount:0, summary:'', invoices:''};
   else if (bodyId === 'salaryBody') defaults = {month:'', name:'', position:'', amount:0, payDate:'', voucher:''};
+  else if (bodyId === 'salaryTempBody') defaults = {month:'', name:'施前华', position:'临时工代领', amount:0, payDate:'', voucher:''};
   else if (bodyId === 'reimburseRenBody' || bodyId === 'reimbursePangBody' || bodyId === 'reimburseYingBody') {
     var pmap = {reimburseRenBody:'任海涛', reimbursePangBody:'庞尚韬', reimburseYingBody:'应红林'};
     defaults = {date:'', person:pmap[bodyId], amount:0, reason:'', docs:[]};
@@ -1887,7 +1888,7 @@ function sectionFromBodyId(bodyId) {
     pettyRenDrawBody:'pettyDraw', pettyPangDrawBody:'pettyDraw',
     pettyRenWriteBody:'pettyWrite', pettyPangWriteBody:'pettyWrite',
     receivableBody:'receivable', assetBody:'asset', managementBody:'management',
-    salaryBody:'salary',
+    salaryBody:'salary', salaryTempBody:'salary',
     reimburseRenBody:'reimburse', reimbursePangBody:'reimburse', reimburseYingBody:'reimburse',
     baseJinyinhuaBody:'baseExpense', baseDangshenBody:'baseExpense', baseSeedlingBody:'baseExpense',
     companyInfoBody:'companyInfo', contractsBody:'contracts', bankAccountsBody:'bankAccounts',
