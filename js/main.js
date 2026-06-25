@@ -318,8 +318,8 @@ function renderReceivable() {
   if (data.length === 0) { $('empty6').style.display = 'block'; return; }
   $('empty6').style.display = 'none';
   var capColors = {"任海涛":"#e8f4fd","庞尚韬":"#fef2f2","吴生成":"#f0faf4","应红林":"#fdf6e3","陈洪斌":"#f5e6f0"};
-  data.forEach(function(r) {
-    body.innerHTML += '<tr><td>' + r.date + '</td><td>' + r.party + '</td><td class="amount expense">' + formatNum(r.amount) + '</td><td>' + r.reason + '</td><td>' + r.status + '</td></tr>';
+  data.forEach(function(r, i) {
+    body.innerHTML += '<tr><td>' + (i+1) + '</td><td>' + r.party + '</td><td class="amount expense">' + formatNum(r.amount) + '</td><td>' + r.reason + '</td><td>' + r.status + '</td></tr>';
   });
 }
 
