@@ -546,9 +546,7 @@ function openBaseFull(base, color, total, itemsJson) {
       '</table>' +
     '</div></div>' +
     '<h4 style="font-size:0.85rem;color:'+color+';margin:0 0 8px">📋 支出明细</h4>' +
-    '<div style="overflow-x:auto"><table class="data-table" style="font-size:0.72rem;min-width:550px"><thead><tr><th>类别</th><th>日期</th><th>项目</th><th>金额</th><th>说明</th><th>票据</th></tr></thead><tbody>' + detailRows + '</tbody></table></div>' +
-    // Agent expenses
-    (function(){ var ad = (DataStore.agentExpenses||[]).filter(function(x){return x.base===base;}); if(!ad.length)return ''; var ar=ad.map(function(r){return '<tr><td style="padding:4px 8px;font-size:0.68rem">'+(r.item||'')+'</td><td style="padding:4px 8px;font-size:0.65rem">'+(r.quantity||'')+'</td><td style="padding:4px 8px;font-size:0.65rem">¥'+(r.unit_price||0)+'</td><td style="padding:4px 8px;font-size:0.7rem;text-align:right">'+(r.amount?formatNum(r.amount):'—')+'</td><td style="padding:4px 8px;font-size:0.7rem;text-align:right;font-weight:600">'+(r.subtotal?formatNum(r.subtotal):'—')+'</td><td style="padding:4px 8px;font-size:0.6rem;color:#888">'+(r.notes||'')+'</td></tr>';}).join(''); return '<h4 style="font-size:0.85rem;color:'+color+';margin:16px 0 8px">👤 杨德彪经手费用</h4><div style="overflow-x:auto"><table class="data-table" style="font-size:0.68rem;min-width:500px"><thead><tr><th>项目</th><th>数量(kg)</th><th>单价</th><th>金额</th><th>小计</th><th>备注</th></tr></thead><tbody>'+ar+'</tbody></table></div>'; })();
+    '<div style="overflow-x:auto"><table class="data-table" style="font-size:0.72rem;min-width:550px"><thead><tr><th>类别</th><th>日期</th><th>项目</th><th>金额</th><th>说明</th><th>票据</th></tr></thead><tbody>' + detailRows + '</tbody></table></div>';
 
   modal.style.display = 'block';
   overlay.style.display = 'block';
@@ -657,20 +655,8 @@ function renderBaseExpense() {
       '</div>' +
     '</div>';
 
-    // 经手人费用
-    var agentHtml = '';
-    var agentData = (DataStore.agentExpenses || []).filter(function(r){ return r.base === base; });
-    if (agentData.length) {
-      agentHtml = '<div style="border-top:1px solid #e8e5e0;padding:6px">' +
-        '<div style="font-size:0.6rem;font-weight:600;color:'+cc+';margin-bottom:4px">👤 杨德彪经手费用</div>' +
-        '<div style="overflow-x:auto"><table style="width:100%;border-collapse:collapse;font-size:0.5rem">' +
-          '<thead><tr style="border-bottom:1px solid '+cc+'"><th style="padding:2px 4px;color:#888">项目</th><th style="padding:2px 4px;color:#888">数量(kg)</th><th style="padding:2px 4px;color:#888">单价</th><th style="padding:2px 4px;color:#888;text-align:right">金额</th><th style="padding:2px 4px;color:#888;text-align:right">小计</th><th style="padding:2px 4px;color:#888">备注</th></tr></thead><tbody>' +
-          agentData.map(function(r){ return '<tr><td style="padding:2px 4px">'+(r.item||'')+'</td><td style="padding:2px 4px">'+(r.quantity||'')+'</td><td style="padding:2px 4px">¥'+(r.unit_price||0)+'</td><td style="padding:2px 4px;text-align:right">'+(r.amount?formatNum(r.amount):'—')+'</td><td style="padding:2px 4px;text-align:right;font-weight:600">'+(r.subtotal?formatNum(r.subtotal):'—')+'</td><td style="padding:2px 4px;font-size:0.45rem;color:#888">'+(r.notes||'')+'</td></tr>'; }).join('') +
-        '</tbody></table></div></div>';
-    }
-
     html += '<div class="base-card" data-base="'+base+'" data-color="'+cc+'" data-total="'+total+'" style="border:1px solid '+cc+'22;box-shadow:0 2px 8px '+cc+'11">' +
-      coverHtml + detailHtml + agentHtml +
+      coverHtml + detailHtml +
     '</div>';
 
     // Chart render
@@ -682,6 +668,35 @@ function renderBaseExpense() {
       ]);
     }, 200, 'baseChart_'+bi, catTotals, total);
   });
+
+  // 第四个卡片：杨德彪经手账单
+  var agentData = DataStore.agentExpenses || [];
+  if (agentData.length) {
+    var agentAccent = '#8e44ad';
+    var agentRows = agentData.map(function(r, idx){
+      return '<tr'+(idx%2===0?' style="background:#fafafa"':'')+'><td style="padding:4px 8px;font-size:0.68rem">'+escapeHtml(r.item||'')+'</td><td style="padding:4px 8px;font-size:0.65rem">'+(r.quantity||'')+'</td><td style="padding:4px 8px;font-size:0.65rem">¥'+(r.unit_price||0).toFixed(2)+'</td><td class="amount" style="padding:4px 8px;font-size:0.7rem;text-align:right">'+(r.amount?formatNum(r.amount):'—')+'</td><td class="amount" style="padding:4px 8px;font-size:0.7rem;text-align:right;font-weight:700;color:'+agentAccent+'">'+(r.subtotal?formatNum(r.subtotal):'—')+'</td><td style="padding:4px 8px;font-size:0.58rem;color:#888">'+(r.notes||'')+'</td></tr>';
+    }).join('');
+    var agentTotal = agentData.reduce(function(s,r){return s+(r.subtotal||0);},0);
+    html += '<div class="base-card" style="border:1px solid '+agentAccent+'44;box-shadow:0 2px 8px '+agentAccent+'11">' +
+      '<div class="cover" style="background:linear-gradient(135deg,'+agentAccent+','+agentAccent+'cc);color:#fff;justify-content:flex-start;padding:20px">' +
+        '<div style="font-size:2rem;margin-bottom:6px">👤</div>' +
+        '<div style="font-size:0.9rem;font-weight:700">杨德彪</div>' +
+        '<div style="font-size:0.6rem;opacity:0.7;margin-top:2px">经手费用 · '+agentData.length+'笔</div>' +
+        '<div style="font-size:1.2rem;font-weight:800;margin-top:6px">'+formatNum(agentTotal)+'</div>' +
+        '<div style="font-size:0.55rem;opacity:0.6;margin-top:10px;border-top:1px solid rgba(255,255,255,0.2);padding-top:6px;width:80%">hover 查看详情 →</div>' +
+      '</div>' +
+      '<div class="detail" style="background:#1a1a2e;color:#fff">' +
+        '<div class="detail-inner" style="padding:10px">' +
+          '<div style="display:flex;align-items:center;gap:8px;margin-bottom:8px">' +
+            '<span style="font-size:1.2rem">👤</span>' +
+            '<span style="font-size:0.78rem;font-weight:700">杨德彪经手账单</span>' +
+            '<span style="margin-left:auto;font-size:0.7rem;color:'+agentAccent+'">'+formatNum(agentTotal)+'</span>' +
+          '</div>' +
+          '<div style="overflow-x:auto"><table style="width:100%;border-collapse:collapse;font-size:0.6rem"><thead><tr style="border-bottom:1px solid '+agentAccent+'44"><th style="padding:3px 6px;color:#888">项目</th><th style="padding:3px 6px;color:#888">数量(kg)</th><th style="padding:3px 6px;color:#888">单价</th><th style="padding:3px 6px;color:#888;text-align:right">金额</th><th style="padding:3px 6px;color:#888;text-align:right">小计</th><th style="padding:3px 6px;color:#888">备注</th></tr></thead><tbody>'+agentRows+'</tbody></table></div>' +
+        '</div>' +
+      '</div>' +
+    '</div>';
+  }
 
   container.innerHTML = html;
   // 点击卡片全屏查看
