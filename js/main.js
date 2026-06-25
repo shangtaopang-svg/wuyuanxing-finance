@@ -353,8 +353,8 @@ function renderManagement() {
 // ⑨ 工资
 function renderSalary() {
   var data = DataStore.salary || [];
-  var regular = data.filter(function(r){ return r.name === '任海涛' || r.name === '庞尚韬'; });
-  var temp = data.filter(function(r){ return r.name === '施前华'; });
+  var regular = data.filter(function(r){ return r.name === '任海涛' || r.name === '庞尚韬' || (r.name === '施前华' && r.position !== '临时工代领'); });
+  var temp = data.filter(function(r){ return r.name === '施前华' && r.position === '临时工代领'; });
 
   // 正式员工
   var rb = $('salaryRegularBody');
