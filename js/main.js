@@ -476,7 +476,6 @@ function renderTempMonthCards() {
 }
 
 function buildMonthCard(label, workers, labor) {
-  // 工资单统计
   var totalAmt = 0;
   var workerMap = {};
   workers.forEach(function(r){
@@ -489,47 +488,68 @@ function buildMonthCard(label, workers, labor) {
   var workerRows = Object.keys(workerMap).map(function(k){
     idx++;
     var p = workerMap[k];
-    return '<tr><td>' + idx + '</td><td>' + p.name + '</td><td style="font-size:0.6rem;font-family:monospace">' + p.id_card + '</td><td class="amount" style="text-align:center">¥' + p.total.toLocaleString() + '</td></tr>';
+    return '<tr><td>' + idx + '</td><td>' + p.name + '</td><td style="font-size:0.55rem;font-family:monospace">' + p.id_card + '</td><td class="amount" style="text-align:center">' + formatNum(p.total) + '</td></tr>';
   }).join('');
 
-  // 劳务统计
   var laborAmt = 0, laborCount = 0;
   labor.forEach(function(r){
     laborAmt += r.amount || 0;
     laborCount += r.headcount || 0;
   });
 
-  var uid = 'mc_' + label.replace(/[^0-9a-zA-Z一-龥]/g, '_');
-  return '<div style="border:1px solid #b8860b;border-radius:8px;overflow:hidden;background:#fefcf5;font-size:0.75rem">' +
-    '<div style="background:#b8860b;color:#fff;padding:4px 8px;font-size:0.68rem;font-weight:600">' +
-      '<span>📅 ' + label + '</span>' +
-    '</div>' +
-    '<div style="padding:5px 6px;display:flex;gap:4px">' +
-      '<div onclick="var t=document.getElementById(\'' + uid + '_pay\');t.style.display=t.style.display==\'none\'?\'block\':\'none\'" style="flex:1;min-width:140px;padding:12px 16px;background:#fff;border:1px solid #e8e5e0;border-radius:8px;cursor:pointer;transition:all 0.2s;text-align center">' +
-        '<div style="font-size:14px">📄</div>' +
-        '<div style="font-size:0.6rem;font-weight:600;color:#b8860b">工资单</div>' +
-        '<div style="font-size:0.5rem;color:#999">' + workerCount + '人</div>' + '<div style="font-size:0.6rem;font-weight:600;color:#b8860b">¥' + (totalAmt/10000).toFixed(1) + '万</div>' +
-      '</div>' +
-      '<div onclick="var t=document.getElementById(\'' + uid + '_labor\');t.style.display=t.style.display==\'none\'?\'block\':\'none\'" style="flex:1;min-width:140px;padding:12px 16px;background:#fff;border:1px solid #e8e5e0;border-radius:8px;cursor:pointer;transition:all 0.2s;text-align:center">' +
-        '<div style="font-size:14px">📋</div>' +
-        '<div style="font-size:0.6rem;font-weight:600;color:#b8860b">劳务</div>' +
-        '<div style="font-size:0.5rem;color:#999">' + laborCount + '人次</div>' + '<div style="font-size:0.6rem;font-weight:600;color:#b8860b">¥' + (laborAmt/10000).toFixed(1) + '万</div>' +
-      '</div>' +
-    '</div>' +
-    '<div id="' + uid + '_pay" style="display:none;border-top:1px solid #e8e5e0;padding:10px 14px;overflow-x:auto">' +
-      '<table class="data-table" style="font-size:0.65rem;min-width:400px"><thead><tr><th>序号</th><th>姓名</th><th>身份证号码</th><th>金额</th></tr></thead><tbody>' + workerRows + '</tbody></table>' +
-    '</div>' +
-    '<div id="' + uid + '_labor" style="display:none;border-top:1px solid #e8e5e0;padding:10px 14px;overflow-x:auto">' +
-      '<table class="data-table" style="font-size:0.68rem"><thead><tr><th>日期</th><th>人数</th><th>工作内容</th><th>金额</th><th>备注</th></tr></thead><tbody>' +
-        (labor.length ? labor.map(function(r){
-          return '<tr><td>' + (r.date||'') + '</td><td>' + (r.headcount||'') + '人</td><td>' + (r.work_content||'') + '</td><td class="amount expense">' + formatNum(r.amount) + '</td><td>' + (r.notes||'') + '</td></tr>';
-        }).join('') : '<tr><td colspan="5" style="text-align:center;color:#999;padding:16px">暂无记录</td></tr>') +
-      '</tbody></table>' +
-    '</div>' +
-  '</div>';
-}
+  var uid = "mc_" + label.replace(/[^0-9a-zA-Z一-鿿]/g, "_");
 
-// ⑩ 基地支出
+  var payRows = workerRows || '<tr><td colspan="4" style="text-align:center;color:#999;padding:10px">暂无</td></tr>';
+  var laborRows = labor.length ? labor.map(function(r){
+    return '<tr><td>' + (r.date||"") + '</td><td>' + (r.headcount||"") + '</td><td>' + (r.work_content||"") + '</td><td class="amount">' + formatNum(r.amount) + '</td><td>' + (r.notes||"") + '</td></tr>';
+  }).join("") : '<tr><td colspan="5" style="text-align:center;color:#999;padding:10px">暂无记录</td></tr>';
+
+  // Full tables for modal
+  var fullPayTable = "<table class="data-table" style="font-size:0.7rem;min-width:450px"><thead><tr><th>序号</th><th>姓名</th><th>身份证号码</th><th>金额</th></tr></thead><tbody>" + payRows + "</tbody></table>";
+  var fullLaborTable = "<table class="data-table" style="font-size:0.72rem;min-width:500px"><thead><tr><th>日期</th><th>人数</th><th>工作内容</th><th>金额</th><th>备注</th></tr></thead><tbody>" + laborRows + "</tbody></table>";
+
+  return "<div style="border:1px solid #b8860b;border-radius:8px;overflow:hidden;background:#fefcf5">" +
+    "<div style="background:#b8860b;color:#fff;padding:4px 8px;font-size:0.68rem;font-weight:600">📅 " + label + "</div>" +
+    "<div style="padding:6px;display:flex;flex-direction:column;gap:6px">" +
+      // Payroll table (preview)
+      "<div style="background:#fff;border:1px solid #e8e5e0;border-radius:6px;padding:4px;overflow-x:auto;cursor:pointer" onclick=\"showFullModal('" + uid + "_pay','" + label + " · 工资单')\">" +
+        "<div style="display:flex;align-items:center;justify-content:space-between;padding:2px 4px 4px">" +
+          "<span style="font-size:0.6rem;font-weight:600;color:#b8860b">📄 工资单</span>" +
+          "<span style="font-size:0.55rem;color:#999">" + workerCount + "人 · " + formatNum(totalAmt) + "</span>" +
+        "</div>" +
+        "<div style="max-height:100px;overflow:hidden">" +
+          "<table class="data-table" style="font-size:0.55rem"><thead><tr><th>#</th><th>姓名</th><th>身份证</th><th>金额</th></tr></thead><tbody>" + payRows + "</tbody></table>" +
+        "</div>" +
+      "</div>" +
+      // Labor table (preview)
+      "<div style="background:#fff;border:1px solid #e8e5e0;border-radius:6px;padding:4px;overflow-x:auto;cursor:pointer" onclick=\"showFullModal('" + uid + "_labor','" + label + " · 劳务清单')\">" +
+        "<div style="display:flex;align-items:center;justify-content:space-between;padding:2px 4px 4px">" +
+          "<span style="font-size:0.6rem;font-weight:600;color:#b8860b">📋 劳务清单</span>" +
+          "<span style="font-size:0.55rem;color:#999">" + laborCount + "人次 · " + formatNum(laborAmt) + "</span>" +
+        "</div>" +
+        "<div style="max-height:100px;overflow:hidden">" +
+          "<table class="data-table" style="font-size:0.55rem"><thead><tr><th>日期</th><th>人数</th><th>工作内容</th><th>金额</th><th>备注</th></tr></thead><tbody>" + laborRows + "</tbody></table>" +
+        "</div>" +
+      "</div>" +
+    "</div>" +
+    // Hidden containers for full-screen modal content
+    "<div id=\"" + uid + "_pay\" style=\"display:none\">" + fullPayTable + "</div>" +
+    "<div id=\"" + uid + "_labor\" style=\"display:none\">" + fullLaborTable + "</div>" +
+  "</div>";
+}
+function showFullModal(cid, title) {
+  var el = document.getElementById(cid);
+  if (!el) return;
+  var modal = document.getElementById('fullTableModal');
+  if (!modal) return;
+  document.getElementById('fullTableTitle').textContent = title || '查看';
+  document.getElementById('fullTableBody').innerHTML = el.innerHTML;
+  modal.style.display = 'block';
+}
+function closeFullModal() {
+  var modal = document.getElementById('fullTableModal');
+  if (modal) modal.style.display = 'none';
+}
 function renderBaseExpense() {
   ['jinyinhua','dangshen','seedling'].forEach(function(base) {
     var data = DataStore.baseExpense[base];

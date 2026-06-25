@@ -490,6 +490,16 @@ function showToast(msg, type) {
   </div>
 
 
+  <!-- ===== 全屏表格查看 ===== -->
+  <div class="modal-overlay" id="fullTableOverlay" onclick="closeFullModal()" style="display:none"></div>
+  <div class="modal" id="fullTableModal" style="display:none;max-width:90vw;max-height:90vh;">
+    <div class="modal-header">
+      <h3 id="fullTableTitle">查看</h3>
+      <button class="modal-close" onclick="closeFullModal()">✕</button>
+    </div>
+    <div class="modal-body" id="fullTableBody" style="overflow:auto;max-height:70vh"></div>
+  </div>
+
   <!-- ===== 添加数据弹窗 ===== -->
   <div class="modal-overlay" id="modalOverlay" onclick="closeModal()"></div>
   <div class="modal" id="modal">
