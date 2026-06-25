@@ -505,37 +505,34 @@ function buildMonthCard(label, workers, labor) {
   }).join("") : '<tr><td colspan="5" style="text-align:center;color:#999;padding:10px">暂无记录</td></tr>';
 
   // Full tables for modal
-  var fullPayTable = "<table class="data-table" style="font-size:0.7rem;min-width:450px"><thead><tr><th>序号</th><th>姓名</th><th>身份证号码</th><th>金额</th></tr></thead><tbody>" + payRows + "</tbody></table>";
-  var fullLaborTable = "<table class="data-table" style="font-size:0.72rem;min-width:500px"><thead><tr><th>日期</th><th>人数</th><th>工作内容</th><th>金额</th><th>备注</th></tr></thead><tbody>" + laborRows + "</tbody></table>";
+  var fullPayTable = '<table class="data-table" style="font-size:0.7rem;min-width:450px"><thead><tr><th>序号</th><th>姓名</th><th>身份证号码</th><th>金额</th></tr></thead><tbody>' + payRows + '</tbody></table>';
+  var fullLaborTable = '<table class="data-table" style="font-size:0.72rem;min-width:500px"><thead><tr><th>日期</th><th>人数</th><th>工作内容</th><th>金额</th><th>备注</th></tr></thead><tbody>' + laborRows + '</tbody></table>';
 
-  return "<div style="border:1px solid #b8860b;border-radius:8px;overflow:hidden;background:#fefcf5">" +
-    "<div style="background:#b8860b;color:#fff;padding:4px 8px;font-size:0.68rem;font-weight:600">📅 " + label + "</div>" +
-    "<div style="padding:6px;display:flex;flex-direction:column;gap:6px">" +
-      // Payroll table (preview)
-      "<div style="background:#fff;border:1px solid #e8e5e0;border-radius:6px;padding:4px;overflow-x:auto;cursor:pointer" onclick=\"showFullModal('" + uid + "_pay','" + label + " · 工资单')\">" +
-        "<div style="display:flex;align-items:center;justify-content:space-between;padding:2px 4px 4px">" +
-          "<span style="font-size:0.6rem;font-weight:600;color:#b8860b">📄 工资单</span>" +
-          "<span style="font-size:0.55rem;color:#999">" + workerCount + "人 · " + formatNum(totalAmt) + "</span>" +
-        "</div>" +
-        "<div style="max-height:100px;overflow:hidden">" +
-          "<table class="data-table" style="font-size:0.55rem"><thead><tr><th>#</th><th>姓名</th><th>身份证</th><th>金额</th></tr></thead><tbody>" + payRows + "</tbody></table>" +
-        "</div>" +
-      "</div>" +
-      // Labor table (preview)
-      "<div style="background:#fff;border:1px solid #e8e5e0;border-radius:6px;padding:4px;overflow-x:auto;cursor:pointer" onclick=\"showFullModal('" + uid + "_labor','" + label + " · 劳务清单')\">" +
-        "<div style="display:flex;align-items:center;justify-content:space-between;padding:2px 4px 4px">" +
-          "<span style="font-size:0.6rem;font-weight:600;color:#b8860b">📋 劳务清单</span>" +
-          "<span style="font-size:0.55rem;color:#999">" + laborCount + "人次 · " + formatNum(laborAmt) + "</span>" +
-        "</div>" +
-        "<div style="max-height:100px;overflow:hidden">" +
-          "<table class="data-table" style="font-size:0.55rem"><thead><tr><th>日期</th><th>人数</th><th>工作内容</th><th>金额</th><th>备注</th></tr></thead><tbody>" + laborRows + "</tbody></table>" +
-        "</div>" +
-      "</div>" +
-    "</div>" +
-    // Hidden containers for full-screen modal content
-    "<div id=\"" + uid + "_pay\" style=\"display:none\">" + fullPayTable + "</div>" +
-    "<div id=\"" + uid + "_labor\" style=\"display:none\">" + fullLaborTable + "</div>" +
-  "</div>";
+  return '<div style="border:1px solid #b8860b;border-radius:8px;overflow:hidden;background:#fefcf5">' +
+    '<div style="background:#b8860b;color:#fff;padding:4px 8px;font-size:0.68rem;font-weight:600">📅 ' + label + '</div>' +
+    '<div style="padding:6px;display:flex;flex-direction:column;gap:6px">' +
+      '<div style="background:#fff;border:1px solid #e8e5e0;border-radius:6px;padding:4px;overflow-x:auto;cursor:pointer" onclick="showFullModal(\'' + uid + '_pay\',\'' + label + ' · 工资单\')">' +
+        '<div style="display:flex;align-items:center;justify-content:space-between;padding:2px 4px 4px">' +
+          '<span style="font-size:0.6rem;font-weight:600;color:#b8860b">📄 工资单</span>' +
+          '<span style="font-size:0.55rem;color:#999">' + workerCount + '人 · ' + formatNum(totalAmt) + '</span>' +
+        '</div>' +
+        '<div style="max-height:100px;overflow:hidden">' +
+          '<table class="data-table" style="font-size:0.55rem"><thead><tr><th>#</th><th>姓名</th><th>身份证</th><th>金额</th></tr></thead><tbody>' + payRows + '</tbody></table>' +
+        '</div>' +
+      '</div>' +
+      '<div style="background:#fff;border:1px solid #e8e5e0;border-radius:6px;padding:4px;overflow-x:auto;cursor:pointer" onclick="showFullModal(\'' + uid + '_labor\',\'' + label + ' · 劳务清单\')">' +
+        '<div style="display:flex;align-items:center;justify-content:space-between;padding:2px 4px 4px">' +
+          '<span style="font-size:0.6rem;font-weight:600;color:#b8860b">📋 劳务清单</span>' +
+          '<span style="font-size:0.55rem;color:#999">' + laborCount + '人次 · ' + formatNum(laborAmt) + '</span>' +
+        '</div>' +
+        '<div style="max-height:100px;overflow:hidden">' +
+          '<table class="data-table" style="font-size:0.55rem"><thead><tr><th>日期</th><th>人数</th><th>工作内容</th><th>金额</th><th>备注</th></tr></thead><tbody>' + laborRows + '</tbody></table>' +
+        '</div>' +
+      '</div>' +
+    '</div>' +
+    '<div id="' + uid + '_pay" style="display:none">' + fullPayTable + '</div>' +
+    '<div id="' + uid + '_labor" style="display:none">' + fullLaborTable + '</div>' +
+  '</div>';
 }
 function showFullModal(cid, title) {
   var el = document.getElementById(cid);
