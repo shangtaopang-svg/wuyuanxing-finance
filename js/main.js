@@ -569,6 +569,7 @@ function closeBaseFull() {
 function renderBaseExpense() {
   var allData = DataStore.baseExpense || [];
   var baseNames = ['金银花基地','党参基地','党参育苗基地'];
+  var baseScales = {'金银花基地':'规模（流转）101.4亩','党参基地':'','党参育苗基地':''};
   var categories = ['土地流转','土地处理','种苗采购','种苗运输','化肥农药','人工费用','其他'];
   var catColors = {'土地流转':'#8B4513','土地处理':'#D2691E','种苗采购':'#27ae60','种苗运输':'#2ecc71','化肥农药':'#f39c12','人工费用':'#e74c3c','其他':'#95a5a6'};
   var coverColors = ['#27ae60','#3498db','#e67e22'];
@@ -597,6 +598,7 @@ function renderBaseExpense() {
     var coverHtml = '<div class="cover" style="background:linear-gradient(135deg,'+cc+','+cc+'cc);color:#fff">' +
       '<div style="font-size:2rem;margin-bottom:6px">'+emojis[bi]+'</div>' +
       '<div style="font-size:0.9rem;font-weight:700">'+base+'</div>' +
+      (baseScales[base]?'<div style="font-size:0.55rem;opacity:0.8;margin-top:2px;background:rgba(255,255,255,0.15);padding:1px 8px;border-radius:4px;display:inline-block">'+baseScales[base]+'</div>':'') +
       '<div style="font-size:0.6rem;opacity:0.7;margin-top:2px">'+items.length+'笔支出</div>' +
       '<div style="font-size:1.2rem;font-weight:800;margin-top:6px;letter-spacing:1px">'+formatNum(total)+'</div>' +
       '<div style="font-size:0.55rem;opacity:0.6;margin-top:10px;border-top:1px solid rgba(255,255,255,0.2);padding-top:6px;width:80%">hover 查看详情 →</div>' +
@@ -639,6 +641,7 @@ function renderBaseExpense() {
         '<div style="display:flex;align-items:center;gap:8px;margin-bottom:6px">' +
           '<span style="font-size:1.2rem">'+emojis[bi]+'</span>' +
           '<span style="font-size:0.72rem;font-weight:700">'+base+'</span>' +
+          (baseScales[base]?'<span style="font-size:0.5rem;opacity:0.6;margin-left:6px">'+baseScales[base]+'</span>':'') +
           '<span style="margin-left:auto;font-size:0.65rem;color:'+cc+'">'+formatNum(total)+'</span>' +
         '</div>' +
         '<div style="display:flex;gap:8px">' +
