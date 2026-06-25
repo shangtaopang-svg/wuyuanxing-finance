@@ -520,7 +520,8 @@ function openBaseFull(base, color, total, itemsJson) {
 
   var sortedI = items.slice().sort(function(a,b){ return (a.category||'').localeCompare(b.category||''); });
   var detailRows = sortedI.map(function(r, i){
-    return '<tr'+(i%2===0?' style="background:#fafafa"':'')+'><td style="padding:5px 8px;font-size:0.68rem;color:'+(catColors[r.category]||'#666')+';font-weight:600">'+(r.category||'')+'</td><td style="padding:5px 8px;font-size:0.72rem">'+(r.date||'')+'</td><td style="padding:5px 8px;font-size:0.72rem">'+(r.item||'')+'</td><td class="amount" style="padding:5px 8px;font-size:0.75rem;text-align:right">'+formatNum(r.amount)+'</td><td style="padding:5px 8px;font-size:0.65rem;color:#888">'+(r.note||'')+'</td></tr>';
+    var inv = r.invoices; var invHtml = '—'; if(inv && inv.length){try{var f=typeof inv==='string'?JSON.parse(inv):inv;if(f.length)invHtml=f.map(function(x){return '<span class="invoice-link" onclick="previewFile(\''+encodeURIComponent(x)+'\')">📎</span>';}).join('');}catch(e){}}
+    return '<tr'+(i%2===0?' style="background:#fafafa"':'')+'><td style="padding:5px 8px;font-size:0.68rem;color:'+(catColors[r.category]||'#666')+';font-weight:600">'+(r.category||'')+'</td><td style="padding:5px 8px;font-size:0.72rem">'+(r.date||'')+'</td><td style="padding:5px 8px;font-size:0.72rem">'+(r.item||'')+'</td><td class="amount" style="padding:5px 8px;font-size:0.75rem;text-align:right">'+formatNum(r.amount)+'</td><td style="padding:5px 8px;font-size:0.65rem;color:#888">'+(r.note||'')+'</td><td style="padding:5px 8px;text-align:center">'+invHtml+'</td></tr>';
   }).join('');
 
   body.innerHTML = '<div style="display:flex;gap:20px;flex-wrap:wrap;margin-bottom:24px">' +
@@ -532,7 +533,7 @@ function openBaseFull(base, color, total, itemsJson) {
       '</table>' +
     '</div></div>' +
     '<h4 style="font-size:0.85rem;color:'+color+';margin:0 0 8px">📋 支出明细</h4>' +
-    '<div style="overflow-x:auto"><table class="data-table" style="font-size:0.72rem;min-width:500px"><thead><tr><th>类别</th><th>日期</th><th>项目</th><th>金额</th><th>说明</th></tr></thead><tbody>' + detailRows + '</tbody></table></div>';
+    '<div style="overflow-x:auto"><table class="data-table" style="font-size:0.72rem;min-width:550px"><thead><tr><th>类别</th><th>日期</th><th>项目</th><th>金额</th><th>说明</th><th>票据</th></tr></thead><tbody>' + detailRows + '</tbody></table></div>';
 
   modal.style.display = 'block';
   overlay.style.display = 'block';
@@ -596,8 +597,9 @@ function renderBaseExpense() {
 
     var sorted = items.slice().sort(function(a,b){ return (a.category||'').localeCompare(b.category||''); });
     var detailRows = sorted.length ? sorted.map(function(r){
-      return '<tr><td style="padding:2px 6px;font-size:0.55rem;color:'+cc+'">'+(r.category||'')+'</td><td style="padding:2px 6px;font-size:0.58rem">'+(r.date||'')+'</td><td style="padding:2px 6px;font-size:0.58rem">'+(r.item||'')+'</td><td class="amount" style="text-align:right;padding:2px 8px;font-size:0.6rem">'+formatNum(r.amount)+'</td><td style="padding:2px 6px;font-size:0.5rem;color:#888">'+(r.note||'')+'</td></tr>';
-    }).join('') : '<tr><td colspan="5" style="text-align:center;color:#999;padding:10px;font-size:0.6rem">暂无</td></tr>';
+      var inv = r.invoices; var invHtml = '—'; if(inv && inv.length){try{var f=typeof inv==='string'?JSON.parse(inv):inv;if(f.length)invHtml=f.map(function(x){return '<span class="invoice-link" onclick="previewFile(\''+encodeURIComponent(x)+'\')">📎</span>';}).join('');}catch(e){}}
+      return '<tr><td style="padding:2px 6px;font-size:0.55rem;color:'+cc+'">'+(r.category||'')+'</td><td style="padding:2px 6px;font-size:0.58rem">'+(r.date||'')+'</td><td style="padding:2px 6px;font-size:0.58rem">'+(r.item||'')+'</td><td class="amount" style="text-align:right;padding:2px 8px;font-size:0.6rem">'+formatNum(r.amount)+'</td><td style="padding:2px 6px;font-size:0.5rem;color:#888">'+(r.note||'')+'</td><td style="padding:2px 4px;font-size:0.5rem;text-align:center">'+invHtml+'</td></tr>';
+    }).join('') : '<tr><td colspan="6" style="text-align:center;color:#999;padding:10px;font-size:0.6rem">暂无</td></tr>';
 
     var detailHtml = '<div class="detail" style="background:#1a1a2e;color:#fff">' +
       '<div class="detail-inner" style="padding:6px">' +
@@ -612,7 +614,7 @@ function renderBaseExpense() {
             '<thead><tr style="border-bottom:1px solid rgba(255,255,255,0.1)"><th style="padding:2px 6px;font-size:0.55rem;color:'+cc+';text-align:left">类别</th><th style="padding:2px 6px;font-size:0.55rem;color:'+cc+';text-align:right">金额</th><th style="padding:2px 6px;font-size:0.55rem;color:'+cc+';text-align:center">%</th></tr></thead><tbody>'+catRows+'</tbody></table></div>' +
         '</div>' +
         '<div style="margin-top:6px;overflow-x:auto">' +
-          '<table style="width:100%;border-collapse:collapse;font-size:0.55rem"><thead><tr style="border-bottom:1px solid rgba(255,255,255,0.1)"><th style="padding:2px 4px;color:#888">类别</th><th style="padding:2px 4px;color:#888">日期</th><th style="padding:2px 4px;color:#888">项目</th><th style="padding:2px 4px;color:#888;text-align:right">金额</th><th style="padding:2px 4px;color:#888">说明</th></tr></thead><tbody>'+detailRows+'</tbody></table>' +
+          '<table style="width:100%;border-collapse:collapse;font-size:0.55rem"><thead><tr style="border-bottom:1px solid rgba(255,255,255,0.1)"><th style="padding:2px 4px;color:#888">类别</th><th style="padding:2px 4px;color:#888">日期</th><th style="padding:2px 4px;color:#888">项目</th><th style="padding:2px 4px;color:#888;text-align:right">金额</th><th style="padding:2px 4px;color:#888">说明</th><th style="padding:2px 4px;color:#888">票据</th></tr></thead><tbody>'+detailRows+'</tbody></table>' +
         '</div>' +
       '</div>' +
     '</div>';
@@ -641,7 +643,7 @@ function renderBaseExpense() {
     var total = parseFloat(card.getAttribute('data-total') || '0');
     var items = [];
     var baseName = base || '';
-    allData.forEach(function(r){ if (r.base === baseName) items.push({date:r.date,category:r.category,item:r.item,amount:r.amount,note:r.note}); });
+    allData.forEach(function(r){ if (r.base === baseName) items.push({date:r.date,category:r.category,item:r.item,amount:r.amount,note:r.note,invoices:r.invoices}); });
     openBaseFull(base, color, total, items);
   };
 }
