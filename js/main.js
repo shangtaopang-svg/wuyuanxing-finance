@@ -546,7 +546,9 @@ function openBaseFull(base, color, total, itemsJson) {
       '</table>' +
     '</div></div>' +
     '<h4 style="font-size:0.85rem;color:'+color+';margin:0 0 8px">📋 支出明细</h4>' +
-    '<div style="overflow-x:auto"><table class="data-table" style="font-size:0.72rem;min-width:550px"><thead><tr><th>类别</th><th>日期</th><th>项目</th><th>金额</th><th>说明</th><th>票据</th></tr></thead><tbody>' + detailRows + '</tbody></table></div>';
+    '<div style="overflow-x:auto"><table class="data-table" style="font-size:0.72rem;min-width:550px"><thead><tr><th>类别</th><th>日期</th><th>项目</th><th>金额</th><th>说明</th><th>票据</th></tr></thead><tbody>' + detailRows + '</tbody></table></div>' +
+    // Agent expenses
+    (function(){ var ad = (DataStore.agentExpenses||[]).filter(function(x){return x.base===base;}); if(!ad.length)return ''; var ar=ad.map(function(r){return '<tr><td style="padding:4px 8px;font-size:0.68rem">'+(r.item||'')+'</td><td style="padding:4px 8px;font-size:0.65rem">'+(r.quantity||'')+'</td><td style="padding:4px 8px;font-size:0.65rem">¥'+(r.unit_price||0)+'</td><td style="padding:4px 8px;font-size:0.7rem;text-align:right">'+(r.amount?formatNum(r.amount):'—')+'</td><td style="padding:4px 8px;font-size:0.7rem;text-align:right;font-weight:600">'+(r.subtotal?formatNum(r.subtotal):'—')+'</td><td style="padding:4px 8px;font-size:0.6rem;color:#888">'+(r.notes||'')+'</td></tr>';}).join(''); return '<h4 style="font-size:0.85rem;color:'+color+';margin:16px 0 8px">👤 杨德彪经手费用</h4><div style="overflow-x:auto"><table class="data-table" style="font-size:0.68rem;min-width:500px"><thead><tr><th>项目</th><th>数量(kg)</th><th>单价</th><th>金额</th><th>小计</th><th>备注</th></tr></thead><tbody>'+ar+'</tbody></table></div>'; })();
 
   modal.style.display = 'block';
   overlay.style.display = 'block';
@@ -655,8 +657,20 @@ function renderBaseExpense() {
       '</div>' +
     '</div>';
 
+    // 经手人费用
+    var agentHtml = '';
+    var agentData = (DataStore.agentExpenses || []).filter(function(r){ return r.base === base; });
+    if (agentData.length) {
+      agentHtml = '<div style="border-top:1px solid #e8e5e0;padding:6px">' +
+        '<div style="font-size:0.6rem;font-weight:600;color:'+cc+';margin-bottom:4px">👤 杨德彪经手费用</div>' +
+        '<div style="overflow-x:auto"><table style="width:100%;border-collapse:collapse;font-size:0.5rem">' +
+          '<thead><tr style="border-bottom:1px solid '+cc+'"><th style="padding:2px 4px;color:#888">项目</th><th style="padding:2px 4px;color:#888">数量(kg)</th><th style="padding:2px 4px;color:#888">单价</th><th style="padding:2px 4px;color:#888;text-align:right">金额</th><th style="padding:2px 4px;color:#888;text-align:right">小计</th><th style="padding:2px 4px;color:#888">备注</th></tr></thead><tbody>' +
+          agentData.map(function(r){ return '<tr><td style="padding:2px 4px">'+(r.item||'')+'</td><td style="padding:2px 4px">'+(r.quantity||'')+'</td><td style="padding:2px 4px">¥'+(r.unit_price||0)+'</td><td style="padding:2px 4px;text-align:right">'+(r.amount?formatNum(r.amount):'—')+'</td><td style="padding:2px 4px;text-align:right;font-weight:600">'+(r.subtotal?formatNum(r.subtotal):'—')+'</td><td style="padding:2px 4px;font-size:0.45rem;color:#888">'+(r.notes||'')+'</td></tr>'; }).join('') +
+        '</tbody></table></div></div>';
+    }
+
     html += '<div class="base-card" data-base="'+base+'" data-color="'+cc+'" data-total="'+total+'" style="border:1px solid '+cc+'22;box-shadow:0 2px 8px '+cc+'11">' +
-      coverHtml + detailHtml +
+      coverHtml + detailHtml + agentHtml +
     '</div>';
 
     // Chart render
@@ -1835,7 +1849,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
   // 从公共API加载数据（无需登录，确保数据最新）
   showLoading(true);
-    var pubSections = ['capital','bankFlow','pettyDraw','pettyWrite','pettyCash','bankAccounts','contracts','companyInfo','receivable','asset','management','salary','baseExpense','farmerLedger','seedlingBill','materialsBill','tempLabor','tempWorkers'];
+    var pubSections = ['capital','bankFlow','pettyDraw','pettyWrite','pettyCash','bankAccounts','contracts','companyInfo','receivable','asset','management','salary','baseExpense','farmerLedger','seedlingBill','materialsBill','tempLabor','tempWorkers','agentExpenses'];
   var pubLoaded = 0;
   pubSections.forEach(function(s) {
     var xhr = new XMLHttpRequest();
@@ -2484,7 +2498,7 @@ function confirmFrontImport() {
 
 function saveFrontData() {
   showToast('⏳ 保存中...', 'info');
-  var sections = ['capital','bankFlow','pettyDraw','pettyWrite','reimburse','receivable','asset','management','salary','baseExpense','tempLabor','tempWorkers'];
+  var sections = ['capital','bankFlow','pettyDraw','pettyWrite','reimburse','receivable','asset','management','salary','baseExpense','tempLabor','tempWorkers','agentExpenses'];
   var done = 0, total = sections.length;
   var apiBase = (typeof API_BASE !== 'undefined' ? API_BASE : (window.location.pathname.startsWith('/finance/') ? '/finance' : ''));
   sections.forEach(function(s) {
