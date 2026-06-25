@@ -373,25 +373,30 @@ function showToast(msg, type) {
 
     <!-- ===== ⑩ 基地支出 ===== -->
     <section class="tab-panel" id="tab10">
-      <div class="panel-header"><h2>🌿 分基地类别直接支出账目</h2></div>
+      <div class="panel-header"><h2>🌿 基地支出成本分析</h2></div>
       <div class="chart-row">
-        <div class="chart-card"><h4>🌿 各基地支出对比</h4><div class="chart-box"><canvas id="chart10a"></canvas></div></div>
-        <div class="chart-card"><h4>📊 支出项目分布</h4><div class="chart-box"><canvas id="chart10b"></canvas></div></div>
+        <div class="chart-card"><h4>📊 各基地成本构成</h4><div class="chart-box"><canvas id="chart10a"></canvas></div></div>
+        <div class="chart-card"><h4>📈 各基地各类成本占比</h4><div class="chart-box"><canvas id="chart10b"></canvas></div></div>
       </div>
+
+      <!-- 成本汇总交叉表 -->
+      <div style="margin:12px 0;overflow-x:auto">
+        <table class="data-table" style="font-size:0.7rem;min-width:600px">
+          <thead><tr><th style="width:80px">支出类别</th><th style="width:100px">金银花基地</th><th style="width:100px">党参基地</th><th style="width:100px">育苗基地</th><th style="width:80px">合计</th><th style="width:60px">占比</th></tr></thead>
+          <tbody id="baseSummaryBody"></tbody>
+        </table>
+      </div>
+
+      <!-- 明细表 -->
       <div class="sub-tabs">
         <button class="sub-tab-btn active" data-sub="sub10a">金银花基地</button>
         <button class="sub-tab-btn" data-sub="sub10b">党参基地</button>
         <button class="sub-tab-btn" data-sub="sub10c">党参育苗基地</button>
       </div>
-      <div class="sub-panel active" id="sub10a"><h3 style="margin:12px 0 8px;font-size:0.95rem">金银花基地</h3>
-        <table class="data-table"><thead><tr><th>日期</th><th>支出项目</th><th>金额</th><th>说明</th><th>凭证</th></tr></thead><tbody id="baseJinyinhuaBody"></tbody></table>
-        <p class="table-empty" id="empty10a">暂无数据</p></div>
-      <div class="sub-panel" id="sub10b"><h3 style="margin:12px 0 8px;font-size:0.95rem">党参基地</h3>
-        <table class="data-table"><thead><tr><th>日期</th><th>支出项目</th><th>金额</th><th>说明</th><th>凭证</th></tr></thead><tbody id="baseDangshenBody"></tbody></table>
-        <p class="table-empty" id="empty10b">暂无数据</p></div>
-      <div class="sub-panel" id="sub10c"><h3 style="margin:12px 0 8px;font-size:0.95rem">党参育苗基地</h3>
-        <table class="data-table"><thead><tr><th>日期</th><th>支出项目</th><th>金额</th><th>说明</th><th>凭证</th></tr></thead><tbody id="baseSeedlingBody"></tbody></table>
-        <p class="table-empty" id="empty10c">暂无数据</p></div>
+      <div style="margin-top:8px;overflow-x:auto">
+        <table class="data-table" style="font-size:0.7rem;min-width:600px"><thead><tr><th>日期</th><th>类别</th><th>支出项目</th><th>金额</th><th>说明</th><th>凭证</th></tr></thead><tbody id="baseDetailBody"></tbody></table>
+      </div>
+      <div class="table-empty" id="empty10">暂无数据</div>
     </section>
 
     <!-- ===== ⑪ 公司信息 ===== -->

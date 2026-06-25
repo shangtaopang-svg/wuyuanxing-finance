@@ -86,7 +86,7 @@ async function initDB() {
     id INTEGER PRIMARY KEY, month TEXT, name TEXT, position TEXT, amount REAL, pay_date TEXT, voucher TEXT DEFAULT ''
   )`);
   db.run(`CREATE TABLE IF NOT EXISTS base_expense (
-    id INTEGER PRIMARY KEY, date TEXT, base TEXT, item TEXT, amount REAL, note TEXT, invoices TEXT DEFAULT '[]'
+    id INTEGER PRIMARY KEY, date TEXT, base TEXT, item TEXT, amount REAL, note TEXT, invoices TEXT DEFAULT '[]', category TEXT DEFAULT ''
   )`);
   db.run(`CREATE TABLE IF NOT EXISTS company_info (
     id INTEGER PRIMARY KEY, field_name TEXT, field_value TEXT
@@ -230,7 +230,7 @@ const TABLE_MAP = {
   salary: { table: 'salary', fields: ['month','name','position','amount','pay_date','voucher'] },
   tempLabor: { table: 'temp_labor', fields: ['date','headcount','work_content','amount','notes','month'] },
   tempWorkers: { table: 'temp_workers', fields: ['name','id_card','month','amount','notes'] },
-  baseExpense: { table: 'base_expense', fields: ['date','base','item','amount','note','invoices'] },
+  baseExpense: { table: 'base_expense', fields: ['date','base','item','amount','note','invoices','category'] },
   companyInfo: { table: 'company_info', fields: ['field_name','field_value'] },
   contracts: { table: 'contracts', fields: ['date','contract_name','party','amount','status','note'] },
   bankAccounts: { table: 'bank_accounts', fields: ['bank_name','account_name','account_number','balance','note'] },
@@ -337,7 +337,7 @@ const PUBLIC_SECTIONS = {
   contracts: { fields: ['date','contract_name','party','amount','status','note'] },
   bankAccounts: { fields: ['bank_name','account_name','account_number','balance','note'] },
   bankFlow: { fields: ['date','income','expense','counterparty_account','counterparty_name','purpose','summary'] },
-  baseExpense: { fields: ["date","base","item","amount","note","invoices"] },
+  baseExpense: { fields: ["date","base","item","amount","note","invoices","category"] },
   farmerLedger: { fields: ["seq","name","phone","area","bags","price_per_bag","weight_per_bag","seedling_total","prepaid","unpaid_seedling","fertilizer_a","fertilizer_b","herbicide","pesticide","mulch","materials_total","materials_paid","materials_unpaid","total_unpaid","notes","paid"] },
   seedlingBill: { fields: ["seq","name","phone","area","bags","price_per_bag","weight_per_bag","total_amount","prepaid","unpaid","is_total","is_subtotal"] },
   materialsBill: { fields: ["seq","name","phone","fertilizer_a","fertilizer_b","herbicide","sealant","pesticide","total_amount","paid","unpaid","notes","is_total","is_subtotal"] },

@@ -114,7 +114,10 @@ document.addEventListener('click', function(e) {
   parent.querySelectorAll('.sub-tab-btn').forEach(function(b) { b.classList.remove('active'); });
   parent.querySelectorAll('.sub-panel').forEach(function(p) { p.classList.remove('active'); });
   btn.classList.add('active');
-  $(btn.dataset.sub).classList.add('active');
+  var sub = $(btn.dataset.sub);
+  if (sub) sub.classList.add('active');
+  // 基地支出明细表切换
+  if (btn.closest('#tab10')) renderBaseExpense();
 });
 
 // === 直接从服务器加载真实数据（简化版） ===
@@ -495,20 +498,72 @@ function closeFullModal() {
   if (modal) modal.style.display = 'none';
 }
 function renderBaseExpense() {
-  ['jinyinhua','dangshen','seedling'].forEach(function(base) {
-    var data = DataStore.baseExpense[base];
-    var names = {jinyinhua:'JinyinhuaBody', dangshen:'DangshenBody', seedling:'SeedlingBody'};
-    var emptyIds = {jinyinhua:'empty10a', dangshen:'empty10b', seedling:'empty10c'};
-      var body = $(names[base]);
-      if (!body) return;
-      body.innerHTML = '';
-    var e=$(emptyIds[base]);if(e)e.style.display = 'none';
-    var capColors = {"任海涛":"#e8f4fd","庞尚韬":"#fef2f2","吴生成":"#f0faf4","应红林":"#fdf6e3","陈洪斌":"#f5e6f0"};
-  data.forEach(function(r) {
-      body.innerHTML += '<tr><td>' + r.date + '</td><td>' + r.item + '</td><td class="amount expense">' + formatNum(r.amount) + '</td><td>' + (r.note || '') + '</td><td>' +
-        (r.invoices && r.invoices.length ? r.invoices.map(function(f) { return '<a href="#" class="invoice-link" onclick="previewFile(\'' + encodeURIComponent(f) + '\')">📎 ' + f + '</a>'; }).join('') : '—') + '</td></tr>';
-    });
+  var allData = DataStore.baseExpense || [];
+  var flatData = [];
+  var baseMap = {};
+  ['金银花基地','党参基地','党参育苗基地'].forEach(function(b){ baseMap[b]=[]; });
+  allData.forEach(function(r){
+    var baseName = r.base || '';
+    if (baseMap[baseName]) baseMap[baseName].push(r);
+    flatData.push(r);
   });
+
+  var categories = ['土地流转','土地处理','种苗采购','种苗运输','化肥农药','人工费用','其他'];
+  var baseNames = ['金银花基地','党参基地','党参育苗基地'];
+
+  // 构建交叉表
+  var summaryBody = $('baseSummaryBody');
+  if (summaryBody) {
+    var totalByBase = {}, totalByCat = {}, grandTotal = 0;
+    baseNames.forEach(function(b){ totalByBase[b]=0; });
+    categories.forEach(function(c){ totalByCat[c]=0; });
+
+    var html = '';
+    categories.forEach(function(cat){
+      var rowTotal = 0;
+      var row = '<td><strong>' + cat + '</strong></td>';
+      baseNames.forEach(function(base){
+        var sum = 0;
+        (baseMap[base]||[]).forEach(function(r){ if((r.category||'') === cat) sum += r.amount||0; });
+        rowTotal += sum; totalByBase[base] += sum; totalByCat[cat] += sum; grandTotal += sum;
+        row += '<td class="amount" style="text-align:center">' + (sum ? formatNum(sum) : '—') + '</td>';
+      });
+      row += '<td class="amount" style="text-align:center;font-weight:700">' + formatNum(rowTotal) + '</td>';
+      row += '<td style="text-align:center;font-size:0.65rem;color:#888">' + (grandTotal > 0 ? (rowTotal/grandTotal*100).toFixed(1)+'%' : '') + '</td>';
+      html += '<tr>' + row + '</tr>';
+    });
+
+    // 合计行
+    var totalRow = '<tr style="background:#f5f0e8;font-weight:700"><td>合计</td>';
+    baseNames.forEach(function(base){
+      totalRow += '<td class="amount" style="text-align:center">' + formatNum(totalByBase[base]) + '</td>';
+    });
+    totalRow += '<td class="amount" style="text-align:center">' + formatNum(grandTotal) + '</td>';
+    totalRow += '<td style="text-align:center">100%</td></tr>';
+    html += totalRow;
+    summaryBody.innerHTML = html || '<tr><td colspan="6" style="text-align:center;color:#999;padding:20px">暂无数据</td></tr>';
+  }
+
+  // 明细表（按基地过滤）
+  var detailBody = $('baseDetailBody');
+  if (detailBody) {
+    var activeBase = document.querySelector('#tab10 .sub-tab-btn.active');
+    var baseFilter = activeBase ? activeBase.textContent.trim() : '金银花基地';
+    detailBody.innerHTML = '';
+    var items = baseMap[baseFilter] || [];
+    if (!items.length) {
+      detailBody.innerHTML = '<tr><td colspan="6" style="text-align:center;color:#999;padding:20px">暂无数据</td></tr>';
+    } else {
+      items.forEach(function(r){
+        detailBody.innerHTML += '<tr><td>' + (r.date||'') + '</td><td>' + (r.category||'') + '</td><td>' + (r.item||'') + '</td><td class="amount expense">' + formatNum(r.amount) + '</td><td>' + (r.note||'') + '</td><td>' +
+          (r.invoices && r.invoices.length ? r.invoices.map(function(f){return '<span class="invoice-link">📎</span>';}).join('') : '—') + '</td></tr>';
+      });
+    }
+  }
+
+  // Empty state
+  var emptyEl = $('empty10');
+  if (emptyEl) emptyEl.style.display = flatData.length ? 'none' : 'block';
 }
 
 // === 汇总数字更新 ===
@@ -963,21 +1018,44 @@ function renderChart9b() {
 // ⑩ 基地支出图表
 function renderChart10a() {
   var data = DataStore.baseExpense || [];
-  var bases = {};
-  var capColors = {"任海涛":"#e8f4fd","庞尚韬":"#fef2f2","吴生成":"#f0faf4","应红林":"#fdf6e3","陈洪斌":"#f5e6f0"};
-  data.forEach(function(r) { bases[r.base] = (bases[r.base]||0) + (r.amount||0); });
-  makeChart('chart10a', 'bar', Object.keys(bases), [
-    { data: Object.keys(bases).map(function(k){return bases[k];}), backgroundColor: '#27ae60', borderColor: '#000', borderWidth: 2 }
-  ]);
+  var catColors = {'土地流转':'#8B4513','土地处理':'#D2691E','种苗采购':'#27ae60','种苗运输':'#2ecc71','化肥农药':'#f39c12','人工费用':'#e74c3c','其他':'#95a5a6'};
+  var categories = ['土地流转','土地处理','种苗采购','种苗运输','化肥农药','人工费用','其他'];
+  var baseNames = ['金银花基地','党参基地','党参育苗基地'];
+  // Aggregate: cat -> base -> amount
+  var catBase = {};
+  categories.forEach(function(c){ catBase[c]={}; baseNames.forEach(function(b){ catBase[c][b]=0; }); });
+  data.forEach(function(r){
+    var cat = r.category || '其他';
+    var base = r.base || '';
+    if (catBase[cat] && catBase[cat][base] !== undefined) catBase[cat][base] += r.amount||0;
+  });
+  makeChart('chart10a', 'bar', categories, baseNames.map(function(base){
+    return {
+      label: base,
+      data: categories.map(function(c){ return catBase[c][base] || 0; }),
+      backgroundColor: base === '金银花基地' ? '#27ae60' : base === '党参基地' ? '#3498db' : '#f39c12'
+    };
+  }), {
+    scales: { x: { stacked: true, grid: { display: false } }, y: { stacked: true, ticks: { callback: function(v){ return '¥'+(v/1000).toFixed(0)+'k'; } } } },
+    plugins: { tooltip: { callbacks: { label: function(ctx){ return ctx.dataset.label + ': ¥' + (ctx.raw||0).toLocaleString(); }} } }
+  });
 }
 function renderChart10b() {
   var data = DataStore.baseExpense || [];
-  var items = {};
-  var capColors = {"任海涛":"#e8f4fd","庞尚韬":"#fef2f2","吴生成":"#f0faf4","应红林":"#fdf6e3","陈洪斌":"#f5e6f0"};
-  data.forEach(function(r) { items[r.item] = (items[r.item]||0) + (r.amount||0); });
-  var sorted = Object.keys(items).sort(function(a,b){return items[b]-items[a];}).slice(0,8);
-  makeChart('chart10b', 'doughnut', sorted, [
-    { data: sorted.map(function(k){return items[k];}), backgroundColor: ['#3498db','#e74c3c','#2ecc71','#f39c12','#9b59b6','#1abc9c','#D35400','#2980b9'], borderColor: '#000', borderWidth: 2 }
+  var catColors = {'土地流转':'#8B4513','土地处理':'#D2691E','种苗采购':'#27ae60','种苗运输':'#2ecc71','化肥农药':'#f39c12','人工费用':'#e74c3c','其他':'#95a5a6'};
+  var baseNames = ['金银花基地','党参基地','党参育苗基地'];
+  var categories = ['土地流转','土地处理','种苗采购','种苗运输','化肥农药','人工费用','其他'].filter(function(c){
+    return data.some(function(r){ return (r.category||'') === c; });
+  });
+  if (!categories.length) return;
+  var totals = categories.map(function(c){
+    return data.filter(function(r){return (r.category||'')===c;}).reduce(function(s,r){return s+(r.amount||0);},0);
+  });
+  var total = totals.reduce(function(s,v){return s+v;},0);
+  makeChart('chart10b', 'doughnut', categories.map(function(c,i){
+    return c + ' ' + (total>0?'('+(totals[i]/total*100).toFixed(1)+'%)':'');
+  }), [
+    { data: totals, backgroundColor: categories.map(function(c){ return catColors[c] || '#95a5a6'; }), borderColor: '#fff', borderWidth: 2 }
   ]);
 }
 
@@ -1837,6 +1915,7 @@ var COL_FIELDS = {
   baseJinyinhuaBody:  ['date','item','amount','note','invoices'],
   baseDangshenBody:   ['date','item','amount','note','invoices'],
   baseSeedlingBody:   ['date','item','amount','note','invoices'],
+  baseDetailBody:     ['date','category','item','amount','note','invoices'],
   companyInfoBody:    ['field_name','field_value'],
   contractsBody:      ['date','contract_name','party','amount','status','note'],
   bankAccountsBody:   ['bank_name','account_name','account_number','balance','note'],
@@ -1945,6 +2024,8 @@ function perTableAddRow(bodyId) {
   } else if (bodyId === 'baseJinyinhuaBody' || bodyId === 'baseDangshenBody' || bodyId === 'baseSeedlingBody') {
     var bmap = {baseJinyinhuaBody:'金银花基地', baseDangshenBody:'党参基地', baseSeedlingBody:'党参育苗基地'};
     defaults = {date:'', base:bmap[bodyId], item:'', amount:0, note:'', invoices:''};
+  } else if (bodyId === 'baseDetailBody') {
+    defaults = {date:'', category:'', item:'', amount:0, note:'', invoices:''};
   } else if (bodyId === 'tempLaborBody') {
     defaults = {date:'', headcount:1, work_content:'', amount:120, notes:''};
   }
@@ -2004,7 +2085,7 @@ function sectionFromBodyId(bodyId) {
     receivableBody:'receivable', assetBody:'asset', managementBody:'management',
     salaryBody:'salary', salaryTempBody:'salary',
     reimburseRenBody:'reimburse', reimbursePangBody:'reimburse', reimburseYingBody:'reimburse',
-    baseJinyinhuaBody:'baseExpense', baseDangshenBody:'baseExpense', baseSeedlingBody:'baseExpense',
+    baseJinyinhuaBody:'baseExpense', baseDangshenBody:'baseExpense', baseSeedlingBody:'baseExpense', baseDetailBody:'baseExpense',
     companyInfoBody:'companyInfo', contractsBody:'contracts', bankAccountsBody:'bankAccounts',
     tempLaborBody:'tempLabor'
   };
