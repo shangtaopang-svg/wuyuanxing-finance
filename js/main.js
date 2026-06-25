@@ -457,7 +457,7 @@ function renderTempMonthCards() {
     return;
   }
 
-  container.innerHTML = monthKeys.map(function(m, mi){
+  container.style.display = 'grid'; container.style.gridTemplateColumns = 'repeat(auto-fill, minmax(180px, 1fr))'; container.style.gap = '10px'; container.innerHTML = monthKeys.map(function(m, mi){
     var info = months[m];
     var mLabel = m.replace('-', '年') + '月';
     // Special: combine 3月 and 4月
@@ -500,20 +500,20 @@ function buildMonthCard(label, workers, labor) {
   });
 
   var uid = 'mc_' + label.replace(/[^0-9a-zA-Z一-龥]/g, '_');
-  return '<div style="border:2px solid #b8860b;border-radius:10px;overflow:hidden;background:#fefcf5">' +
-    '<div style="background:#b8860b;color:#fff;padding:8px 14px;font-size:0.85rem;font-weight:700;display:flex;align-items:center;justify-content:space-between">' +
+  return '<div style="border:1px solid #b8860b;border-radius:8px;overflow:hidden;background:#fefcf5;font-size:0.75rem">' +
+    '<div style="background:#b8860b;color:#fff;padding:4px 8px;font-size:0.68rem;font-weight:600">' +
       '<span>📅 ' + label + '</span>' +
     '</div>' +
-    '<div style="padding:10px 14px;display:flex;gap:10px;flex-wrap:wrap">' +
+    '<div style="padding:5px 6px;display:flex;gap:4px">' +
       '<div onclick="var t=document.getElementById(\'' + uid + '_pay\');t.style.display=t.style.display==\'none\'?\'block\':\'none\'" style="flex:1;min-width:140px;padding:12px 16px;background:#fff;border:1px solid #e8e5e0;border-radius:8px;cursor:pointer;transition:all 0.2s;text-align center">' +
-        '<div style="font-size:1.2rem;margin-bottom:4px">📄</div>' +
-        '<div style="font-size:0.8rem;font-weight:600;color:#b8860b">财务工资单</div>' +
-        '<div style="font-size:0.65rem;color:#999;margin-top:2px">' + workerCount + '人 · ¥' + totalAmt.toLocaleString() + '</div>' +
+        '<div style="font-size:14px">📄</div>' +
+        '<div style="font-size:0.6rem;font-weight:600;color:#b8860b">工资单</div>' +
+        '<div style="font-size:0.5rem;color:#999">' + workerCount + '人</div>' + '<div style="font-size:0.6rem;font-weight:600;color:#b8860b">¥' + (totalAmt/10000).toFixed(1) + '万</div>' +
       '</div>' +
       '<div onclick="var t=document.getElementById(\'' + uid + '_labor\');t.style.display=t.style.display==\'none\'?\'block\':\'none\'" style="flex:1;min-width:140px;padding:12px 16px;background:#fff;border:1px solid #e8e5e0;border-radius:8px;cursor:pointer;transition:all 0.2s;text-align:center">' +
-        '<div style="font-size:1.2rem;margin-bottom:4px">📋</div>' +
-        '<div style="font-size:0.8rem;font-weight:600;color:#b8860b">劳务清单</div>' +
-        '<div style="font-size:0.65rem;color:#999;margin-top:2px">' + laborCount + '人次 · ¥' + laborAmt.toLocaleString() + '</div>' +
+        '<div style="font-size:14px">📋</div>' +
+        '<div style="font-size:0.6rem;font-weight:600;color:#b8860b">劳务</div>' +
+        '<div style="font-size:0.5rem;color:#999">' + laborCount + '人次</div>' + '<div style="font-size:0.6rem;font-weight:600;color:#b8860b">¥' + (laborAmt/10000).toFixed(1) + '万</div>' +
       '</div>' +
     '</div>' +
     '<div id="' + uid + '_pay" style="display:none;border-top:1px solid #e8e5e0;padding:10px 14px;overflow-x:auto">' +
