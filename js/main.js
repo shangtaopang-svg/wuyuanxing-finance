@@ -524,7 +524,7 @@ function openBaseFull(base, color, total, itemsJson) {
   sortedI.forEach(function(r, idx){
     var cat = r.category||'其他';
     if (cat !== lastCat2 && !catStarted) {
-      detailRows += '<tr style="border-top:2px solid #ccc;background:#f5f0e8"><td colspan="5" style="padding:4px 8px;font-size:0.75rem;font-weight:700;color:#333;text-align:right">小计 ('+lastCat2+')</td><td style="padding:4px 8px;font-size:0.8rem;font-weight:700;color:#c0392b;text-align:center">'+formatNum(catTotal2)+'</td></tr>';
+      detailRows += '<tr style="border-top:2px solid #e8e5e0;background:#fff3cd"><td colspan="5" style="padding:4px 8px;font-size:0.75rem;font-weight:700;color:#856404;text-align:right">小计 ('+lastCat2+')</td><td style="padding:4px 8px;font-size:0.8rem;font-weight:700;color:#856404;text-align:center">'+formatNum(catTotal2)+'</td></tr>';
       catTotal2 = 0;
     }
     catStarted = false;
@@ -532,7 +532,7 @@ function openBaseFull(base, color, total, itemsJson) {
     var inv = r.invoices; var invHtml = '—'; if(inv && inv.length){try{var f=typeof inv==='string'?JSON.parse(inv):inv;if(f.length)invHtml=f.map(function(x){return '<span class="invoice-link" onclick="previewFile(\''+encodeURIComponent(x)+'\')">📎</span>';}).join('');}catch(e){}}
     detailRows += '<tr'+(idx%2===0?' style="background:#fafafa"':'')+'><td style="padding:5px 8px;font-size:0.68rem;color:'+(catColors[r.category]||'#666')+';font-weight:600">'+(r.category||'')+'</td><td style="padding:5px 8px;font-size:0.72rem">'+(r.date||'')+'</td><td style="padding:5px 8px;font-size:0.72rem">'+(r.item||'')+'</td><td class="amount" style="padding:5px 8px;font-size:0.75rem;text-align:right">'+formatNum(r.amount)+'</td><td style="padding:5px 8px;font-size:0.65rem;color:#888">'+(r.note||'')+'</td><td style="padding:5px 8px;text-align:center">'+invHtml+'</td></tr>';
     if (idx === sortedI.length - 1) {
-      detailRows += '<tr style="border-top:2px solid #ccc;background:#f5f0e8"><td colspan="5" style="padding:4px 8px;font-size:0.75rem;font-weight:700;color:#333;text-align:right">小计 ('+cat+')</td><td style="padding:4px 8px;font-size:0.8rem;font-weight:700;color:#c0392b;text-align:center">'+formatNum(catTotal2)+'</td></tr>';
+      detailRows += '<tr style="border-top:2px solid #e8e5e0;background:#fff3cd"><td colspan="5" style="padding:4px 8px;font-size:0.75rem;font-weight:700;color:#856404;text-align:right">小计 ('+cat+')</td><td style="padding:4px 8px;font-size:0.8rem;font-weight:700;color:#856404;text-align:center">'+formatNum(catTotal2)+'</td></tr>';
     }
   });
 
@@ -615,7 +615,7 @@ function renderBaseExpense() {
         var cat = r.category||'其他';
         if (cat !== lastCat && !catStart) {
           // Subtotal for previous category
-          detailRows += '<tr style="border-top:1px dashed rgba(255,255,255,0.15)"><td colspan="5" style="padding:3px 8px;font-size:0.6rem;font-weight:700;color:'+cc+';text-align:right">小计 ('+lastCat+')</td><td style="padding:3px 8px;font-size:0.65rem;font-weight:700;color:#fff;text-align:center">'+formatNum(catTotal)+'</td></tr>';
+          detailRows += '<tr style="border-top:1px dashed rgba(255,255,255,0.15);background:rgba(255,255,255,0.06)"><td colspan="5" style="padding:3px 8px;font-size:0.6rem;font-weight:700;color:'+cc+';text-align:right">小计 ('+lastCat+')</td><td style="padding:3px 8px;font-size:0.65rem;font-weight:700;color:#fff;text-align:center">'+formatNum(catTotal)+'</td></tr>';
           catTotal = 0;
         }
         catStart = false;
@@ -625,7 +625,7 @@ function renderBaseExpense() {
         detailRows += '<tr><td style="padding:2px 6px;font-size:0.55rem;color:'+cc+'">'+(r.category||'')+'</td><td style="padding:2px 6px;font-size:0.58rem">'+(r.date||'')+'</td><td style="padding:2px 6px;font-size:0.58rem">'+(r.item||'')+'</td><td class="amount" style="text-align:right;padding:2px 8px;font-size:0.6rem">'+formatNum(r.amount)+'</td><td style="padding:2px 6px;font-size:0.5rem;color:#888">'+(r.note||'')+'</td><td style="padding:2px 4px;font-size:0.5rem;text-align:center">'+invHtml+'</td></tr>';
         // Last item - show final subtotal
         if (idx === sorted.length - 1) {
-          detailRows += '<tr style="border-top:1px dashed rgba(255,255,255,0.15)"><td colspan="5" style="padding:3px 8px;font-size:0.6rem;font-weight:700;color:'+cc+';text-align:right">小计 ('+cat+')</td><td style="padding:3px 8px;font-size:0.65rem;font-weight:700;color:#fff;text-align:center">'+formatNum(catTotal)+'</td></tr>';
+          detailRows += '<tr style="border-top:1px dashed rgba(255,255,255,0.15);background:rgba(255,255,255,0.06)"><td colspan="5" style="padding:3px 8px;font-size:0.6rem;font-weight:700;color:'+cc+';text-align:right">小计 ('+cat+')</td><td style="padding:3px 8px;font-size:0.65rem;font-weight:700;color:#fff;text-align:center">'+formatNum(catTotal)+'</td></tr>';
         }
       });
     } else {
