@@ -349,8 +349,16 @@ function showToast(msg, type) {
         <div class="chart-card"><h4>📊 月度工资对比</h4><div class="chart-box"><canvas id="chart9a"></canvas></div></div>
         <div class="chart-card"><h4>👤 岗位占比</h4><div class="chart-box"><canvas id="chart9b"></canvas></div></div>
       </div>
-      <table class="data-table"><thead><tr><th>月份</th><th>姓名</th><th>岗位</th><th>金额</th><th>发放日期</th><th>凭证</th></tr></thead><tbody id="salaryBody"></tbody></table>
-      <div class="table-empty" id="empty9"><span class="empty-icon">📭</span><span class="empty-text">暂无数据</span><span class="empty-hint">数据录入后将在次显示</span></div>
+
+      <!-- 正式员工 -->
+      <h3 style="font-size:0.9rem;color:#2d5a27;margin:14px 0 6px;border-left:4px solid #2d5a27;padding-left:10px">👔 正式员工工资</h3>
+      <table class="data-table" style="font-size:0.75rem"><thead><tr><th>月份</th><th>姓名</th><th>岗位</th><th>金额</th><th>发放日期</th><th>凭证</th></tr></thead><tbody id="salaryRegularBody"></tbody></table>
+
+      <!-- 临时工 -->
+      <h3 style="font-size:0.9rem;color:#b8860b;margin:18px 0 6px;border-left:4px solid #b8860b;padding-left:10px">🛠️ 临时工工资</h3>
+      <table class="data-table" style="font-size:0.75rem"><thead><tr><th>月份</th><th>姓名</th><th>岗位</th><th>金额</th><th>发放日期</th><th>凭证</th></tr></thead><tbody id="salaryTempBody"></tbody></table>
+
+      <div class="table-empty" id="empty9" style="display:none"><span class="empty-icon">📭</span><span class="empty-text">暂无数据</span></div>
     </section>
 
     <!-- ===== ⑩ 基地支出 ===== -->

@@ -352,16 +352,40 @@ function renderManagement() {
 
 // ⑨ 工资
 function renderSalary() {
-  var data = DataStore.salary;
-  var body = $('salaryBody');
-  body.innerHTML = '';
-  if (data.length === 0) { $('empty9').style.display = 'block'; return; }
-  $('empty9').style.display = 'none';
-  var capColors = {"任海涛":"#e8f4fd","庞尚韬":"#fef2f2","吴生成":"#f0faf4","应红林":"#fdf6e3","陈洪斌":"#f5e6f0"};
-  data.forEach(function(r) {
-    body.innerHTML += '<tr><td>' + r.month + '</td><td>' + r.name + '</td><td>' + r.position + '</td><td class="amount expense">' + formatNum(r.amount) + '</td><td>' + r.payDate + '</td><td>' +
-      (r.voucher ? '<span class="invoice-link">📎</span>' : '—') + '</td></tr>';
-  });
+  var data = DataStore.salary || [];
+  var regular = data.filter(function(r){ return r.name === '任海涛' || r.name === '庞尚韬' || r.name === '施前华'; });
+  var temp = data.filter(function(r){ return r.name !== '任海涛' && r.name !== '庞尚韬' && r.name !== '施前华'; });
+
+  // 正式员工
+  var rb = $('salaryRegularBody');
+  if (rb) {
+    rb.innerHTML = '';
+    if (regular.length) {
+      regular.forEach(function(r) {
+        rb.innerHTML += '<tr><td>' + (r.month||'') + '</td><td>' + (r.name||'') + '</td><td>' + (r.position||'') + '</td><td class="amount expense">' + formatNum(r.amount) + '</td><td>' + (r.payDate||'') + '</td><td>' +
+          (r.voucher ? '<span class="invoice-link">📎</span>' : '—') + '</td></tr>';
+      });
+    } else {
+      rb.innerHTML = '<tr><td colspan="6" style="text-align:center;color:#999;padding:20px">暂无数据</td></tr>';
+    }
+  }
+
+  // 临时工
+  var tb = $('salaryTempBody');
+  if (tb) {
+    tb.innerHTML = '';
+    if (temp.length) {
+      temp.forEach(function(r) {
+        tb.innerHTML += '<tr><td>' + (r.month||'') + '</td><td>' + (r.name||'') + '</td><td>' + (r.position||'') + '</td><td class="amount expense">' + formatNum(r.amount) + '</td><td>' + (r.payDate||'') + '</td><td>' +
+          (r.voucher ? '<span class="invoice-link">📎</span>' : '—') + '</td></tr>';
+      });
+    } else {
+      tb.innerHTML = '<tr><td colspan="6" style="text-align:center;color:#999;padding:20px">暂无数据</td></tr>';
+    }
+  }
+
+  var empty = $('empty9');
+  if (empty) empty.style.display = (!regular.length && !temp.length) ? 'block' : 'none';
 }
 
 // ⑩ 基地支出
