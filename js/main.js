@@ -564,6 +564,8 @@ function openBaseFull(base, color, total, itemsJson) {
         '<div style="font-size:0.5rem;color:#888;margin-top:2px">'+(total>0?(catAmt/total*100).toFixed(1)+'%':'')+'</div></div>';
     }).join('') + '</div>';
 
+  // Store context for back button
+  _lastBaseContext = {base: base, color: color, total: total, items: JSON.stringify(items)};
   modal.style.display = 'block';
   overlay.style.display = 'block';
 
@@ -578,6 +580,7 @@ function openBaseFull(base, color, total, itemsJson) {
     ]);
   }, 100);
 }
+var _lastBaseContext = null;
 function openCatDetail(cat, color, total, itemsJson, baseName) {
   var items = JSON.parse(decodeURIComponent(itemsJson));
   var modal = document.getElementById('baseFullModal');
@@ -585,12 +588,13 @@ function openCatDetail(cat, color, total, itemsJson, baseName) {
   var title = document.getElementById('baseFullTitle');
   var body = document.getElementById('baseFullBody');
   if (!modal || !body) return;
-  title.textContent = cat + ' · ' + baseName + ' · ' + formatNum(total);
+  title.textContent = cat + ' · ' + baseName;
   var rows = items.map(function(r, i){
     var n = (r.note||'').replace(/公司账户/g,'🏦').replace(/庞尚韬备用金/g,'💰').replace(/任海涛/g,'👤');
     return '<tr'+(i%2===0?' style="background:#fafafa"':'')+'><td style="padding:5px 8px;font-size:0.72rem">'+(r.date||'')+'</td><td style="padding:5px 8px;font-size:0.72rem">'+(r.item||'')+'</td><td class="amount" style="padding:5px 8px;font-size:0.75rem;text-align:right">'+formatNum(r.amount)+'</td><td style="padding:5px 8px;font-size:0.65rem;color:#888">'+n+'</td></tr>';
   }).join('');
-  body.innerHTML = '<h4 style="font-size:0.9rem;color:'+color+';margin:0 0 12px">'+cat+' · '+baseName+' · 合计'+formatNum(total)+'</h4>' +
+  body.innerHTML = '<div style="margin-bottom:10px"><button onclick="if(_lastBaseContext){openBaseFull(_lastBaseContext.base,_lastBaseContext.color,_lastBaseContext.total,_lastBaseContext.items)}else{closeBaseFull()}" style="padding:6px 14px;border:1px solid #ddd;border-radius:6px;background:#fff;cursor:pointer;font-size:13px">← 返回</button></div>' +
+    '<h4 style="font-size:0.9rem;color:'+color+';margin:0 0 12px">'+cat+' · '+baseName+' · 合计'+formatNum(total)+'</h4>' +
     '<div style="overflow-x:auto"><table class="data-table" style="font-size:0.72rem;width:100%"><thead><tr><th style="width:80px">日期</th><th>项目</th><th style="width:80px">金额</th><th>说明</th></tr></thead><tbody>' + rows + '</tbody></table></div>';
   modal.style.display = 'block';
   overlay.style.display = 'block';
