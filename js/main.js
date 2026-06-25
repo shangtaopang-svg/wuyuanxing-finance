@@ -634,7 +634,7 @@ function renderBaseExpense() {
         var cat = r.category||'其他';
         if (cat !== lastCat && !catStart) {
           // Subtotal for previous category
-          detailRows += '<tr style="border-top:1px dashed rgba(255,255,255,0.15);background:rgba(255,255,255,0.06)"><td colspan="5" style="padding:3px 8px;font-size:0.6rem;font-weight:700;color:'+cc+';text-align:right">小计 ('+lastCat+')</td><td style="padding:3px 8px;font-size:0.65rem;font-weight:700;color:#fff;text-align:center">'+formatNum(catTotal)+'</td></tr>';
+          detailRows += '<tr style="border-top:1px dashed rgba(255,255,255,0.15);background:rgba(255,255,255,0.06)"><td colspan="3" style="padding:3px 8px;font-size:0.6rem;font-weight:700;color:'+cc+';text-align:right">小计 ('+lastCat+')</td><td style="padding:3px 8px;font-size:0.65rem;font-weight:700;color:#fff;text-align:center">'+formatNum(catTotal)+'</td><td colspan="2"></td></tr>';
           catTotal = 0;
         }
         catStart = false;
