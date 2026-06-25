@@ -351,8 +351,14 @@ function showToast(msg, type) {
       </div>
 
       <!-- 正式员工 -->
-      <h3 style="font-size:0.9rem;color:#2d5a27;margin:14px 0 6px;border-left:4px solid #2d5a27;padding-left:10px">👔 正式员工工资</h3>
-      <table class="data-table" style="font-size:0.75rem"><thead><tr><th>月份</th><th>姓名</th><th>岗位</th><th>金额</th><th>发放日期</th><th>凭证</th></tr></thead><tbody id="salaryRegularBody"></tbody></table>
+      <h3 style="font-size:0.9rem;color:#2d5a27;margin:14px 0 6px;border-left:4px solid #2d5a27;padding-left:10px">👔 正式员工工资单</h3>
+      <p style="font-size:0.7rem;color:#999;margin:2px 0 8px 10px">姓名（岗位）\ 月份</p>
+      <div style="overflow-x:auto">
+        <table class="data-table" style="font-size:0.72rem;min-width:700px">
+          <thead><tr id="salaryRegularHeader"></tr></thead>
+          <tbody id="salaryRegularBody"></tbody>
+        </table>
+      </div>
 
       <!-- 临时工（统一版块） -->
       <div style="background:#fefcf5;border:2px solid #b8860b;border-radius:10px;padding:14px 16px 6px;margin:14px 0 8px;">

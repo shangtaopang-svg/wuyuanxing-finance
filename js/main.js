@@ -356,18 +356,55 @@ function renderSalary() {
   var regular = data.filter(function(r){ return r.name === '任海涛' || r.name === '庞尚韬' || (r.name === '施前华' && r.position !== '临时工代领'); });
   var temp = data.filter(function(r){ return r.name === '施前华' && r.position === '临时工代领'; });
 
-  // 正式员工
+  // === 正式员工：交叉表（姓名×月份） ===
   var rb = $('salaryRegularBody');
-  if (rb) {
-    rb.innerHTML = '';
-    if (regular.length) {
-      regular.forEach(function(r) {
-        rb.innerHTML += '<tr><td>' + (r.month||'') + '</td><td>' + (r.name||'') + '</td><td>' + (r.position||'') + '</td><td class="amount expense">' + formatNum(r.amount) + '</td><td>' + (r.payDate||'') + '</td><td>' +
-          (r.voucher ? '<span class="invoice-link">📎</span>' : '—') + '</td></tr>';
+  var rh = $('salaryRegularHeader');
+  if (rb && rh) {
+    // 收集月份
+    var months = [];
+    var monthSet = {};
+    regular.forEach(function(r){
+      var m = r.month || '';
+      if (m && !monthSet[m]) { monthSet[m] = true; months.push(m); }
+    });
+    months.sort();
+
+    // 收集员工
+    var employees = [];
+    var empSet = {};
+    regular.forEach(function(r){
+      var key = r.name + '|' + r.position;
+      if (!empSet[key]) { empSet[key] = true; employees.push({name: r.name, position: r.position}); }
+    });
+
+    // 构建查询表: name|month -> amount
+    var lookup = {};
+    regular.forEach(function(r){
+      lookup[r.name + '|' + (r.month||'')] = r.amount;
+    });
+
+    // 表头
+    var headerHtml = '<th style="width:100px">姓名（岗位）</th>';
+    months.forEach(function(m){
+      headerHtml += '<th style="min-width:70px;text-align:center">' + m.replace('-', '/') + '</th>';
+    });
+    headerHtml += '<th style="width:70px;text-align:center">合计</th>';
+    rh.innerHTML = headerHtml;
+
+    // 表体
+    var bodyHtml = '';
+    employees.forEach(function(emp){
+      var total = 0;
+      var row = '<td><strong>' + emp.name + '</strong><br><span style="font-size:0.6rem;color:#999">' + emp.position + '</span></td>';
+      months.forEach(function(m){
+        var amt = lookup[emp.name + '|' + m] || 0;
+        total += amt;
+        row += '<td class="amount" style="text-align:center;font-size:0.78rem">' + (amt > 0 ? '¥' + amt.toLocaleString() : '—') + '</td>';
       });
-    } else {
-      rb.innerHTML = '<tr><td colspan="6" style="text-align:center;color:#999;padding:20px">暂无数据</td></tr>';
-    }
+      row += '<td class="amount" style="text-align:center;font-weight:700;color:#2d5a27">¥' + total.toLocaleString() + '</td>';
+      bodyHtml += '<tr>' + row + '</tr>';
+    });
+    rb.innerHTML = bodyHtml || '<tr><td colspan="' + (months.length+2) + '" style="text-align:center;color:#999;padding:20px">暂无数据</td></tr>';
   }
 
   // 临时工
