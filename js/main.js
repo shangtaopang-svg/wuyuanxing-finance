@@ -499,71 +499,99 @@ function closeFullModal() {
 }
 function renderBaseExpense() {
   var allData = DataStore.baseExpense || [];
-  var flatData = [];
+  var baseNames = ['金银花基地','党参基地','党参育苗基地'];
+  var categories = ['土地流转','土地处理','种苗采购','种苗运输','化肥农药','人工费用','其他'];
+  var catColors = {'土地流转':'#8B4513','土地处理':'#D2691E','种苗采购':'#27ae60','种苗运输':'#2ecc71','化肥农药':'#f39c12','人工费用':'#e74c3c','其他':'#95a5a6'};
+
+  var container = $('baseCards');
+  var emptyEl = $('empty10');
+  if (!container) return;
+
+  if (!allData.length) {
+    container.innerHTML = '';
+    if (emptyEl) emptyEl.style.display = 'block';
+    return;
+  }
+  if (emptyEl) emptyEl.style.display = 'none';
+
+  // 每个基地打包
   var baseMap = {};
-  ['金银花基地','党参基地','党参育苗基地'].forEach(function(b){ baseMap[b]=[]; });
+  baseNames.forEach(function(b){ baseMap[b] = []; });
   allData.forEach(function(r){
-    var baseName = r.base || '';
-    if (baseMap[baseName]) baseMap[baseName].push(r);
-    flatData.push(r);
+    var n = r.base || '';
+    if (baseMap[n]) baseMap[n].push(r);
   });
 
-  var categories = ['土地流转','土地处理','种苗采购','种苗运输','化肥农药','人工费用','其他'];
-  var baseNames = ['金银花基地','党参基地','党参育苗基地'];
+  var html = '';
+  baseNames.forEach(function(base, bi){
+    var items = baseMap[base] || [];
+    var colors = ['#27ae60','#3498db','#f39c12'];
+    var color = colors[bi % 3];
 
-  // 构建交叉表
-  var summaryBody = $('baseSummaryBody');
-  if (summaryBody) {
-    var totalByBase = {}, totalByCat = {}, grandTotal = 0;
-    baseNames.forEach(function(b){ totalByBase[b]=0; });
-    categories.forEach(function(c){ totalByCat[c]=0; });
+    // 按类别汇总
+    var catTotals = {};
+    categories.forEach(function(c){ catTotals[c] = 0; });
+    var baseTotal = 0;
+    items.forEach(function(r){
+      var cat = r.category || '其他';
+      if (catTotals[cat] !== undefined) catTotals[cat] += r.amount||0;
+      baseTotal += r.amount||0;
+    });
 
-    var html = '';
+    // 表格行
+    var tableRows = '';
     categories.forEach(function(cat){
-      var rowTotal = 0;
-      var row = '<td><strong>' + cat + '</strong></td>';
-      baseNames.forEach(function(base){
-        var sum = 0;
-        (baseMap[base]||[]).forEach(function(r){ if((r.category||'') === cat) sum += r.amount||0; });
-        rowTotal += sum; totalByBase[base] += sum; totalByCat[cat] += sum; grandTotal += sum;
-        row += '<td class="amount" style="text-align:center">' + (sum ? formatNum(sum) : '—') + '</td>';
-      });
-      row += '<td class="amount" style="text-align:center;font-weight:700">' + formatNum(rowTotal) + '</td>';
-      row += '<td style="text-align:center;font-size:0.65rem;color:#888">' + (grandTotal > 0 ? (rowTotal/grandTotal*100).toFixed(1)+'%' : '') + '</td>';
-      html += '<tr>' + row + '</tr>';
+      if (catTotals[cat] > 0) {
+        tableRows += '<tr><td style="padding:3px 6px;font-size:0.65rem;color:#666">' + cat + '</td><td class="amount" style="text-align:right;padding:3px 8px;font-size:0.7rem">' + formatNum(catTotals[cat]) + '</td><td style="text-align:center;font-size:0.6rem;color:#888">' + (baseTotal>0?(catTotals[cat]/baseTotal*100).toFixed(1)+'%':'') + '</td></tr>';
+      }
     });
+    tableRows += '<tr style="background:#f5f0e8;font-weight:700"><td style="padding:3px 6px">合计</td><td class="amount" style="text-align:right;padding:3px 8px">' + formatNum(baseTotal) + '</td><td style="text-align:center">100%</td></tr>';
 
-    // 合计行
-    var totalRow = '<tr style="background:#f5f0e8;font-weight:700"><td>合计</td>';
-    baseNames.forEach(function(base){
-      totalRow += '<td class="amount" style="text-align:center">' + formatNum(totalByBase[base]) + '</td>';
-    });
-    totalRow += '<td class="amount" style="text-align:center">' + formatNum(grandTotal) + '</td>';
-    totalRow += '<td style="text-align:center">100%</td></tr>';
-    html += totalRow;
-    summaryBody.innerHTML = html || '<tr><td colspan="6" style="text-align:center;color:#999;padding:20px">暂无数据</td></tr>';
-  }
+    var chartId = 'baseChart_' + bi;
+    var hasData = items.length > 0;
 
-  // 明细表（按基地过滤）
-  var detailBody = $('baseDetailBody');
-  if (detailBody) {
-    var activeBase = document.querySelector('#tab10 .sub-tab-btn.active');
-    var baseFilter = activeBase ? activeBase.textContent.trim() : '金银花基地';
-    detailBody.innerHTML = '';
-    var items = baseMap[baseFilter] || [];
-    if (!items.length) {
-      detailBody.innerHTML = '<tr><td colspan="6" style="text-align:center;color:#999;padding:20px">暂无数据</td></tr>';
-    } else {
-      items.forEach(function(r){
-        detailBody.innerHTML += '<tr><td>' + (r.date||'') + '</td><td>' + (r.category||'') + '</td><td>' + (r.item||'') + '</td><td class="amount expense">' + formatNum(r.amount) + '</td><td>' + (r.note||'') + '</td><td>' +
-          (r.invoices && r.invoices.length ? r.invoices.map(function(f){return '<span class="invoice-link">📎</span>';}).join('') : '—') + '</td></tr>';
-      });
-    }
-  }
+    html += '<div style="border:2px solid ' + color + ';border-radius:10px;overflow:hidden;background:#fefcf5">' +
+      '<div style="background:' + color + ';color:#fff;padding:8px 14px;font-size:0.9rem;font-weight:700;display:flex;align-items:center;justify-content:space-between">' +
+        '<span>' + (bi===0?'🌿':bi===1?'🌱':'🌰') + ' ' + base + '</span>' +
+        '<span style="font-size:0.7rem;font-weight:400;opacity:0.9">' + items.length + '笔 · ' + formatNum(baseTotal) + '</span>' +
+      '</div>' +
+      '<div style="padding:10px;display:flex;gap:14px;flex-wrap:wrap">' +
+        // 图表
+        '<div style="flex:1;min-width:200px;height:180px">' +
+          '<canvas id="' + chartId + '"></canvas>' +
+        '</div>' +
+        // 分类表
+        '<div style="flex:1;min-width:200px">' +
+          '<table style="width:100%;border-collapse:collapse">' +
+            '<thead><tr style="border-bottom:2px solid ' + color + '"><th style="padding:3px 6px;font-size:0.65rem;font-weight:700;color:' + color + ';text-align:left">类别</th><th style="padding:3px 8px;font-size:0.65rem;font-weight:700;color:' + color + ';text-align:right">金额</th><th style="padding:3px 6px;font-size:0.65rem;font-weight:700;color:' + color + ';text-align:center">占比</th></tr></thead>' +
+            '<tbody>' + tableRows + '</tbody>' +
+          '</table>' +
+        '</div>' +
+      '</div>' +
+      // 明细表
+      '<div style="border-top:1px solid #e8e5e0">' +
+        '<div style="padding:6px 10px;font-size:0.7rem;font-weight:600;color:#666;background:#fafafa">📋 支出明细</div>' +
+        '<div style="overflow-x:auto;padding:0 6px 6px">' +
+          '<table class="data-table" style="font-size:0.65rem;min-width:500px"><thead><tr><th>日期</th><th>类别</th><th>支出项目</th><th>金额</th><th>说明</th></tr></thead><tbody>' +
+            (items.length ? items.map(function(r){
+              return '<tr><td>' + (r.date||'') + '</td><td>' + (r.category||'') + '</td><td>' + (r.item||'') + '</td><td class="amount expense">' + formatNum(r.amount) + '</td><td>' + (r.note||'') + '</td></tr>';
+            }).join('') : '<tr><td colspan="5" style="text-align:center;color:#999;padding:16px">暂无明细</td></tr>') +
+          '</tbody></table>' +
+        '</div>' +
+      '</div>' +
+    '</div>';
 
-  // Empty state
-  var emptyEl = $('empty10');
-  if (emptyEl) emptyEl.style.display = flatData.length ? 'none' : 'block';
+    // 延迟渲染图表
+    setTimeout(function(id, ct, bt){
+      var cats = Object.keys(ct).filter(function(c){ return ct[c] > 0; });
+      if (!cats.length) return;
+      makeChart(id, 'doughnut', cats.map(function(c){ return c + ' ' + (bt>0?(ct[c]/bt*100).toFixed(1)+'%':''); }), [
+        { data: cats.map(function(c){ return ct[c]; }), backgroundColor: cats.map(function(c){ return catColors[c]||'#95a5a6'; }), borderColor: '#fff', borderWidth: 2 }
+      ]);
+    }, 100, chartId, catTotals, baseTotal);
+  });
+
+  container.innerHTML = html;
 }
 
 // === 汇总数字更新 ===
