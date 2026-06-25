@@ -918,12 +918,31 @@ function renderChart8b() {
 // ⑨ 工资图表
 function renderChart9a() {
   var data = DataStore.salary || [];
-  var months = {};
-  var capColors = {"任海涛":"#e8f4fd","庞尚韬":"#fef2f2","吴生成":"#f0faf4","应红林":"#fdf6e3","陈洪斌":"#f5e6f0"};
-  data.forEach(function(r) { months[r.month] = (months[r.month]||0) + (r.amount||0); });
-  makeChart('chart9a', 'bar', Object.keys(months), [
-    { data: Object.keys(months).map(function(k){return months[k];}), backgroundColor: '#e74c3c', borderColor: '#000', borderWidth: 2 }
-  ]);
+  var regular = data.filter(function(r){ return r.name === '任海涛' || r.name === '庞尚韬' || (r.name === '施前华' && r.position !== '临时工'); });
+  var temp = data.filter(function(r){ return r.name === '施前华' && r.position === '临时工'; });
+  var monthSet = {};
+  regular.forEach(function(r){ monthSet[r.month] = 1; });
+  temp.forEach(function(r){ monthSet[r.month] = 1; });
+  var months = Object.keys(monthSet).sort();
+  if (!months.length) return;
+  var regData = months.map(function(m){
+    return regular.filter(function(r){return r.month===m;}).reduce(function(s,r){return s+(r.amount||0);},0);
+  });
+  var tempData = months.map(function(m){
+    return temp.filter(function(r){return r.month===m;}).reduce(function(s,r){return s+(r.amount||0);},0);
+  });
+  makeChart('chart9a', 'bar', months.map(function(m){return m.replace('-','/');}), [
+    { label: '正式员工', data: regData, backgroundColor: '#2d5a27' },
+    { label: '临时工', data: tempData, backgroundColor: '#f39c12' }
+  ], {
+    scales: {
+      x: { stacked: true, grid: { display: false } },
+      y: { stacked: true, ticks: { callback: function(v){ return '¥'+(v/1000).toFixed(0)+'k'; } } }
+    },
+    plugins: {
+      tooltip: { callbacks: { label: function(ctx){ return ctx.dataset.label + ': ¥' + (ctx.raw||0).toLocaleString(); }}}
+    }
+  });
 }
 function renderChart9b() {
   var data = DataStore.salary || [];
