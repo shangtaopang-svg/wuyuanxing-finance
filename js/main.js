@@ -98,7 +98,7 @@ document.querySelectorAll('.tab-btn').forEach(function(btn) {
     // 触发图表重绘
     setTimeout(function() {
       renderCharts();
-      if (id === 'tab10') renderBaseExpense();
+      if (btn.dataset.tab === 'tab10') renderBaseExpense();
     }, 100);
   });
 });
