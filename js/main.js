@@ -511,8 +511,8 @@ function openBaseFull(base, color, total, itemsJson) {
   title.textContent = '🌿 ' + base + ' · ' + formatNum(total);
 
   // Build categories from items
-  var cats = ['土地流转','土地处理','种苗采购（含运费）','农资采购','人工费用','其他'];
-  var catColors = {'土地流转':'#8B4513','土地处理':'#D2691E','种苗采购（含运费）':'#27ae60','农资采购':'#f39c12','人工费用':'#e74c3c','其他':'#95a5a6'};
+  var cats = ['土地流转','土地处理','种苗采购（含运费）','农资采购（含农药化肥和地膜及运输费）','人工费用','其他'];
+  var catColors = {'土地流转':'#8B4513','土地处理':'#D2691E','种苗采购（含运费）':'#27ae60','农资采购（含农药化肥和地膜及运输费）':'#f39c12','人工费用':'#e74c3c','其他':'#95a5a6'};
   var catTotals = {};
   cats.forEach(function(c){ catTotals[c] = 0; });
   items.forEach(function(r){ var cat=r.category||'其他'; if(catTotals[cat]!==undefined) catTotals[cat]+=r.amount||0; });
@@ -521,7 +521,7 @@ function openBaseFull(base, color, total, itemsJson) {
     return '<tr><td style="padding:6px 12px;font-size:0.8rem;border-bottom:1px solid #f0ede8"><span style="display:inline-block;width:10px;height:10px;border-radius:2px;background:'+(catColors[c]||'#95a5a6')+';margin-right:8px"></span>'+c+'</td><td class="amount" style="padding:6px 12px;font-size:0.85rem;text-align:right;border-bottom:1px solid #f0ede8">'+formatNum(catTotals[c])+'</td><td style="padding:6px 12px;font-size:0.75rem;text-align:center;color:#888;border-bottom:1px solid #f0ede8">'+(total>0?(catTotals[c]/total*100).toFixed(1)+'%':'')+'</td></tr>';
   }).join('');
 
-  var cats = ['土地流转','土地处理','种苗采购（含运费）','农资采购','人工费用','其他'];
+  var cats = ['土地流转','土地处理','种苗采购（含运费）','农资采购（含农药化肥和地膜及运输费）','人工费用','其他'];
   var sortedI = items.slice().sort(function(a,b){ var ai=cats.indexOf(a.category||'其他'),bi=cats.indexOf(b.category||'其他'); return ai-bi || ((a.date||'')>(b.date||'')?1:-1); });
   var detailRows = '', lastCat2 = '', catTotal2 = 0, catStarted = true;
   sortedI.forEach(function(r, idx){
@@ -554,7 +554,7 @@ function openBaseFull(base, color, total, itemsJson) {
   var cardsHtml = '<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:12px;margin-top:16px">' +
     cats.filter(function(c){return catTotals[c]>0;}).map(function(cat){
       var bg = catColors[cat] || '#95a5a6';
-      var icon = {'土地流转':'🏞️','土地处理':'🚜','种苗采购':'🌱','种苗采购（含运费）':'🌱','农资采购':'🧪','人工费用':'👷','其他':'📦'}[cat] || '📋';
+      var icon = {'土地流转':'🏞️','土地处理':'🚜','种苗采购':'🌱','种苗采购（含运费）':'🌱','农资采购（含农药化肥和地膜及运输费）':'🧪','人工费用':'👷','其他':'📦'}[cat] || '📋';
       var catItems = items.filter(function(r){return (r.category||'其他')===cat;});
       var catAmt = catItems.reduce(function(s,r){return s+(r.amount||0);},0);
       var pct = total>0?(catAmt/total*100).toFixed(1):0;
@@ -647,8 +647,8 @@ function renderBaseExpense() {
   var allData = DataStore.baseExpense || [];
   var baseNames = ['金银花基地','党参基地','党参育苗基地'];
   var baseScales = {'金银花基地':'规模（流转）101.4亩','党参基地':'','党参育苗基地':''};
-  var categories = ['土地流转','土地处理','种苗采购（含运费）','农资采购','人工费用','其他'];
-  var catColors = {'土地流转':'#8B4513','土地处理':'#D2691E','种苗采购（含运费）':'#27ae60','农资采购':'#f39c12','人工费用':'#e74c3c','其他':'#95a5a6'};
+  var categories = ['土地流转','土地处理','种苗采购（含运费）','农资采购（含农药化肥和地膜及运输费）','人工费用','其他'];
+  var catColors = {'土地流转':'#8B4513','土地处理':'#D2691E','种苗采购（含运费）':'#27ae60','农资采购（含农药化肥和地膜及运输费）':'#f39c12','人工费用':'#e74c3c','其他':'#95a5a6'};
   var coverColors = ['#27ae60','#3498db','#e67e22'];
   var emojis = ['🌿','🌱','🌰'];
 
@@ -690,7 +690,7 @@ function renderBaseExpense() {
       var catPct = total > 0 ? (catAmt/total*100).toFixed(1) : 0;
       var bg = catColors[cat] || '#95a5a6';
       var catLabel = cat;
-      var catIcon = {'土地流转':'🏞️','土地处理':'🚜','种苗采购':'🌱','种苗采购（含运费）':'🌱','农资采购':'🧪','人工费用':'👷','其他':'📦'}[cat] || '📋';
+      var catIcon = {'土地流转':'🏞️','土地处理':'🚜','种苗采购':'🌱','种苗采购（含运费）':'🌱','农资采购（含农药化肥和地膜及运输费）':'🧪','人工费用':'👷','其他':'📦'}[cat] || '📋';
       var jsonItems = encodeURIComponent(JSON.stringify(catItems.map(function(r){return {date:r.date,item:r.item,amount:r.amount,note:r.note,invoices:r.invoices};})));
 
       catTileHtml += '<div style="background:'+bg+'11;border:1px solid '+bg+'44;border-radius:8px;overflow:hidden;cursor:pointer;transition:all 0.2s" ' +
@@ -1224,8 +1224,8 @@ function renderChart9b() {
 // ⑩ 基地支出图表
 function renderChart10a() {
   var data = DataStore.baseExpense || [];
-  var catColors = {'土地流转':'#8B4513','土地处理':'#D2691E','种苗采购（含运费）':'#27ae60','农资采购':'#f39c12','人工费用':'#e74c3c','其他':'#95a5a6'};
-  var categories = ['土地流转','土地处理','种苗采购（含运费）','农资采购','人工费用','其他'];
+  var catColors = {'土地流转':'#8B4513','土地处理':'#D2691E','种苗采购（含运费）':'#27ae60','农资采购（含农药化肥和地膜及运输费）':'#f39c12','人工费用':'#e74c3c','其他':'#95a5a6'};
+  var categories = ['土地流转','土地处理','种苗采购（含运费）','农资采购（含农药化肥和地膜及运输费）','人工费用','其他'];
   var baseNames = ['金银花基地','党参基地','党参育苗基地'];
   // Aggregate: cat -> base -> amount
   var catBase = {};
@@ -1248,9 +1248,9 @@ function renderChart10a() {
 }
 function renderChart10b() {
   var data = DataStore.baseExpense || [];
-  var catColors = {'土地流转':'#8B4513','土地处理':'#D2691E','种苗采购（含运费）':'#27ae60','农资采购':'#f39c12','人工费用':'#e74c3c','其他':'#95a5a6'};
+  var catColors = {'土地流转':'#8B4513','土地处理':'#D2691E','种苗采购（含运费）':'#27ae60','农资采购（含农药化肥和地膜及运输费）':'#f39c12','人工费用':'#e74c3c','其他':'#95a5a6'};
   var baseNames = ['金银花基地','党参基地','党参育苗基地'];
-  var categories = ['土地流转','土地处理','种苗采购（含运费）','农资采购','人工费用','其他'].filter(function(c){
+  var categories = ['土地流转','土地处理','种苗采购（含运费）','农资采购（含农药化肥和地膜及运输费）','人工费用','其他'].filter(function(c){
     return data.some(function(r){ return (r.category||'') === c; });
   });
   if (!categories.length) return;
