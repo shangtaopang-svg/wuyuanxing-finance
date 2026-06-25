@@ -353,8 +353,8 @@ function renderManagement() {
 // ⑨ 工资
 function renderSalary() {
   var data = DataStore.salary || [];
-  var regular = data.filter(function(r){ return r.name === '任海涛' || r.name === '庞尚韬' || (r.name === '施前华' && r.position !== '临时工代领'); });
-  var temp = data.filter(function(r){ return r.name === '施前华' && r.position === '临时工代领'; });
+  var regular = data.filter(function(r){ return r.name === '任海涛' || r.name === '庞尚韬' || (r.name === '施前华' && r.position !== '临时工'); });
+  var temp = data.filter(function(r){ return r.name === '施前华' && r.position === '临时工'; });
 
   // === 正式员工：交叉表（姓名×月份） ===
   var rb = $('salaryRegularBody');
@@ -930,8 +930,10 @@ function renderChart9b() {
   var pos = {};
   var capColors = {"任海涛":"#e8f4fd","庞尚韬":"#fef2f2","吴生成":"#f0faf4","应红林":"#fdf6e3","陈洪斌":"#f5e6f0"};
   data.forEach(function(r) { pos[r.position] = (pos[r.position]||0) + (r.amount||0); });
+  var positionColors = {'董事长':'#e74c3c','总经理':'#3498db','基地管理员':'#2ecc71','临时工':'#f39c12'};
+  var posColors = Object.keys(pos).map(function(k){ return positionColors[k] || '#9b59b6'; });
   makeChart('chart9b', 'doughnut', Object.keys(pos), [
-    { data: Object.keys(pos).map(function(k){return pos[k];}), backgroundColor: ['#3498db','#e74c3c','#2ecc71'], borderColor: '#000', borderWidth: 2 }
+    { data: Object.keys(pos).map(function(k){return pos[k];}), backgroundColor: posColors, borderColor: '#fff', borderWidth: 2 }
   ]);
 }
 
@@ -1913,7 +1915,7 @@ function perTableAddRow(bodyId) {
   else if (bodyId === 'assetBody') defaults = {date:'', name:'', amount:0, location:'', status:'在用'};
   else if (bodyId === 'managementBody') defaults = {date:'', category:'', amount:0, summary:'', invoices:''};
   else if (bodyId === 'salaryBody') defaults = {month:'', name:'', position:'', amount:0, payDate:'', voucher:''};
-  else if (bodyId === 'salaryTempBody') defaults = {month:'', name:'施前华', position:'临时工代领', amount:0, payDate:'', voucher:''};
+  else if (bodyId === 'salaryTempBody') defaults = {month:'', name:'施前华', position:'临时工', amount:0, payDate:'', voucher:''};
   else if (bodyId === 'reimburseRenBody' || bodyId === 'reimbursePangBody' || bodyId === 'reimburseYingBody') {
     var pmap = {reimburseRenBody:'任海涛', reimbursePangBody:'庞尚韬', reimburseYingBody:'应红林'};
     defaults = {date:'', person:pmap[bodyId], amount:0, reason:'', docs:[]};
