@@ -638,21 +638,41 @@ function renderBaseExpense() {
       '<div style="font-size:0.55rem;opacity:0.6;margin-top:10px;border-top:1px solid rgba(255,255,255,0.2);padding-top:6px;width:80%">hover 查看详情 →</div>' +
     '</div>';
 
-    // Accordion detail sections
-    var sorted = items.slice().sort(function(a,b){ var ai=categories.indexOf(a.category||'其他'),bi=categories.indexOf(b.category||'其他'); return ai-bi || ((a.date||'')>(b.date||'')?1:-1); });
-    var accordionHtml = '';
-    if (sorted.length) {
-      var lastCat = '', catItems = [], catAmount = 0;
-      sorted.forEach(function(r){
-        var cat = r.category||'其他';
-        if (cat !== lastCat && lastCat) {
-          accordionHtml += buildCatSection(lastCat, catItems, catAmount, cc, total);
-          catItems = []; catAmount = 0;
-        }
-        catItems.push(r); catAmount += r.amount||0; lastCat = cat;
-      });
-      if (catItems.length) accordionHtml += buildCatSection(lastCat, catItems, catAmount, cc, total);
-    }
+    // 分类封面方块（悬浮展开详情）
+    var catTileHtml = '';
+    categories.forEach(function(cat){
+      var catItems = items.filter(function(r){ return (r.category||'其他') === cat; });
+      if (!catItems.length) return;
+      var catAmt = catItems.reduce(function(s,r){return s+(r.amount||0);},0);
+      var catPct = total > 0 ? (catAmt/total*100).toFixed(1) : 0;
+      var bg = catColors[cat] || '#95a5a6';
+      var tileId = 'tile_'+bi+'_'+cat.replace(/[^0-9a-z]/gi,'_');
+
+      var detailRows = catItems.map(function(r){
+        var note = (r.note||'').replace(/公司账户/g,'🏦').replace(/庞尚韬备用金/g,'💰').replace(/任海涛/g,'👤');
+        return '<div style="display:flex;align-items:center;padding:2px 4px;border-bottom:1px solid rgba(255,255,255,0.06);font-size:0.5rem;gap:4px">' +
+          '<span style="min-width:44px;color:#aaa">'+(r.date||'')+'</span>' +
+          '<span style="flex:1;color:#fff">'+(r.item||'')+'</span>' +
+          '<span style="min-width:40px;text-align:right;color:'+bg+';font-weight:700">'+formatNum(r.amount)+'</span>' +
+          '<span style="min-width:24px;font-size:0.4rem;color:#888">'+note+'</span></div>';
+      }).join('');
+
+      catTileHtml += '<div style="position:relative;overflow:hidden;border-radius:6px;cursor:pointer;background:'+bg+'22;border:1px solid '+bg+'44" ' +
+        'onmouseenter="this.querySelector(\'.tile-cover\').style.transform=\'translateX(-100%)\';this.querySelector(\'.tile-detail\').style.transform=\'translateX(0)\'" ' +
+        'onmouseleave="this.querySelector(\'.tile-cover\').style.transform=\'translateX(0)\';this.querySelector(\'.tile-detail\').style.transform=\'translateX(100%)\'">' +
+        '<div class="tile-cover" style="transition:transform 0.3s;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:6px 2px;text-align:center">' +
+          '<div style="font-size:0.6rem;font-weight:700;color:'+bg+'">'+cat.replace('及运输','')+'</div>' +
+          '<div style="font-size:0.75rem;font-weight:800;color:#fff;margin-top:2px">'+formatNum(catAmt)+'</div>' +
+          '<div style="font-size:0.45rem;color:#888">'+catItems.length+'笔 · '+catPct+'%</div>' +
+        '</div>' +
+        '<div class="tile-detail" style="position:absolute;inset:0;transition:transform 0.3s;transform:translateX(100%);overflow:hidden;background:'+bg+'22;padding:4px">' +
+          '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:2px">' +
+            '<span style="font-size:0.55rem;font-weight:700;color:'+bg+'">'+cat+'</span>' +
+            '<span style="font-size:0.5rem;color:#888">'+formatNum(catAmt)+'</span>' +
+          '</div>' +
+          '<div style="overflow-y:auto;max-height:120px">'+detailRows+'</div>' +
+        '</div></div>';
+    });
 
     var laborItems = items.filter(function(r){ return r.category === '人工费用'; });
     var pmSummary = '';
@@ -689,7 +709,7 @@ function renderBaseExpense() {
             pmSummary +
             '</tbody></table></div>' +
         '</div>' +
-        '<div style="margin-top:4px">'+accordionHtml+'</div>' +
+        '<div style="margin-top:6px;display:grid;grid-template-columns:repeat(4,1fr);gap:4px">'+catTileHtml+'</div>' +
       '</div>' +
     '</div>';    html += '<div class="base-card" data-base="'+base+'" data-color="'+cc+'" data-total="'+total+'" style="border:1px solid '+cc+'22;box-shadow:0 2px 8px '+cc+'11">' +
       coverHtml + detailHtml +

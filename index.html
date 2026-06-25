@@ -377,6 +377,7 @@ function showToast(msg, type) {
 
       <style>
         .base-card-wrap { display:grid; grid-template-columns:repeat(3,1fr); gap:12px; }
+        @media (max-width:600px) { .base-card-wrap { grid-template-columns:1fr; } }
         .base-card { position:relative; border-radius:12px; overflow:hidden; cursor:pointer; transition:all 0.35s cubic-bezier(0.22,1,0.36,1); min-height:140px; }
         .base-card .cover { position:absolute; inset:0; display:flex; flex-direction:column; align-items:center; justify-content:center; z-index:2; transition:opacity 0.3s; padding:16px; text-align:center; }
         .base-card:hover .cover { opacity:0; pointer-events:none; }
