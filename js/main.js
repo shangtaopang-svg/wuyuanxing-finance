@@ -1019,6 +1019,9 @@ function previewFile(path) {
   var apiBase = (typeof API_BASE !== 'undefined' ? API_BASE : '');
   var ext = decoded.split('.').pop().toLowerCase();
   var fileUrl = '/finance/uploads/vouchers/' + decoded;
+  // 显示文件名
+  var titleEl = document.querySelector('.viewer-title');
+  if (titleEl) titleEl.textContent = '📎 ' + decoded;
   if (['jpg','jpeg','png','gif','webp'].indexOf(ext) !== -1) {
     $('previewImg').src = fileUrl;
     $('previewImg').style.display = '';
@@ -1026,7 +1029,6 @@ function previewFile(path) {
     $('imgViewer').classList.add('show');
     $('imgOverlay').classList.add('show');
   } else {
-    // PDF/其他文件用iframe嵌入查看
     $('previewImg').style.display = 'none';
     $('previewPdf').src = fileUrl;
     $('previewPdf').style.display = '';
