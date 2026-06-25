@@ -547,7 +547,7 @@ function openBaseFull(base, color, total, itemsJson) {
       '</table>' +
     '</div></div>' +
     '<h4 style="font-size:0.85rem;color:'+color+';margin:0 0 8px">📋 支出明细</h4>' +
-    '<div style="overflow-x:auto"><table class="data-table" style="font-size:0.72rem;min-width:900px"><thead><tr><th style="width:70px">类别</th><th style="width:90px">日期</th><th style="width:200px">项目</th><th style="width:80px">金额</th><th style="width:250px">说明</th><th style="width:50px">票据</th></tr></thead><tbody>' + detailRows + '</tbody></table></div>';
+    '<div style="overflow-x:auto"><table class="data-table" style="font-size:0.72rem;width:100%"><thead><tr><th style="width:60px">类别</th><th style="width:80px">日期</th><th>项目</th><th style="width:70px">金额</th><th style="min-width:200px">说明</th><th style="width:40px">票据</th></tr></thead><tbody>' + detailRows + '</tbody></table></div>';
 
   modal.style.display = 'block';
   overlay.style.display = 'block';
