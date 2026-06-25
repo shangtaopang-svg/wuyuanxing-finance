@@ -582,6 +582,24 @@ function closeBaseFull() {
   document.getElementById('baseFullModal').style.display = 'none';
   document.getElementById('baseFullOverlay').style.display = 'none';
 }
+function buildCatSection(cat, items, catTotal, cc, grandTotal) {
+  var rows = items.map(function(r){
+    var inv = r.invoices; var invHtml = ''; if(inv && inv.length){try{var f=typeof inv==='string'?JSON.parse(inv):inv;if(f.length)invHtml=' <span class="invoice-link" onclick="previewFile(\''+encodeURIComponent(f[0])+'\')">\u{1f4ce}</span>';}catch(e){}}
+    var note = (r.note||'').replace(/公司账户/g,'\u{1f3e6}').replace(/庞尚韬备用金/g,'\u{1f4b0}').replace(/任海涛/g,'\u{1f464}');
+    return '<div style="display:flex;align-items:center;padding:2px 0;border-bottom:1px solid rgba(255,255,255,0.04);font-size:0.5rem;gap:4px">' +
+      '<span style="min-width:48px;color:#888">'+(r.date||'')+'</span>' +
+      '<span style="flex:1;color:#ddd">'+(r.item||'')+'</span>' +
+      '<span style="min-width:42px;text-align:right;color:#fff;font-weight:600">'+formatNum(r.amount)+'</span>' +
+      '<span style="min-width:30px;color:#aaa;font-size:0.45rem">'+note+'</span>' +
+      '<span>'+invHtml+'</span></div>';
+  }).join('');
+  return '<div style="margin-bottom:2px;border:1px solid rgba(255,255,255,0.06);border-radius:4px;overflow:hidden">' +
+    '<div style="display:flex;align-items:center;justify-content:space-between;padding:3px 6px;background:rgba(255,255,255,0.04);cursor:pointer;font-size:0.58rem" onclick="var t=this.nextElementSibling;t.style.display=t.style.display==\'none\'?\'\':\'none\'">' +
+      '<span style="font-weight:700;color:'+cc+'">' + cat + '</span>' +
+      '<span style="color:#fff">'+items.length+'笔 · '+formatNum(catTotal)+' <span style="color:#888;font-size:0.45rem">('+(grandTotal>0?(catTotal/grandTotal*100).toFixed(1)+'%':'')+') ▼</span></span>' +
+    '</div>' +
+    '<div style="display:none;padding:2px 6px 4px">'+rows+'</div></div>';
+}
 function renderBaseExpense() {
   var allData = DataStore.baseExpense || [];
   var baseNames = ['金银花基地','党参基地','党参育苗基地'];
@@ -620,14 +638,24 @@ function renderBaseExpense() {
       '<div style="font-size:0.55rem;opacity:0.6;margin-top:10px;border-top:1px solid rgba(255,255,255,0.2);padding-top:6px;width:80%">hover 查看详情 →</div>' +
     '</div>';
 
-    // Detail content
-    var catRows = categories.filter(function(c){return catTotals[c]>0;}).map(function(c){
-      return '<tr><td style="padding:2px 6px;font-size:0.6rem;color:'+cc+'">'+c+'</td><td class="amount" style="text-align:right;padding:2px 8px;font-size:0.65rem">'+formatNum(catTotals[c])+'</td><td style="text-align:center;font-size:0.55rem;color:#888">'+(total>0?(catTotals[c]/total*100).toFixed(1)+'%':'')+'</td></tr>';
-    }).join('');
-    catRows += '<tr style="background:rgba(255,255,255,0.05);font-weight:700"><td style="padding:2px 6px;font-size:0.6rem;color:#fff">合计</td><td class="amount" style="text-align:right;padding:2px 8px;font-size:0.7rem;color:#fff">'+formatNum(total)+'</td><td style="text-align:center;font-size:0.6rem;color:#fff">100%</td></tr>';
+    // Accordion detail sections
+    var sorted = items.slice().sort(function(a,b){ var ai=categories.indexOf(a.category||'其他'),bi=categories.indexOf(b.category||'其他'); return ai-bi || ((a.date||'')>(b.date||'')?1:-1); });
+    var accordionHtml = '';
+    if (sorted.length) {
+      var lastCat = '', catItems = [], catAmount = 0;
+      sorted.forEach(function(r){
+        var cat = r.category||'其他';
+        if (cat !== lastCat && lastCat) {
+          accordionHtml += buildCatSection(lastCat, catItems, catAmount, cc, total);
+          catItems = []; catAmount = 0;
+        }
+        catItems.push(r); catAmount += r.amount||0; lastCat = cat;
+      });
+      if (catItems.length) accordionHtml += buildCatSection(lastCat, catItems, catAmount, cc, total);
+    }
 
-    // Payment method summary for labor
     var laborItems = items.filter(function(r){ return r.category === '人工费用'; });
+    var pmSummary = '';
     if (laborItems.length) {
       var pm = {'公司账户':0,'庞尚韬备用金':0,'任海涛':0,'其他':0};
       laborItems.forEach(function(r){
@@ -638,38 +666,10 @@ function renderBaseExpense() {
         else pm['其他'] += r.amount||0;
       });
       var pmc = {'公司账户':'#27ae60','庞尚韬备用金':'#e67e22','任海涛':'#3498db','其他':'#95a5a6'};
-      var pmr = '';
+      pmSummary = '<tr style="border-top:1px dashed rgba(255,255,255,0.1)"><td colspan="3" style="padding:4px 6px;font-size:0.55rem;font-weight:700;color:'+cc+'">📊 人工 · 支付方式</td></tr>';
       Object.keys(pm).forEach(function(k){
-        if (pm[k] > 0) pmr += '<tr><td style="padding:2px 6px;font-size:0.55rem;color:#fff;background:'+pmc[k]+'88;border-radius:3px;font-weight:600">'+(k==='公司账户'?'🏦 公司账户':k==='庞尚韬备用金'?'💰 庞备用金':k==='任海涛'?'👤 任海涛':'其他')+'</td><td class="amount" style="text-align:right;padding:2px 8px;font-size:0.6rem;color:#fff">'+formatNum(pm[k])+'</td><td style="text-align:center;font-size:0.5rem;color:#aaa">'+(total>0?(pm[k]/total*100).toFixed(1)+'%':'')+'</td></tr>';
+        if (pm[k] > 0) pmSummary += '<tr><td style="padding:1px 6px;font-size:0.5rem;color:#fff;background:'+pmc[k]+'88;border-radius:2px;font-weight:600">'+(k==='公司账户'?'🏦公司':k==='庞尚韬备用金'?'💰庞备用金':k==='任海涛'?'👤任海涛':'其他')+'</td><td class="amount" style="text-align:right;padding:1px 8px;font-size:0.55rem;color:#fff">'+formatNum(pm[k])+'</td><td style="text-align:center;font-size:0.45rem;color:#aaa">'+(total>0?(pm[k]/total*100).toFixed(1)+'%':'')+'</td></tr>';
       });
-      catRows += '<tr style="border-top:1px dashed rgba(255,255,255,0.1)"><td colspan="3" style="padding:4px 6px;font-size:0.55rem;font-weight:700;color:'+cc+'">📊 人工费用 · 支付方式</td></tr>' + pmr;
-    }
-
-    var sorted = items.slice().sort(function(a,b){ var ai=categories.indexOf(a.category||'其他'),bi=categories.indexOf(b.category||'其他'); return ai-bi || ((a.date||'')>(b.date||'')?1:-1); });
-    var detailRows = '';
-    if (sorted.length) {
-      var lastCat = '', catTotal = 0, catStart = true;
-      sorted.forEach(function(r, idx){
-        var cat = r.category||'其他';
-        if (cat !== lastCat && !catStart) {
-          // Subtotal for previous category
-          detailRows += '<tr style="border-top:1px dashed rgba(255,255,255,0.15);background:rgba(255,255,255,0.06)"><td colspan="3" style="padding:3px 8px;font-size:0.6rem;font-weight:700;color:'+cc+';text-align:right">小计 ('+lastCat+')</td><td style="padding:3px 8px;font-size:0.65rem;font-weight:700;color:#fff;text-align:center">'+formatNum(catTotal)+'</td><td colspan="2"></td></tr>';
-          catTotal = 0;
-        }
-        catStart = false;
-        catTotal += r.amount||0;
-        lastCat = cat;
-        var inv = r.invoices; var invHtml = '—'; if(inv && inv.length){try{var f=typeof inv==='string'?JSON.parse(inv):inv;if(f.length)invHtml=f.map(function(x){return '<span class="invoice-link" onclick="previewFile(\''+encodeURIComponent(x)+'\')">📎</span>';}).join('');}catch(e){}}
-        var catStyle = 'padding:2px 6px;font-size:0.55rem;font-weight:700;color:#fff;background:'+cc+'88;border-radius:3px';
-        var noteHtml = (r.note||'').replace(/\//g,' · ').replace(/公司账户/g,'<span style="color:#27ae60">公司账户</span>').replace(/庞尚韬备用金/g,'<span style="color:#e67e22">庞备用金</span>').replace(/任海涛/g,'<span style="color:#3498db">任海涛</span>');
-        detailRows += '<tr><td style="'+catStyle+'">'+(r.category||'')+'</td><td style="padding:2px 6px;font-size:0.58rem">'+(r.date||'')+'</td><td style="padding:2px 6px;font-size:0.58rem">'+(r.item||'')+'</td><td class="amount" style="text-align:right;padding:2px 8px;font-size:0.6rem">'+formatNum(r.amount)+'</td><td style="padding:2px 4px;font-size:0.5rem;color:#aaa;line-height:1.4;word-break:break-word;max-width:200px">'+noteHtml+'</td><td style="padding:2px 4px;font-size:0.5rem;text-align:center">'+invHtml+'</td></tr>';
-        // Last item - show final subtotal
-        if (idx === sorted.length - 1) {
-          detailRows += '<tr style="border-top:1px dashed rgba(255,255,255,0.15);background:rgba(255,255,255,0.06)"><td colspan="5" style="padding:3px 8px;font-size:0.6rem;font-weight:700;color:'+cc+';text-align:right">小计 ('+cat+')</td><td style="padding:3px 8px;font-size:0.65rem;font-weight:700;color:#fff;text-align:center">'+formatNum(catTotal)+'</td></tr>';
-        }
-      });
-    } else {
-      detailRows = '<tr><td colspan="6" style="text-align:center;color:#999;padding:10px;font-size:0.6rem">暂无</td></tr>';
     }
 
     var detailHtml = '<div class="detail" style="background:#1a1a2e;color:#fff">' +
@@ -683,15 +683,15 @@ function renderBaseExpense() {
         '<div style="display:flex;gap:8px">' +
           '<div style="flex:1;min-width:0;height:80px"><canvas id="baseChart_'+bi+'"></canvas></div>' +
           '<div style="flex:1;min-width:0"><table style="width:100%;border-collapse:collapse">' +
-            '<thead><tr style="border-bottom:1px solid rgba(255,255,255,0.1)"><th style="padding:2px 6px;font-size:0.55rem;color:'+cc+';text-align:left">类别</th><th style="padding:2px 6px;font-size:0.55rem;color:'+cc+';text-align:right">金额</th><th style="padding:2px 6px;font-size:0.55rem;color:'+cc+';text-align:center">%</th></tr></thead><tbody>'+catRows+'</tbody></table></div>' +
+            '<thead><tr style="border-bottom:1px solid rgba(255,255,255,0.1)"><th style="padding:2px 6px;font-size:0.55rem;color:'+cc+';text-align:left">类别</th><th style="padding:2px 6px;font-size:0.55rem;color:'+cc+';text-align:right">金额</th><th style="padding:2px 6px;font-size:0.55rem;color:'+cc+';text-align:center">%</th></tr></thead><tbody>' +
+            categories.filter(function(c){return catTotals[c]>0;}).map(function(c){return '<tr><td style="padding:2px 6px;font-size:0.6rem;color:'+cc+'">'+c+'</td><td class="amount" style="text-align:right;padding:2px 8px;font-size:0.65rem">'+formatNum(catTotals[c])+'</td><td style="text-align:center;font-size:0.55rem;color:#888">'+(total>0?(catTotals[c]/total*100).toFixed(1)+'%':'')+'</td></tr>';}).join('') +
+            '<tr style="background:rgba(255,255,255,0.05);font-weight:700"><td style="padding:2px 6px;font-size:0.6rem;color:#fff">合计</td><td class="amount" style="text-align:right;padding:2px 8px;font-size:0.7rem;color:#fff">'+formatNum(total)+'</td><td style="text-align:center;font-size:0.6rem;color:#fff">100%</td></tr>' +
+            pmSummary +
+            '</tbody></table></div>' +
         '</div>' +
-        '<div style="margin-top:6px;overflow-x:auto">' +
-          '<table style="width:100%;border-collapse:collapse;font-size:0.55rem"><thead><tr style="border-bottom:1px solid rgba(255,255,255,0.1)"><th style="padding:2px 4px;color:#888">类别</th><th style="padding:2px 4px;color:#888">日期</th><th style="padding:2px 4px;color:#888">项目</th><th style="padding:2px 4px;color:#888;text-align:right">金额</th><th style="padding:2px 4px;color:#888">说明</th><th style="padding:2px 4px;color:#888">票据</th></tr></thead><tbody>'+detailRows+'</tbody></table>' +
-        '</div>' +
+        '<div style="margin-top:4px">'+accordionHtml+'</div>' +
       '</div>' +
-    '</div>';
-
-    html += '<div class="base-card" data-base="'+base+'" data-color="'+cc+'" data-total="'+total+'" style="border:1px solid '+cc+'22;box-shadow:0 2px 8px '+cc+'11">' +
+    '</div>';    html += '<div class="base-card" data-base="'+base+'" data-color="'+cc+'" data-total="'+total+'" style="border:1px solid '+cc+'22;box-shadow:0 2px 8px '+cc+'11">' +
       coverHtml + detailHtml +
     '</div>';
 
