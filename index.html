@@ -355,8 +355,13 @@ function showToast(msg, type) {
       <table class="data-table" style="font-size:0.75rem"><thead><tr><th>月份</th><th>姓名</th><th>岗位</th><th>金额</th><th>发放日期</th><th>凭证</th></tr></thead><tbody id="salaryRegularBody"></tbody></table>
 
       <!-- 临时工 -->
-      <h3 style="font-size:0.9rem;color:#b8860b;margin:18px 0 6px;border-left:4px solid #b8860b;padding-left:10px">🛠️ 临时工工资</h3>
-      <table class="data-table" style="font-size:0.75rem"><thead><tr><th>月份</th><th>姓名</th><th>岗位</th><th>金额</th><th>发放日期</th><th>凭证</th></tr></thead><tbody id="salaryTempBody"></tbody></table>
+      <h3 style="font-size:0.9rem;color:#b8860b;margin:18px 0 6px;border-left:4px solid #b8860b;padding-left:10px">🛠️ 临时工工资 · 发放清单</h3>
+      <p style="font-size:0.7rem;color:#999;margin:2px 0 8px 10px">财务记账 —— 实际领款记录</p>
+      <table class="data-table" style="font-size:0.75rem"><thead><tr><th>月份</th><th>领款人</th><th>岗位</th><th>金额</th><th>发放日期</th><th>凭证</th></tr></thead><tbody id="salaryTempBody"></tbody></table>
+
+      <h3 style="font-size:0.9rem;color:#b8860b;margin:18px 0 6px;border-left:4px solid #b8860b;padding-left:10px">📋 临时工劳务清单</h3>
+      <p style="font-size:0.7rem;color:#999;margin:2px 0 8px 10px">实际干活记录 · 120元/人/天</p>
+      <table class="data-table" style="font-size:0.75rem"><thead><tr><th>日期</th><th>人数</th><th>工作内容</th><th>金额</th><th>备注</th></tr></thead><tbody id="tempLaborBody"></tbody></table>
 
       <div class="table-empty" id="empty9" style="display:none"><span class="empty-icon">📭</span><span class="empty-text">暂无数据</span></div>
     </section>

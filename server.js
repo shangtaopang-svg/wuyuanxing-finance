@@ -126,6 +126,12 @@ async function initDB() {
     total_amount REAL DEFAULT 0, paid REAL DEFAULT 0, unpaid REAL DEFAULT 0,
     notes TEXT DEFAULT '', is_total INTEGER DEFAULT 0, is_subtotal INTEGER DEFAULT 0
   )`);
+  // 临时工劳务清单
+  db.run(`CREATE TABLE IF NOT EXISTS temp_labor (
+    id INTEGER PRIMARY KEY, date TEXT, headcount INTEGER DEFAULT 0,
+    work_content TEXT DEFAULT '', amount REAL DEFAULT 0,
+    notes TEXT DEFAULT '', month TEXT DEFAULT ''
+  )`);
 
   // 插入默认管理员
   const users = db.exec("SELECT COUNT(*) as c FROM users");
@@ -218,6 +224,7 @@ const TABLE_MAP = {
   asset: { table: 'asset', fields: ['date','name','amount','location','status'] },
   management: { table: 'management', fields: ['date','category','amount','summary','invoices'] },
   salary: { table: 'salary', fields: ['month','name','position','amount','pay_date','voucher'] },
+  tempLabor: { table: 'temp_labor', fields: ['date','headcount','work_content','amount','notes','month'] },
   baseExpense: { table: 'base_expense', fields: ['date','base','item','amount','note','invoices'] },
   companyInfo: { table: 'company_info', fields: ['field_name','field_value'] },
   contracts: { table: 'contracts', fields: ['date','contract_name','party','amount','status','note'] },
@@ -329,12 +336,13 @@ const PUBLIC_SECTIONS = {
   farmerLedger: { fields: ["seq","name","phone","area","bags","price_per_bag","weight_per_bag","seedling_total","prepaid","unpaid_seedling","fertilizer_a","fertilizer_b","herbicide","pesticide","mulch","materials_total","materials_paid","materials_unpaid","total_unpaid","notes","paid"] },
   seedlingBill: { fields: ["seq","name","phone","area","bags","price_per_bag","weight_per_bag","total_amount","prepaid","unpaid","is_total","is_subtotal"] },
   materialsBill: { fields: ["seq","name","phone","fertilizer_a","fertilizer_b","herbicide","sealant","pesticide","total_amount","paid","unpaid","notes","is_total","is_subtotal"] },
+  tempLabor: { fields: ["date","headcount","work_content","amount","notes","month"] },
 };
 Object.keys(PUBLIC_SECTIONS).forEach(function(key) {
   app.get('/api/public/' + key, function(req, res) {
     try {
       var cfg = PUBLIC_SECTIONS[key];
-      var table = key === 'incomeExpense' ? 'income_expense' : key === 'pettyCash' || key === 'pettyDraw' || key === 'pettyWrite' ? 'petty_cash' : key === "baseExpense" ? "base_expense" : key === "bankFlow" ? "bank_flow" : key === "companyInfo" ? "company_info" : key === "bankAccounts" ? "bank_accounts" : key === "farmerLedger" ? "farmer_ledger" : key === "seedlingBill" ? "seedling_bill" : key === "materialsBill" ? "materials_bill" : key;
+      var table = key === 'incomeExpense' ? 'income_expense' : key === 'pettyCash' || key === 'pettyDraw' || key === 'pettyWrite' ? 'petty_cash' : key === "baseExpense" ? "base_expense" : key === "bankFlow" ? "bank_flow" : key === "companyInfo" ? "company_info" : key === "bankAccounts" ? "bank_accounts" : key === "farmerLedger" ? "farmer_ledger" : key === "seedlingBill" ? "seedling_bill" : key === "materialsBill" ? "materials_bill" : key === "tempLabor" ? "temp_labor" : key;
       var sql = "SELECT " + cfg.fields.join(',') + " FROM " + table; if (key === 'pettyDraw') sql += " WHERE type='领用'"; else if (key === 'pettyWrite') sql += " WHERE type='核销'"; var data = query(sql + " ORDER BY id");
       res.json(data);
     } catch(e) { res.json([]); }

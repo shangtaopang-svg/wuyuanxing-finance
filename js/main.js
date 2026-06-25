@@ -386,6 +386,23 @@ function renderSalary() {
 
   var empty = $('empty9');
   if (empty) empty.style.display = (!regular.length && !temp.length) ? 'block' : 'none';
+
+  // 劳务清单
+  renderTempLabor();
+}
+
+function renderTempLabor() {
+  var data = DataStore.tempLabor || [];
+  var body = $('tempLaborBody');
+  if (!body) return;
+  body.innerHTML = '';
+  if (!data.length) {
+    body.innerHTML = '<tr><td colspan="5" style="text-align:center;color:#999;padding:20px">暂无数据</td></tr>';
+    return;
+  }
+  data.forEach(function(r) {
+    body.innerHTML += '<tr><td>' + (r.date||'') + '</td><td>' + (r.headcount||'') + '人</td><td>' + (r.work_content||'') + '</td><td class="amount expense">' + formatNum(r.amount) + '</td><td>' + (r.notes||'') + '</td></tr>';
+  });
 }
 
 // ⑩ 基地支出
@@ -1508,7 +1525,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
   // 从公共API加载数据（无需登录，确保数据最新）
   showLoading(true);
-    var pubSections = ['capital','bankFlow','pettyDraw','pettyWrite','pettyCash','bankAccounts','contracts','companyInfo','receivable','asset','management','salary','baseExpense','farmerLedger','seedlingBill','materialsBill'];
+    var pubSections = ['capital','bankFlow','pettyDraw','pettyWrite','pettyCash','bankAccounts','contracts','companyInfo','receivable','asset','management','salary','baseExpense','farmerLedger','seedlingBill','materialsBill','tempLabor'];
   var pubLoaded = 0;
   pubSections.forEach(function(s) {
     var xhr = new XMLHttpRequest();
@@ -1708,7 +1725,8 @@ var COL_FIELDS = {
   baseSeedlingBody:   ['date','item','amount','note','invoices'],
   companyInfoBody:    ['field_name','field_value'],
   contractsBody:      ['date','contract_name','party','amount','status','note'],
-  bankAccountsBody:   ['bank_name','account_name','account_number','balance','note']
+  bankAccountsBody:   ['bank_name','account_name','account_number','balance','note'],
+  tempLaborBody:     ['date','headcount','work_content','amount','notes']
 };
 
 // 给所有数据行加上 data-idx 和删除按钮，以及表下方的"新增"按钮
@@ -1812,6 +1830,8 @@ function perTableAddRow(bodyId) {
   } else if (bodyId === 'baseJinyinhuaBody' || bodyId === 'baseDangshenBody' || bodyId === 'baseSeedlingBody') {
     var bmap = {baseJinyinhuaBody:'金银花基地', baseDangshenBody:'党参基地', baseSeedlingBody:'党参育苗基地'};
     defaults = {date:'', base:bmap[bodyId], item:'', amount:0, note:'', invoices:''};
+  } else if (bodyId === 'tempLaborBody') {
+    defaults = {date:'', headcount:1, work_content:'', amount:120, notes:''};
   }
   data.push(defaults);
   localStorage.setItem('wyx_' + section, JSON.stringify(data));
@@ -1870,7 +1890,8 @@ function sectionFromBodyId(bodyId) {
     salaryBody:'salary',
     reimburseRenBody:'reimburse', reimbursePangBody:'reimburse', reimburseYingBody:'reimburse',
     baseJinyinhuaBody:'baseExpense', baseDangshenBody:'baseExpense', baseSeedlingBody:'baseExpense',
-    companyInfoBody:'companyInfo', contractsBody:'contracts', bankAccountsBody:'bankAccounts'
+    companyInfoBody:'companyInfo', contractsBody:'contracts', bankAccountsBody:'bankAccounts',
+    tempLaborBody:'tempLabor'
   };
   return map[bodyId] || null;
 }
@@ -2149,7 +2170,7 @@ function confirmFrontImport() {
 
 function saveFrontData() {
   showToast('⏳ 保存中...', 'info');
-  var sections = ['capital','bankFlow','pettyDraw','pettyWrite','reimburse','receivable','asset','management','salary','baseExpense'];
+  var sections = ['capital','bankFlow','pettyDraw','pettyWrite','reimburse','receivable','asset','management','salary','baseExpense','tempLabor'];
   var done = 0, total = sections.length;
   var apiBase = (typeof API_BASE !== 'undefined' ? API_BASE : (window.location.pathname.startsWith('/finance/') ? '/finance' : ''));
   sections.forEach(function(s) {
