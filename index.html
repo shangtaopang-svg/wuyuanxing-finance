@@ -364,16 +364,8 @@ function showToast(msg, type) {
       <div style="background:#fefcf5;border:2px solid #b8860b;border-radius:10px;padding:14px 16px 6px;margin:14px 0 8px;">
         <h3 style="font-size:0.9rem;color:#b8860b;margin:0 0 4px;display:flex;align-items:center;gap:6px;">🛠️ 临时工工资 <span style="font-size:0.65rem;color:#999;font-weight:400">代领人：施前华</span></h3>
 
-        <h4 style="font-size:0.78rem;color:#8a7a6a;margin:12px 0 4px;">📤 发放清单</h4>
-        <p style="font-size:0.65rem;color:#bbb;margin:0 0 6px;">临时工工资明细 · 代领人：施前华</p>
-        <div style="overflow-x:auto">
-          <table class="data-table" style="font-size:0.65rem;min-width:600px"><thead><tr><th style="width:35px">序号</th><th>姓名</th><th>身份证号码</th><th style="width:65px">3月</th><th style="width:65px">4月</th><th style="width:65px">合计</th></tr></thead><tbody id="tempWorkersBody"></tbody></table>
-        </div>
-        <p style="font-size:0.7rem;color:#999;margin:4px 0 0;text-align:right">3月合计：¥51,292 &nbsp; 4月合计：¥89,280 &nbsp; <strong>总计：¥140,572</strong></p>
-
-        <h4 style="font-size:0.78rem;color:#8a7a6a;margin:18px 0 4px;">📋 劳务清单</h4>
-        <p style="font-size:0.65rem;color:#bbb;margin:0 0 6px;">实际干活记录 · 120元/人/天</p>
-        <table class="data-table" style="font-size:0.72rem"><thead><tr><th>日期</th><th>人数</th><th>工作内容</th><th>金额</th><th>备注</th></tr></thead><tbody id="tempLaborBody"></tbody></table>
+        <!-- 月份卡片容器 -->
+        <div id="tempMonthCards" style="display:flex;flex-direction:column;gap:12px;margin-top:10px;"></div>
       </div>
 
       <div class="table-empty" id="empty9" style="display:none"><span class="empty-icon">📭</span><span class="empty-text">暂无数据</span></div>
