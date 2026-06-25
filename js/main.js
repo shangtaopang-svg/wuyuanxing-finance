@@ -377,18 +377,19 @@ function renderSalary() {
       if (!empSet[key]) { empSet[key] = true; employees.push({name: r.name, position: r.position}); }
     });
 
-    // 构建查询表: name|month -> amount
+    // 构建查询表: name|month -> {amount, payDate}
     var lookup = {};
     regular.forEach(function(r){
-      lookup[r.name + '|' + (r.month||'')] = r.amount;
+      lookup[r.name + '|' + (r.month||'')] = {amount: r.amount, payDate: r.payDate || ''};
     });
 
-    // 表头
-    var headerHtml = '<th style="width:100px">姓名（岗位）</th>';
+    // 表头（金额+发放日期双列）
+    var headerHtml = '<th style="width:90px">姓名（岗位）</th>';
     months.forEach(function(m){
-      headerHtml += '<th style="min-width:70px;text-align:center">' + m.replace('-', '/') + '</th>';
+      headerHtml += '<th style="min-width:55px;text-align:center;border-right:1px solid #e8e5e0">' + m.replace('-', '/') + '<br><span style="font-weight:400;font-size:0.6rem">金额</span></th>';
+      headerHtml += '<th style="min-width:65px;text-align:center;font-weight:400;font-size:0.6rem">发放日期</th>';
     });
-    headerHtml += '<th style="width:70px;text-align:center">合计</th>';
+    headerHtml += '<th style="width:60px;text-align:center">合计</th>';
     rh.innerHTML = headerHtml;
 
     // 表体
@@ -397,14 +398,15 @@ function renderSalary() {
       var total = 0;
       var row = '<td><strong>' + emp.name + '</strong><br><span style="font-size:0.6rem;color:#999">' + emp.position + '</span></td>';
       months.forEach(function(m){
-        var amt = lookup[emp.name + '|' + m] || 0;
-        total += amt;
-        row += '<td class="amount" style="text-align:center;font-size:0.78rem">' + (amt > 0 ? '¥' + amt.toLocaleString() : '—') + '</td>';
+        var info = lookup[emp.name + '|' + m] || {amount: 0, payDate: ''};
+        total += info.amount;
+        row += '<td class="amount" style="text-align:center;font-size:0.75rem;border-right:1px solid #f0ede8">' + (info.amount > 0 ? '¥' + info.amount.toLocaleString() : '—') + '</td>';
+        row += '<td style="text-align:center;font-size:0.65rem;color:#888">' + (info.payDate || '—') + '</td>';
       });
-      row += '<td class="amount" style="text-align:center;font-weight:700;color:#2d5a27">¥' + total.toLocaleString() + '</td>';
+      row += '<td class="amount" style="text-align:center;font-weight:700;color:#2d5a27;font-size:0.8rem">¥' + total.toLocaleString() + '</td>';
       bodyHtml += '<tr>' + row + '</tr>';
     });
-    rb.innerHTML = bodyHtml || '<tr><td colspan="' + (months.length+2) + '" style="text-align:center;color:#999;padding:20px">暂无数据</td></tr>';
+    rb.innerHTML = bodyHtml || '<tr><td colspan="' + (months.length*2+2) + '" style="text-align:center;color:#999;padding:20px">暂无数据</td></tr>';
   }
 
   // 临时工
