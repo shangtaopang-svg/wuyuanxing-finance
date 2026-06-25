@@ -508,8 +508,8 @@ function openBaseFull(base, color, total, itemsJson) {
   title.textContent = '🌿 ' + base + ' · ' + formatNum(total);
 
   // Build categories from items
-  var cats = ['土地流转','土地处理','种苗采购','种苗运输','农资','人工费用','其他'];
-  var catColors = {'土地流转':'#8B4513','土地处理':'#D2691E','种苗采购':'#27ae60','种苗运输':'#2ecc71','农资':'#f39c12','人工费用':'#e74c3c','其他':'#95a5a6'};
+  var cats = ['土地流转','土地处理','种苗采购','地膜采购','农资','人工费用','其他'];
+  var catColors = {'土地流转':'#8B4513','土地处理':'#D2691E','种苗采购':'#27ae60','地膜采购':'#9b59b6','农资':'#f39c12','人工费用':'#e74c3c','其他':'#95a5a6'};
   var catTotals = {};
   cats.forEach(function(c){ catTotals[c] = 0; });
   items.forEach(function(r){ var cat=r.category||'其他'; if(catTotals[cat]!==undefined) catTotals[cat]+=r.amount||0; });
@@ -518,7 +518,7 @@ function openBaseFull(base, color, total, itemsJson) {
     return '<tr><td style="padding:6px 12px;font-size:0.8rem;border-bottom:1px solid #f0ede8"><span style="display:inline-block;width:10px;height:10px;border-radius:2px;background:'+(catColors[c]||'#95a5a6')+';margin-right:8px"></span>'+c+'</td><td class="amount" style="padding:6px 12px;font-size:0.85rem;text-align:right;border-bottom:1px solid #f0ede8">'+formatNum(catTotals[c])+'</td><td style="padding:6px 12px;font-size:0.75rem;text-align:center;color:#888;border-bottom:1px solid #f0ede8">'+(total>0?(catTotals[c]/total*100).toFixed(1)+'%':'')+'</td></tr>';
   }).join('');
 
-  var cats = ['土地流转','土地处理','种苗采购','种苗运输','农资','人工费用','其他'];
+  var cats = ['土地流转','土地处理','种苗采购','地膜采购','农资','人工费用','其他'];
   var sortedI = items.slice().sort(function(a,b){ var ai=cats.indexOf(a.category||'其他'),bi=cats.indexOf(b.category||'其他'); return ai-bi || ((a.date||'')>(b.date||'')?1:-1); });
   var detailRows = '', lastCat2 = '', catTotal2 = 0, catStarted = true;
   sortedI.forEach(function(r, idx){
@@ -550,7 +550,7 @@ function openBaseFull(base, color, total, itemsJson) {
     '<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:8px">' +
     cats.filter(function(c){return catTotals[c]>0;}).map(function(cat){
       var bg = catColors[cat] || '#95a5a6';
-      var icon = {'土地流转':'🏞️','土地处理':'🚜','种苗采购':'🌱','种苗运输':'🚛','农资':'🧪','人工费用':'👷','其他':'📦'}[cat] || '📋';
+      var icon = {'土地流转':'🏞️','土地处理':'🚜','种苗采购':'🌱','地膜采购':'🛍️','农资':'🧪','人工费用':'👷','其他':'📦'}[cat] || '📋';
       var catItems = items.filter(function(r){return (r.category||'其他')===cat;});
       var catAmt = catItems.reduce(function(s,r){return s+(r.amount||0);},0);
       var json = encodeURIComponent(JSON.stringify(catItems.map(function(r){return{date:r.date,item:r.item,amount:r.amount,note:r.note,invoices:r.invoices};})));
@@ -593,7 +593,7 @@ function openCatDetail(cat, color, total, itemsJson, baseName) {
     var n = (r.note||'').replace(/公司账户/g,'🏦').replace(/庞尚韬备用金/g,'💰').replace(/任海涛/g,'👤');
     return '<tr'+(i%2===0?' style="background:#fafafa"':'')+'><td style="padding:5px 8px;font-size:0.72rem">'+(r.date||'')+'</td><td style="padding:5px 8px;font-size:0.72rem">'+(r.item||'')+'</td><td class="amount" style="padding:5px 8px;font-size:0.75rem;text-align:right">'+formatNum(r.amount)+'</td><td style="padding:5px 8px;font-size:0.65rem;color:#888">'+n+'</td></tr>';
   }).join('');
-  body.innerHTML = '<div style="margin-bottom:10px"><button onclick="if(_lastBaseContext){openBaseFull(_lastBaseContext.base,_lastBaseContext.color,_lastBaseContext.total,_lastBaseContext.items)}else{closeBaseFull()}" style="padding:6px 14px;border:1px solid #ddd;border-radius:6px;background:#fff;cursor:pointer;font-size:13px">← 返回</button></div>' +
+  body.innerHTML = '<div style="margin-bottom:10px"><button onclick="if(_lastBaseContext){openBaseFull(_lastBaseContext.base,_lastBaseContext.color,_lastBaseContext.total,_lastBaseContext.items)}else{closeBaseFull()}" style="padding:8px 18px;border:2px solid '+color+';border-radius:8px;background:'+color+';color:#fff;cursor:pointer;font-size:14px;font-weight:700;box-shadow:0 2px 8px '+color+'44">← 返回上级</button></div>' +
     '<h4 style="font-size:0.9rem;color:'+color+';margin:0 0 12px">'+cat+' · '+baseName+' · 合计'+formatNum(total)+'</h4>' +
     '<div style="overflow-x:auto"><table class="data-table" style="font-size:0.72rem;width:100%"><thead><tr><th style="width:80px">日期</th><th>项目</th><th style="width:80px">金额</th><th>说明</th></tr></thead><tbody>' + rows + '</tbody></table></div>';
   modal.style.display = 'block';
@@ -640,8 +640,8 @@ function renderBaseExpense() {
   var allData = DataStore.baseExpense || [];
   var baseNames = ['金银花基地','党参基地','党参育苗基地'];
   var baseScales = {'金银花基地':'规模（流转）101.4亩','党参基地':'','党参育苗基地':''};
-  var categories = ['土地流转','土地处理','种苗采购','种苗运输','农资','人工费用','其他'];
-  var catColors = {'土地流转':'#8B4513','土地处理':'#D2691E','种苗采购':'#27ae60','种苗运输':'#2ecc71','农资':'#f39c12','人工费用':'#e74c3c','其他':'#95a5a6'};
+  var categories = ['土地流转','土地处理','种苗采购','地膜采购','农资','人工费用','其他'];
+  var catColors = {'土地流转':'#8B4513','土地处理':'#D2691E','种苗采购':'#27ae60','地膜采购':'#9b59b6','农资':'#f39c12','人工费用':'#e74c3c','其他':'#95a5a6'};
   var coverColors = ['#27ae60','#3498db','#e67e22'];
   var emojis = ['🌿','🌱','🌰'];
 
@@ -683,7 +683,7 @@ function renderBaseExpense() {
       var catPct = total > 0 ? (catAmt/total*100).toFixed(1) : 0;
       var bg = catColors[cat] || '#95a5a6';
       var catLabel = cat;
-      var catIcon = {'土地流转':'🏞️','土地处理':'🚜','种苗采购':'🌱','种苗运输':'🚛','农资':'🧪','人工费用':'👷','其他':'📦'}[cat] || '📋';
+      var catIcon = {'土地流转':'🏞️','土地处理':'🚜','种苗采购':'🌱','地膜采购':'🛍️','农资':'🧪','人工费用':'👷','其他':'📦'}[cat] || '📋';
       var jsonItems = encodeURIComponent(JSON.stringify(catItems.map(function(r){return {date:r.date,item:r.item,amount:r.amount,note:r.note,invoices:r.invoices};})));
 
       catTileHtml += '<div style="background:'+bg+'11;border:1px solid '+bg+'44;border-radius:8px;overflow:hidden;cursor:pointer;transition:all 0.2s" ' +
@@ -1216,8 +1216,8 @@ function renderChart9b() {
 // ⑩ 基地支出图表
 function renderChart10a() {
   var data = DataStore.baseExpense || [];
-  var catColors = {'土地流转':'#8B4513','土地处理':'#D2691E','种苗采购':'#27ae60','种苗运输':'#2ecc71','农资':'#f39c12','人工费用':'#e74c3c','其他':'#95a5a6'};
-  var categories = ['土地流转','土地处理','种苗采购','种苗运输','农资','人工费用','其他'];
+  var catColors = {'土地流转':'#8B4513','土地处理':'#D2691E','种苗采购':'#27ae60','地膜采购':'#9b59b6','农资':'#f39c12','人工费用':'#e74c3c','其他':'#95a5a6'};
+  var categories = ['土地流转','土地处理','种苗采购','地膜采购','农资','人工费用','其他'];
   var baseNames = ['金银花基地','党参基地','党参育苗基地'];
   // Aggregate: cat -> base -> amount
   var catBase = {};
@@ -1240,9 +1240,9 @@ function renderChart10a() {
 }
 function renderChart10b() {
   var data = DataStore.baseExpense || [];
-  var catColors = {'土地流转':'#8B4513','土地处理':'#D2691E','种苗采购':'#27ae60','种苗运输':'#2ecc71','农资':'#f39c12','人工费用':'#e74c3c','其他':'#95a5a6'};
+  var catColors = {'土地流转':'#8B4513','土地处理':'#D2691E','种苗采购':'#27ae60','地膜采购':'#9b59b6','农资':'#f39c12','人工费用':'#e74c3c','其他':'#95a5a6'};
   var baseNames = ['金银花基地','党参基地','党参育苗基地'];
-  var categories = ['土地流转','土地处理','种苗采购','种苗运输','化肥农药','人工费用','其他'].filter(function(c){
+  var categories = ['土地流转','土地处理','种苗采购','地膜采购','农资','人工费用','其他'].filter(function(c){
     return data.some(function(r){ return (r.category||'') === c; });
   });
   if (!categories.length) return;
