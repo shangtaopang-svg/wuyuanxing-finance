@@ -572,10 +572,8 @@ function openBaseFull(base, color, total, itemsJson) {
     '<div style="flex:1;min-width:200px">'+tableHtml+'</div>' +
     '</div>' + cardsHtml;
 
-  // Store context and hide back button (this IS the top level)
+  // Store context for back button
   _lastBaseContext = {base: base, color: color, total: total, items: JSON.stringify(items)};
-  var backBtn = document.getElementById('baseBackBtn');
-  if (backBtn) backBtn.style.display = 'none';
   modal.style.display = 'block';
   overlay.style.display = 'block';
 
@@ -603,8 +601,6 @@ function openCatDetail(cat, color, total, itemsJson, baseName) {
     var n = (r.note||'').replace(/公司账户/g,'🏦').replace(/庞尚韬备用金/g,'💰').replace(/任海涛/g,'👤');
     return '<tr'+(i%2===0?' style="background:#fafafa"':'')+'><td style="padding:5px 8px;font-size:0.72rem">'+(r.date||'')+'</td><td style="padding:5px 8px;font-size:0.72rem">'+(r.item||'')+'</td><td class="amount" style="padding:5px 8px;font-size:0.75rem;text-align:right">'+formatNum(r.amount)+'</td><td style="padding:5px 8px;font-size:0.65rem;color:#888">'+n+'</td></tr>';
   }).join('');
-  var backBtn = document.getElementById('baseBackBtn');
-  if (backBtn) { backBtn.style.display = 'inline-flex'; backBtn.onclick = function(){ if(_lastBaseContext){openBaseFull(_lastBaseContext.base,_lastBaseContext.color,_lastBaseContext.total,_lastBaseContext.items)}else{closeBaseFull()} }; }
   body.innerHTML = '<h4 style="font-size:0.9rem;color:'+color+';margin:0 0 12px">'+cat+' · '+baseName+' · 合计'+formatNum(total)+'</h4>' +
     '<div style="overflow-x:auto"><table class="data-table" style="font-size:0.72rem;width:100%"><thead><tr><th style="width:80px">日期</th><th>项目</th><th style="width:80px">金额</th><th>说明</th></tr></thead><tbody>' + rows + '</tbody></table></div>';
   modal.style.display = 'block';
