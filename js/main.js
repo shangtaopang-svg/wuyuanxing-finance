@@ -518,7 +518,8 @@ function openBaseFull(base, color, total, itemsJson) {
     return '<tr><td style="padding:6px 12px;font-size:0.8rem;border-bottom:1px solid #f0ede8"><span style="display:inline-block;width:10px;height:10px;border-radius:2px;background:'+(catColors[c]||'#95a5a6')+';margin-right:8px"></span>'+c+'</td><td class="amount" style="padding:6px 12px;font-size:0.85rem;text-align:right;border-bottom:1px solid #f0ede8">'+formatNum(catTotals[c])+'</td><td style="padding:6px 12px;font-size:0.75rem;text-align:center;color:#888;border-bottom:1px solid #f0ede8">'+(total>0?(catTotals[c]/total*100).toFixed(1)+'%':'')+'</td></tr>';
   }).join('');
 
-  var detailRows = items.map(function(r, i){
+  var sortedI = items.slice().sort(function(a,b){ return (a.category||'').localeCompare(b.category||''); });
+  var detailRows = sortedI.map(function(r, i){
     return '<tr'+(i%2===0?' style="background:#fafafa"':'')+'><td style="padding:5px 8px;font-size:0.72rem">'+(r.date||'')+'</td><td style="padding:5px 8px;font-size:0.68rem;color:'+(catColors[r.category]||'#666')+'">'+(r.category||'')+'</td><td style="padding:5px 8px;font-size:0.72rem">'+(r.item||'')+'</td><td class="amount" style="padding:5px 8px;font-size:0.75rem;text-align:right">'+formatNum(r.amount)+'</td><td style="padding:5px 8px;font-size:0.65rem;color:#888">'+(r.note||'')+'</td></tr>';
   }).join('');
 
@@ -593,7 +594,8 @@ function renderBaseExpense() {
     }).join('');
     catRows += '<tr style="background:rgba(255,255,255,0.05);font-weight:700"><td style="padding:2px 6px;font-size:0.6rem;color:#fff">合计</td><td class="amount" style="text-align:right;padding:2px 8px;font-size:0.7rem;color:#fff">'+formatNum(total)+'</td><td style="text-align:center;font-size:0.6rem;color:#fff">100%</td></tr>';
 
-    var detailRows = items.length ? items.map(function(r){
+    var sorted = items.slice().sort(function(a,b){ return (a.category||'').localeCompare(b.category||''); });
+    var detailRows = sorted.length ? sorted.map(function(r){
       return '<tr><td style="padding:2px 6px;font-size:0.58rem">'+(r.date||'')+'</td><td style="padding:2px 6px;font-size:0.55rem;color:'+cc+'">'+(r.category||'')+'</td><td style="padding:2px 6px;font-size:0.58rem">'+(r.item||'')+'</td><td class="amount" style="text-align:right;padding:2px 8px;font-size:0.6rem">'+formatNum(r.amount)+'</td><td style="padding:2px 6px;font-size:0.5rem;color:#888">'+(r.note||'')+'</td></tr>';
     }).join('') : '<tr><td colspan="5" style="text-align:center;color:#999;padding:10px;font-size:0.6rem">暂无</td></tr>';
 
