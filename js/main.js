@@ -626,6 +626,25 @@ function renderBaseExpense() {
     }).join('');
     catRows += '<tr style="background:rgba(255,255,255,0.05);font-weight:700"><td style="padding:2px 6px;font-size:0.6rem;color:#fff">合计</td><td class="amount" style="text-align:right;padding:2px 8px;font-size:0.7rem;color:#fff">'+formatNum(total)+'</td><td style="text-align:center;font-size:0.6rem;color:#fff">100%</td></tr>';
 
+    // Payment method summary for labor
+    var laborItems = items.filter(function(r){ return r.category === '人工费用'; });
+    if (laborItems.length) {
+      var pm = {'公司账户':0,'庞尚韬备用金':0,'任海涛':0,'其他':0};
+      laborItems.forEach(function(r){
+        var n = r.note || '';
+        if (n.indexOf('庞尚韬备用金')>=0) pm['庞尚韬备用金'] += r.amount||0;
+        else if (n.indexOf('任海涛')>=0) pm['任海涛'] += r.amount||0;
+        else if (n.indexOf('公司账户')>=0) pm['公司账户'] += r.amount||0;
+        else pm['其他'] += r.amount||0;
+      });
+      var pmc = {'公司账户':'#27ae60','庞尚韬备用金':'#e67e22','任海涛':'#3498db','其他':'#95a5a6'};
+      var pmr = '';
+      Object.keys(pm).forEach(function(k){
+        if (pm[k] > 0) pmr += '<tr><td style="padding:2px 6px;font-size:0.55rem;color:#fff;background:'+pmc[k]+'88;border-radius:3px;font-weight:600">'+(k==='公司账户'?'🏦 公司账户':k==='庞尚韬备用金'?'💰 庞备用金':k==='任海涛'?'👤 任海涛':'其他')+'</td><td class="amount" style="text-align:right;padding:2px 8px;font-size:0.6rem;color:#fff">'+formatNum(pm[k])+'</td><td style="text-align:center;font-size:0.5rem;color:#aaa">'+(total>0?(pm[k]/total*100).toFixed(1)+'%':'')+'</td></tr>';
+      });
+      catRows += '<tr style="border-top:1px dashed rgba(255,255,255,0.1)"><td colspan="3" style="padding:4px 6px;font-size:0.55rem;font-weight:700;color:'+cc+'">📊 人工费用 · 支付方式</td></tr>' + pmr;
+    }
+
     var sorted = items.slice().sort(function(a,b){ var ai=categories.indexOf(a.category||'其他'),bi=categories.indexOf(b.category||'其他'); return ai-bi || ((a.date||'')>(b.date||'')?1:-1); });
     var detailRows = '';
     if (sorted.length) {
