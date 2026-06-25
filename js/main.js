@@ -503,7 +503,6 @@ function buildMonthCard(label, workers, labor) {
   return '<div style="border:2px solid #b8860b;border-radius:10px;overflow:hidden;background:#fefcf5">' +
     '<div style="background:#b8860b;color:#fff;padding:8px 14px;font-size:0.85rem;font-weight:700;display:flex;align-items:center;justify-content:space-between">' +
       '<span>📅 ' + label + '</span>' +
-      '<span style="font-size:0.72rem;font-weight:400;opacity:0.9">代领人：施前华</span>' +
     '</div>' +
     '<div style="padding:10px 14px;display:flex;gap:10px;flex-wrap:wrap">' +
       '<div onclick="var t=document.getElementById(\'' + uid + '_pay\');t.style.display=t.style.display==\'none\'?\'block\':\'none\'" style="flex:1;min-width:140px;padding:12px 16px;background:#fff;border:1px solid #e8e5e0;border-radius:8px;cursor:pointer;transition:all 0.2s;text-align center">' +
