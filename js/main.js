@@ -380,7 +380,7 @@ function renderSalary() {
     // 构建查询表: name|month -> {amount, payDate}
     var lookup = {};
     regular.forEach(function(r){
-      lookup[r.name + '|' + (r.month||'')] = {amount: r.amount, payDate: r.payDate || ''};
+      lookup[r.name + '|' + (r.month||'')] = {amount: r.amount, payDate: r.pay_date || ''};
     });
 
     // 表头（金额+发放日期双列）
