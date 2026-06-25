@@ -469,7 +469,7 @@ function buildTabContent(d, label) {
   return "<div style=\"border:1px solid #b8860b;border-radius:8px;overflow:hidden;background:#fefcf5\">" +
     "<div style=\"background:#b8860b;color:#fff;padding:6px 12px;font-size:0.78rem;font-weight:600\">\u{1f4c5} "+label+"</div>" +
     "<div style=\"padding:8px 10px 4px\">" +
-      "<div style=\"display:flex;align-items:center;justify-content:space-between;margin-bottom:4px\"><span style=\"font-size:0.72rem;font-weight:600;color:#b8860b\">\u{1f4c4} \u5de5\u8d44\u5355</span><span style=\"font-size:0.65rem;color:#999\">"+wk.length+"\u4eba \u00b7 \u5408\u8ba1"+formatNum(total)+"</span></div>" +
+      "<div style=\"display:flex;align-items:center;justify-content:space-between;margin-bottom:4px\"><span style=\"font-size:0.72rem;font-weight:600;color:#b8860b\">\u{1f4c4} \u5de5\u8d44\u5355\uff08\u8d22\u52a1\u6570\u636e\uff09</span><span style=\"font-size:0.65rem;color:#999\">"+wk.length+"\u4eba \u00b7 \u5408\u8ba1"+formatNum(total)+"</span></div>" +
       "<div style=\"overflow-x:auto;max-height:300px;overflow-y:auto;border:1px solid #e8e5e0;border-radius:6px\"><table class=\"data-table\" style=\"font-size:0.68rem;min-width:450px\"><thead><tr><th style=\"width:35px\">\u5e8f\u53f7</th><th>\u59d3\u540d</th><th>\u8eab\u4efd\u8bc1\u53f7\u7801</th><th style=\"width:80px\">\u91d1\u989d</th></tr></thead><tbody>"+wr+"</tbody></table></div>" +
     "</div>" +
     "<div style=\"padding:8px 10px 10px\">" +
