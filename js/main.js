@@ -520,10 +520,21 @@ function openBaseFull(base, color, total, itemsJson) {
 
   var cats = ['土地流转','土地处理','种苗采购','种苗运输','化肥农药','人工费用','其他'];
   var sortedI = items.slice().sort(function(a,b){ var ai=cats.indexOf(a.category||'其他'),bi=cats.indexOf(b.category||'其他'); return ai-bi || ((a.date||'')>(b.date||'')?1:-1); });
-  var detailRows = sortedI.map(function(r, i){
+  var detailRows = '', lastCat2 = '', catTotal2 = 0, catStarted = true;
+  sortedI.forEach(function(r, idx){
+    var cat = r.category||'其他';
+    if (cat !== lastCat2 && !catStarted) {
+      detailRows += '<tr style="border-top:2px solid #ccc;background:#f5f0e8"><td colspan="5" style="padding:4px 8px;font-size:0.75rem;font-weight:700;color:#333;text-align:right">小计 ('+lastCat2+')</td><td style="padding:4px 8px;font-size:0.8rem;font-weight:700;color:#c0392b;text-align:center">'+formatNum(catTotal2)+'</td></tr>';
+      catTotal2 = 0;
+    }
+    catStarted = false;
+    catTotal2 += r.amount||0; lastCat2 = cat;
     var inv = r.invoices; var invHtml = '—'; if(inv && inv.length){try{var f=typeof inv==='string'?JSON.parse(inv):inv;if(f.length)invHtml=f.map(function(x){return '<span class="invoice-link" onclick="previewFile(\''+encodeURIComponent(x)+'\')">📎</span>';}).join('');}catch(e){}}
-    return '<tr'+(i%2===0?' style="background:#fafafa"':'')+'><td style="padding:5px 8px;font-size:0.68rem;color:'+(catColors[r.category]||'#666')+';font-weight:600">'+(r.category||'')+'</td><td style="padding:5px 8px;font-size:0.72rem">'+(r.date||'')+'</td><td style="padding:5px 8px;font-size:0.72rem">'+(r.item||'')+'</td><td class="amount" style="padding:5px 8px;font-size:0.75rem;text-align:right">'+formatNum(r.amount)+'</td><td style="padding:5px 8px;font-size:0.65rem;color:#888">'+(r.note||'')+'</td><td style="padding:5px 8px;text-align:center">'+invHtml+'</td></tr>';
-  }).join('');
+    detailRows += '<tr'+(idx%2===0?' style="background:#fafafa"':'')+'><td style="padding:5px 8px;font-size:0.68rem;color:'+(catColors[r.category]||'#666')+';font-weight:600">'+(r.category||'')+'</td><td style="padding:5px 8px;font-size:0.72rem">'+(r.date||'')+'</td><td style="padding:5px 8px;font-size:0.72rem">'+(r.item||'')+'</td><td class="amount" style="padding:5px 8px;font-size:0.75rem;text-align:right">'+formatNum(r.amount)+'</td><td style="padding:5px 8px;font-size:0.65rem;color:#888">'+(r.note||'')+'</td><td style="padding:5px 8px;text-align:center">'+invHtml+'</td></tr>';
+    if (idx === sortedI.length - 1) {
+      detailRows += '<tr style="border-top:2px solid #ccc;background:#f5f0e8"><td colspan="5" style="padding:4px 8px;font-size:0.75rem;font-weight:700;color:#333;text-align:right">小计 ('+cat+')</td><td style="padding:4px 8px;font-size:0.8rem;font-weight:700;color:#c0392b;text-align:center">'+formatNum(catTotal2)+'</td></tr>';
+    }
+  });
 
   body.innerHTML = '<div style="display:flex;gap:20px;flex-wrap:wrap;margin-bottom:24px">' +
     '<div style="flex:1;min-width:250px;height:250px"><canvas id="baseFullChart"></canvas></div>' +
@@ -597,10 +608,29 @@ function renderBaseExpense() {
     catRows += '<tr style="background:rgba(255,255,255,0.05);font-weight:700"><td style="padding:2px 6px;font-size:0.6rem;color:#fff">合计</td><td class="amount" style="text-align:right;padding:2px 8px;font-size:0.7rem;color:#fff">'+formatNum(total)+'</td><td style="text-align:center;font-size:0.6rem;color:#fff">100%</td></tr>';
 
     var sorted = items.slice().sort(function(a,b){ var ai=categories.indexOf(a.category||'其他'),bi=categories.indexOf(b.category||'其他'); return ai-bi || ((a.date||'')>(b.date||'')?1:-1); });
-    var detailRows = sorted.length ? sorted.map(function(r){
-      var inv = r.invoices; var invHtml = '—'; if(inv && inv.length){try{var f=typeof inv==='string'?JSON.parse(inv):inv;if(f.length)invHtml=f.map(function(x){return '<span class="invoice-link" onclick="previewFile(\''+encodeURIComponent(x)+'\')">📎</span>';}).join('');}catch(e){}}
-      return '<tr><td style="padding:2px 6px;font-size:0.55rem;color:'+cc+'">'+(r.category||'')+'</td><td style="padding:2px 6px;font-size:0.58rem">'+(r.date||'')+'</td><td style="padding:2px 6px;font-size:0.58rem">'+(r.item||'')+'</td><td class="amount" style="text-align:right;padding:2px 8px;font-size:0.6rem">'+formatNum(r.amount)+'</td><td style="padding:2px 6px;font-size:0.5rem;color:#888">'+(r.note||'')+'</td><td style="padding:2px 4px;font-size:0.5rem;text-align:center">'+invHtml+'</td></tr>';
-    }).join('') : '<tr><td colspan="6" style="text-align:center;color:#999;padding:10px;font-size:0.6rem">暂无</td></tr>';
+    var detailRows = '';
+    if (sorted.length) {
+      var lastCat = '', catTotal = 0, catStart = true;
+      sorted.forEach(function(r, idx){
+        var cat = r.category||'其他';
+        if (cat !== lastCat && !catStart) {
+          // Subtotal for previous category
+          detailRows += '<tr style="border-top:1px dashed rgba(255,255,255,0.15)"><td colspan="5" style="padding:3px 8px;font-size:0.6rem;font-weight:700;color:'+cc+';text-align:right">小计 ('+lastCat+')</td><td style="padding:3px 8px;font-size:0.65rem;font-weight:700;color:#fff;text-align:center">'+formatNum(catTotal)+'</td></tr>';
+          catTotal = 0;
+        }
+        catStart = false;
+        catTotal += r.amount||0;
+        lastCat = cat;
+        var inv = r.invoices; var invHtml = '—'; if(inv && inv.length){try{var f=typeof inv==='string'?JSON.parse(inv):inv;if(f.length)invHtml=f.map(function(x){return '<span class="invoice-link" onclick="previewFile(\''+encodeURIComponent(x)+'\')">📎</span>';}).join('');}catch(e){}}
+        detailRows += '<tr><td style="padding:2px 6px;font-size:0.55rem;color:'+cc+'">'+(r.category||'')+'</td><td style="padding:2px 6px;font-size:0.58rem">'+(r.date||'')+'</td><td style="padding:2px 6px;font-size:0.58rem">'+(r.item||'')+'</td><td class="amount" style="text-align:right;padding:2px 8px;font-size:0.6rem">'+formatNum(r.amount)+'</td><td style="padding:2px 6px;font-size:0.5rem;color:#888">'+(r.note||'')+'</td><td style="padding:2px 4px;font-size:0.5rem;text-align:center">'+invHtml+'</td></tr>';
+        // Last item - show final subtotal
+        if (idx === sorted.length - 1) {
+          detailRows += '<tr style="border-top:1px dashed rgba(255,255,255,0.15)"><td colspan="5" style="padding:3px 8px;font-size:0.6rem;font-weight:700;color:'+cc+';text-align:right">小计 ('+cat+')</td><td style="padding:3px 8px;font-size:0.65rem;font-weight:700;color:#fff;text-align:center">'+formatNum(catTotal)+'</td></tr>';
+        }
+      });
+    } else {
+      detailRows = '<tr><td colspan="6" style="text-align:center;color:#999;padding:10px;font-size:0.6rem">暂无</td></tr>';
+    }
 
     var detailHtml = '<div class="detail" style="background:#1a1a2e;color:#fff">' +
       '<div class="detail-inner" style="padding:6px">' +
