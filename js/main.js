@@ -443,7 +443,7 @@ function renderTempMonthCards() {
   if (!keys.length) { container.innerHTML="<div style=\"text-align:center;padding:40px;color:#999\">\u6682\u65e0\u6570\u636e</div>"; return; }
   var tabs = [];
   if (md["2026-03"] && md["2026-04"]) {
-    tabs.push({label:"2026\u5e743-4\u6708", d:{w:md["2026-03"].w.concat(md["2026-04"].w), l:md["2026-03"].l.concat(md["2026-04"].l)}});
+    tabs.push({label:"2026\u5e744\u6708", d:{w:md["2026-03"].w.concat(md["2026-04"].w), l:md["2026-03"].l.concat(md["2026-04"].l)}});
     keys = keys.filter(function(k){ return k!=="2026-03"&&k!=="2026-04"; });
   }
   keys.forEach(function(k){ tabs.push({label:k.replace("-","\u5e74")+"\u6708", d:md[k]}); });
