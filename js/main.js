@@ -428,6 +428,7 @@ function renderSalary() {
 
   // 劳务清单
   renderTempLabor();
+  renderTempWorkers();
 }
 
 function renderTempLabor() {
@@ -442,6 +443,27 @@ function renderTempLabor() {
   data.forEach(function(r) {
     body.innerHTML += '<tr><td>' + (r.date||'') + '</td><td>' + (r.headcount||'') + '人</td><td>' + (r.work_content||'') + '</td><td class="amount expense">' + formatNum(r.amount) + '</td><td>' + (r.notes||'') + '</td></tr>';
   });
+}
+
+function renderTempWorkers() {
+  var data = DataStore.tempWorkers || [];
+  var body = $('tempWorkersBody');
+  if (!body) return;
+  if (!data.length) { body.innerHTML = '<tr><td colspan="6" style="text-align:center;color:#999;padding:20px">暂无数据</td></tr>'; return; }
+  // Group by name, show 3月 and 4月 as columns
+  var map = {};
+  data.forEach(function(r){
+    if (!map[r.name]) map[r.name] = {name: r.name, id_card: r.id_card || '', m3: 0, m4: 0};
+    if (r.month === '2026-03') map[r.name].m3 = r.amount;
+    if (r.month === '2026-04') map[r.name].m4 = r.amount;
+  });
+  var list = Object.keys(map).map(function(k){ return map[k]; });
+  var idx = 0;
+  body.innerHTML = list.map(function(p){
+    idx++;
+    var total = (p.m3||0) + (p.m4||0);
+    return '<tr><td>' + idx + '</td><td>' + p.name + '</td><td style="font-size:0.6rem;font-family:monospace">' + (p.id_card||'') + '</td><td class="amount" style="text-align:center">' + (p.m3 > 0 ? '¥' + p.m3.toLocaleString() : '—') + '</td><td class="amount" style="text-align:center">' + (p.m4 > 0 ? '¥' + p.m4.toLocaleString() : '—') + '</td><td class="amount" style="text-align:center;font-weight:700">¥' + total.toLocaleString() + '</td></tr>';
+  }).join('');
 }
 
 // ⑩ 基地支出
@@ -1564,7 +1586,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
   // 从公共API加载数据（无需登录，确保数据最新）
   showLoading(true);
-    var pubSections = ['capital','bankFlow','pettyDraw','pettyWrite','pettyCash','bankAccounts','contracts','companyInfo','receivable','asset','management','salary','baseExpense','farmerLedger','seedlingBill','materialsBill','tempLabor'];
+    var pubSections = ['capital','bankFlow','pettyDraw','pettyWrite','pettyCash','bankAccounts','contracts','companyInfo','receivable','asset','management','salary','baseExpense','farmerLedger','seedlingBill','materialsBill','tempLabor','tempWorkers'];
   var pubLoaded = 0;
   pubSections.forEach(function(s) {
     var xhr = new XMLHttpRequest();
@@ -2210,7 +2232,7 @@ function confirmFrontImport() {
 
 function saveFrontData() {
   showToast('⏳ 保存中...', 'info');
-  var sections = ['capital','bankFlow','pettyDraw','pettyWrite','reimburse','receivable','asset','management','salary','baseExpense','tempLabor'];
+  var sections = ['capital','bankFlow','pettyDraw','pettyWrite','reimburse','receivable','asset','management','salary','baseExpense','tempLabor','tempWorkers'];
   var done = 0, total = sections.length;
   var apiBase = (typeof API_BASE !== 'undefined' ? API_BASE : (window.location.pathname.startsWith('/finance/') ? '/finance' : ''));
   sections.forEach(function(s) {

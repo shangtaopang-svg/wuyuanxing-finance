@@ -132,6 +132,10 @@ async function initDB() {
     work_content TEXT DEFAULT '', amount REAL DEFAULT 0,
     notes TEXT DEFAULT '', month TEXT DEFAULT ''
   )`);
+  // 临时工工资明细（按人）
+  db.run(`CREATE TABLE IF NOT EXISTS temp_workers (
+    id INTEGER PRIMARY KEY, name TEXT, id_card TEXT, month TEXT, amount REAL DEFAULT 0
+  )`);
 
   // 插入默认管理员
   const users = db.exec("SELECT COUNT(*) as c FROM users");
@@ -225,6 +229,7 @@ const TABLE_MAP = {
   management: { table: 'management', fields: ['date','category','amount','summary','invoices'] },
   salary: { table: 'salary', fields: ['month','name','position','amount','pay_date','voucher'] },
   tempLabor: { table: 'temp_labor', fields: ['date','headcount','work_content','amount','notes','month'] },
+  tempWorkers: { table: 'temp_workers', fields: ['name','id_card','month','amount'] },
   baseExpense: { table: 'base_expense', fields: ['date','base','item','amount','note','invoices'] },
   companyInfo: { table: 'company_info', fields: ['field_name','field_value'] },
   contracts: { table: 'contracts', fields: ['date','contract_name','party','amount','status','note'] },
@@ -337,12 +342,13 @@ const PUBLIC_SECTIONS = {
   seedlingBill: { fields: ["seq","name","phone","area","bags","price_per_bag","weight_per_bag","total_amount","prepaid","unpaid","is_total","is_subtotal"] },
   materialsBill: { fields: ["seq","name","phone","fertilizer_a","fertilizer_b","herbicide","sealant","pesticide","total_amount","paid","unpaid","notes","is_total","is_subtotal"] },
   tempLabor: { fields: ["date","headcount","work_content","amount","notes","month"] },
+  tempWorkers: { fields: ["name","id_card","month","amount"] },
 };
 Object.keys(PUBLIC_SECTIONS).forEach(function(key) {
   app.get('/api/public/' + key, function(req, res) {
     try {
       var cfg = PUBLIC_SECTIONS[key];
-      var table = key === 'incomeExpense' ? 'income_expense' : key === 'pettyCash' || key === 'pettyDraw' || key === 'pettyWrite' ? 'petty_cash' : key === "baseExpense" ? "base_expense" : key === "bankFlow" ? "bank_flow" : key === "companyInfo" ? "company_info" : key === "bankAccounts" ? "bank_accounts" : key === "farmerLedger" ? "farmer_ledger" : key === "seedlingBill" ? "seedling_bill" : key === "materialsBill" ? "materials_bill" : key === "tempLabor" ? "temp_labor" : key;
+      var table = key === 'incomeExpense' ? 'income_expense' : key === 'pettyCash' || key === 'pettyDraw' || key === 'pettyWrite' ? 'petty_cash' : key === "baseExpense" ? "base_expense" : key === "bankFlow" ? "bank_flow" : key === "companyInfo" ? "company_info" : key === "bankAccounts" ? "bank_accounts" : key === "farmerLedger" ? "farmer_ledger" : key === "seedlingBill" ? "seedling_bill" : key === "materialsBill" ? "materials_bill" : key === "tempLabor" ? "temp_labor" : key === "tempWorkers" ? "temp_workers" : key;
       var sql = "SELECT " + cfg.fields.join(',') + " FROM " + table; if (key === 'pettyDraw') sql += " WHERE type='领用'"; else if (key === 'pettyWrite') sql += " WHERE type='核销'"; var data = query(sql + " ORDER BY id");
       res.json(data);
     } catch(e) { res.json([]); }

@@ -368,9 +368,12 @@ function showToast(msg, type) {
         <p style="font-size:0.65rem;color:#bbb;margin:0 0 6px;">财务记账 —— 实际领款记录</p>
         <table class="data-table" style="font-size:0.72rem"><thead><tr><th>月份</th><th>领款人</th><th>岗位</th><th>金额</th><th>发放日期</th><th>凭证</th></tr></thead><tbody id="salaryTempBody"></tbody></table>
 
-        <h4 style="font-size:0.78rem;color:#8a7a6a;margin:16px 0 4px;">📋 劳务清单</h4>
-        <p style="font-size:0.65rem;color:#bbb;margin:0 0 6px;">实际干活记录 · 120元/人/天</p>
-        <table class="data-table" style="font-size:0.72rem"><thead><tr><th>日期</th><th>人数</th><th>工作内容</th><th>金额</th><th>备注</th></tr></thead><tbody id="tempLaborBody"></tbody></table>
+        <h4 style="font-size:0.78rem;color:#8a7a6a;margin:16px 0 4px;">📋 劳务清单（明细）</h4>
+        <p style="font-size:0.65rem;color:#bbb;margin:0 0 6px;">2026年3-4月 · 实际干活人员及工资</p>
+        <div style="overflow-x:auto">
+          <table class="data-table" style="font-size:0.65rem;min-width:600px"><thead><tr><th style="width:35px">序号</th><th>姓名</th><th>身份证号码</th><th style="width:65px">3月</th><th style="width:65px">4月</th><th style="width:65px">合计</th></tr></thead><tbody id="tempWorkersBody"></tbody></table>
+        </div>
+        <p style="font-size:0.7rem;color:#999;margin:4px 0 0;text-align:right">3月合计：¥51,292 &nbsp; 4月合计：¥89,280 &nbsp; <strong>总计：¥140,572</strong></p>
       </div>
 
       <div class="table-empty" id="empty9" style="display:none"><span class="empty-icon">📭</span><span class="empty-text">暂无数据</span></div>
