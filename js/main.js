@@ -546,8 +546,23 @@ function openBaseFull(base, color, total, itemsJson) {
         '<tbody>' + catRows + '<tr style="font-weight:700;background:'+color+'22"><td style="padding:6px 12px;font-size:0.8rem">合计</td><td class="amount" style="padding:6px 12px;font-size:0.85rem;text-align:right">'+formatNum(total)+'</td><td style="padding:6px 12px;font-size:0.8rem;text-align:center">100%</td></tr></tbody>' +
       '</table>' +
     '</div></div>' +
-    '<h4 style="font-size:0.85rem;color:'+color+';margin:0 0 8px">📋 支出明细</h4>' +
-    '<div style="overflow-x:auto"><table class="data-table" style="font-size:0.72rem;width:100%"><thead><tr><th style="width:60px">类别</th><th style="width:80px">日期</th><th>项目</th><th style="width:70px">金额</th><th style="min-width:200px">说明</th><th style="width:40px">票据</th></tr></thead><tbody>' + detailRows + '</tbody></table></div>';
+    '<h4 style="font-size:0.85rem;color:'+color+';margin:16px 0 8px">📋 点击分类查看明细</h4>' +
+    '<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:8px">' +
+    cats.filter(function(c){return catTotals[c]>0;}).map(function(cat){
+      var bg = catColors[cat] || '#95a5a6';
+      var icon = {'土地流转':'🏞️','土地处理':'🚜','种苗采购':'🌱','种苗运输':'🚛','农资':'🧪','人工费用':'👷','其他':'📦'}[cat] || '📋';
+      var catItems = items.filter(function(r){return (r.category||'其他')===cat;});
+      var catAmt = catItems.reduce(function(s,r){return s+(r.amount||0);},0);
+      var json = encodeURIComponent(JSON.stringify(catItems.map(function(r){return{date:r.date,item:r.item,amount:r.amount,note:r.note,invoices:r.invoices};})));
+      return '<div style="background:'+bg+'11;border:1px solid '+bg+'44;border-radius:8px;cursor:pointer;text-align:center;padding:10px 6px;transition:all 0.2s" '+
+        'onclick="openCatDetail(\''+cat+'\',\''+bg+'\','+catAmt+',\''+json+'\',\''+(base||'')+'\')" '+
+        'onmouseover="this.style.transform=\'translateY(-2px)\';this.style.boxShadow=\'0 4px 12px '+bg+'33\'" '+
+        'onmouseout="this.style.transform=\'\';this.style.boxShadow=\'\'">'+
+        '<div style="font-size:1.3rem">'+icon+'</div>'+
+        '<div style="font-size:0.65rem;font-weight:700;color:'+bg+';margin-top:4px">'+cat+'</div>'+
+        '<div style="font-size:0.78rem;font-weight:800;color:#1a1a1a;margin-top:2px">'+formatNum(catAmt)+'</div>'+
+        '<div style="font-size:0.5rem;color:#888;margin-top:2px">'+(total>0?(catAmt/total*100).toFixed(1)+'%':'')+'</div></div>';
+    }).join('') + '</div>';
 
   modal.style.display = 'block';
   overlay.style.display = 'block';
