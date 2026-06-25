@@ -518,7 +518,8 @@ function openBaseFull(base, color, total, itemsJson) {
     return '<tr><td style="padding:6px 12px;font-size:0.8rem;border-bottom:1px solid #f0ede8"><span style="display:inline-block;width:10px;height:10px;border-radius:2px;background:'+(catColors[c]||'#95a5a6')+';margin-right:8px"></span>'+c+'</td><td class="amount" style="padding:6px 12px;font-size:0.85rem;text-align:right;border-bottom:1px solid #f0ede8">'+formatNum(catTotals[c])+'</td><td style="padding:6px 12px;font-size:0.75rem;text-align:center;color:#888;border-bottom:1px solid #f0ede8">'+(total>0?(catTotals[c]/total*100).toFixed(1)+'%':'')+'</td></tr>';
   }).join('');
 
-  var sortedI = items.slice().sort(function(a,b){ return (a.category||'').localeCompare(b.category||''); });
+  var cats = ['土地流转','土地处理','种苗采购','种苗运输','化肥农药','人工费用','其他'];
+  var sortedI = items.slice().sort(function(a,b){ var ai=cats.indexOf(a.category||'其他'),bi=cats.indexOf(b.category||'其他'); return ai-bi || ((a.date||'')>(b.date||'')?1:-1); });
   var detailRows = sortedI.map(function(r, i){
     var inv = r.invoices; var invHtml = '—'; if(inv && inv.length){try{var f=typeof inv==='string'?JSON.parse(inv):inv;if(f.length)invHtml=f.map(function(x){return '<span class="invoice-link" onclick="previewFile(\''+encodeURIComponent(x)+'\')">📎</span>';}).join('');}catch(e){}}
     return '<tr'+(i%2===0?' style="background:#fafafa"':'')+'><td style="padding:5px 8px;font-size:0.68rem;color:'+(catColors[r.category]||'#666')+';font-weight:600">'+(r.category||'')+'</td><td style="padding:5px 8px;font-size:0.72rem">'+(r.date||'')+'</td><td style="padding:5px 8px;font-size:0.72rem">'+(r.item||'')+'</td><td class="amount" style="padding:5px 8px;font-size:0.75rem;text-align:right">'+formatNum(r.amount)+'</td><td style="padding:5px 8px;font-size:0.65rem;color:#888">'+(r.note||'')+'</td><td style="padding:5px 8px;text-align:center">'+invHtml+'</td></tr>';
@@ -595,7 +596,7 @@ function renderBaseExpense() {
     }).join('');
     catRows += '<tr style="background:rgba(255,255,255,0.05);font-weight:700"><td style="padding:2px 6px;font-size:0.6rem;color:#fff">合计</td><td class="amount" style="text-align:right;padding:2px 8px;font-size:0.7rem;color:#fff">'+formatNum(total)+'</td><td style="text-align:center;font-size:0.6rem;color:#fff">100%</td></tr>';
 
-    var sorted = items.slice().sort(function(a,b){ return (a.category||'').localeCompare(b.category||''); });
+    var sorted = items.slice().sort(function(a,b){ var ai=categories.indexOf(a.category||'其他'),bi=categories.indexOf(b.category||'其他'); return ai-bi || ((a.date||'')>(b.date||'')?1:-1); });
     var detailRows = sorted.length ? sorted.map(function(r){
       var inv = r.invoices; var invHtml = '—'; if(inv && inv.length){try{var f=typeof inv==='string'?JSON.parse(inv):inv;if(f.length)invHtml=f.map(function(x){return '<span class="invoice-link" onclick="previewFile(\''+encodeURIComponent(x)+'\')">📎</span>';}).join('');}catch(e){}}
       return '<tr><td style="padding:2px 6px;font-size:0.55rem;color:'+cc+'">'+(r.category||'')+'</td><td style="padding:2px 6px;font-size:0.58rem">'+(r.date||'')+'</td><td style="padding:2px 6px;font-size:0.58rem">'+(r.item||'')+'</td><td class="amount" style="text-align:right;padding:2px 8px;font-size:0.6rem">'+formatNum(r.amount)+'</td><td style="padding:2px 6px;font-size:0.5rem;color:#888">'+(r.note||'')+'</td><td style="padding:2px 4px;font-size:0.5rem;text-align:center">'+invHtml+'</td></tr>';
