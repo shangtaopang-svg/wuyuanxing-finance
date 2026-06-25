@@ -229,7 +229,7 @@ const TABLE_MAP = {
   management: { table: 'management', fields: ['date','category','amount','summary','invoices'] },
   salary: { table: 'salary', fields: ['month','name','position','amount','pay_date','voucher'] },
   tempLabor: { table: 'temp_labor', fields: ['date','headcount','work_content','amount','notes','month'] },
-  tempWorkers: { table: 'temp_workers', fields: ['name','id_card','month','amount'] },
+  tempWorkers: { table: 'temp_workers', fields: ['name','id_card','month','amount','notes'] },
   baseExpense: { table: 'base_expense', fields: ['date','base','item','amount','note','invoices'] },
   companyInfo: { table: 'company_info', fields: ['field_name','field_value'] },
   contracts: { table: 'contracts', fields: ['date','contract_name','party','amount','status','note'] },
@@ -342,7 +342,7 @@ const PUBLIC_SECTIONS = {
   seedlingBill: { fields: ["seq","name","phone","area","bags","price_per_bag","weight_per_bag","total_amount","prepaid","unpaid","is_total","is_subtotal"] },
   materialsBill: { fields: ["seq","name","phone","fertilizer_a","fertilizer_b","herbicide","sealant","pesticide","total_amount","paid","unpaid","notes","is_total","is_subtotal"] },
   tempLabor: { fields: ["date","headcount","work_content","amount","notes","month"] },
-  tempWorkers: { fields: ["name","id_card","month","amount"] },
+  tempWorkers: { fields: ["name","id_card","month","amount","notes"] },
 };
 Object.keys(PUBLIC_SECTIONS).forEach(function(key) {
   app.get('/api/public/' + key, function(req, res) {

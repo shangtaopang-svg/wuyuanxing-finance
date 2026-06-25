@@ -461,16 +461,16 @@ function switchTempTab(idx) {
 function buildTabContent(d, label) {
   var w = d.w || [], l = d.l || [];
   var total = 0, wm = {};
-  w.forEach(function(r){ total += r.amount||0; if(!wm[r.name]) wm[r.name]={name:r.name,card:r.id_card||"",total:0}; wm[r.name].total += r.amount||0; });
+  w.forEach(function(r){ total += r.amount||0; if(!wm[r.name]) wm[r.name]={name:r.name,card:r.id_card||"",total:0,note:r.notes||""}; wm[r.name].total += r.amount||0; if(r.notes) wm[r.name].note = r.notes; });
   var wk = Object.keys(wm);
-  var wr = wk.map(function(k,i){ var p=wm[k]; return "<tr><td>"+(i+1)+"</td><td>"+p.name+"</td><td style=\"font-family:monospace;font-size:0.6rem\">"+p.card+"</td><td class=\"amount\" style=\"text-align:center\">"+formatNum(p.total)+"</td></tr>"; }).join("");
+  var wr = wk.map(function(k,i){ var p=wm[k]; var note = p.note||""; return "<tr><td>"+(i+1)+"</td><td>"+p.name+"</td><td style=\"font-family:monospace;font-size:0.6rem\">"+p.card+"</td><td class=\"amount\" style=\"text-align:center\">"+formatNum(p.total)+"</td><td style=\"font-size:0.55rem;color:#888;max-width:150px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap\" title=\""+note+"\">"+(note||"")+"</td></tr>"; }).join("");
   var la = 0; l.forEach(function(r){ la += r.amount||0; });
   var lr = l.length ? l.map(function(r){ return "<tr><td>"+(r.date||"")+"</td><td>"+(r.headcount||"")+"</td><td>"+(r.work_content||"")+"</td><td class=\"amount\">"+formatNum(r.amount)+"</td><td>"+(r.notes||"")+"</td></tr>"; }).join("") : "<tr><td colspan=\"5\" style=\"text-align:center;color:#999;padding:20px\">\u6682\u65e0\u8bb0\u5f55</td></tr>";
   return "<div style=\"border:1px solid #b8860b;border-radius:8px;overflow:hidden;background:#fefcf5\">" +
     "<div style=\"background:#b8860b;color:#fff;padding:6px 12px;font-size:0.78rem;font-weight:600\">\u{1f4c5} "+label+"</div>" +
     "<div style=\"padding:8px 10px 4px\">" +
       "<div style=\"display:flex;align-items:center;justify-content:space-between;margin-bottom:4px\"><span style=\"font-size:0.72rem;font-weight:600;color:#b8860b\">\u{1f4c4} \u5de5\u8d44\u5355\uff08\u8d22\u52a1\u6570\u636e\uff09</span><span style=\"font-size:0.65rem;color:#999\">"+wk.length+"\u4eba \u00b7 \u5408\u8ba1"+formatNum(total)+"</span></div>" +
-      "<div style=\"overflow-x:auto;max-height:300px;overflow-y:auto;border:1px solid #e8e5e0;border-radius:6px\"><table class=\"data-table\" style=\"font-size:0.68rem;min-width:450px\"><thead><tr><th style=\"width:35px\">\u5e8f\u53f7</th><th>\u59d3\u540d</th><th>\u8eab\u4efd\u8bc1\u53f7\u7801</th><th style=\"width:80px\">\u91d1\u989d</th></tr></thead><tbody>"+wr+"</tbody></table></div>" +
+      "<div style=\"overflow-x:auto;max-height:300px;overflow-y:auto;border:1px solid #e8e5e0;border-radius:6px\"><table class=\"data-table\" style=\"font-size:0.68rem;min-width:450px\"><thead><tr><th style=\"width:35px\">\u5e8f\u53f7</th><th>\u59d3\u540d</th><th>\u8eab\u4efd\u8bc1\u53f7\u7801</th><th style=\"width:80px\">\u91d1\u989d</th><th>\u5907\u6ce8</th></tr></thead><tbody>"+wr+"</tbody></table></div>" +
     "</div>" +
     "<div style=\"padding:8px 10px 10px\">" +
       "<div style=\"display:flex;align-items:center;justify-content:space-between;margin-bottom:4px\"><span style=\"font-size:0.72rem;font-weight:600;color:#b8860b\">\u{1f4cb} \u52b3\u52a1\u6e05\u5355</span><span style=\"font-size:0.65rem;color:#999\">\u5408\u8ba1"+formatNum(la)+"</span></div>" +
