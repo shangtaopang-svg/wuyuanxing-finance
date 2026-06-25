@@ -690,19 +690,67 @@ function renderChart5b() {
 
 // ⑥ 应收款图表
 function renderChart6a() {
-  var data = DataStore.receivable || [];
-  var statuses = {};
-  var capColors = {"任海涛":"#e8f4fd","庞尚韬":"#fef2f2","吴生成":"#f0faf4","应红林":"#fdf6e3","陈洪斌":"#f5e6f0"};
-  data.forEach(function(r) { statuses[r.status] = (statuses[r.status]||0) + (r.amount||0); });
-  makeChart('chart6a', 'doughnut', Object.keys(statuses), [
-    { data: Object.keys(statuses).map(function(k){return statuses[k];}), backgroundColor: ['#e74c3c','#f39c12','#27ae60'], borderColor: '#000', borderWidth: 2 }
+  // 从种苗和农资数据计算应收总额
+  var slData = DataStore.seedlingBill || [];
+  var mtData = DataStore.materialsBill || [];
+  var totalSl = 0, totalMt = 0;
+  slData.forEach(function(r){ if(!r.is_total) totalSl += r.unpaid||0; });
+  mtData.forEach(function(r){ if(!r.is_total) totalMt += r.unpaid||0; });
+  var grand = totalSl + totalMt;
+  var pctSl = grand > 0 ? (totalSl/grand*100).toFixed(1) : 0;
+  var pctMt = grand > 0 ? (totalMt/grand*100).toFixed(1) : 0;
+  makeChart('chart6a', 'doughnut', [
+    '种苗款 ¥' + totalSl.toLocaleString(),
+    '农资款 ¥' + totalMt.toLocaleString()
+  ], [
+    { data: [totalSl, totalMt], backgroundColor: ['#27ae60','#f39c12'], borderColor: '#fff', borderWidth: 3 }
   ]);
+  var chart = charts.chart6a;
+  if (chart) {
+    try {
+      chart.options.plugins.legend.labels.font = { size: 13, weight: 'bold' };
+      chart.options.plugins.datalabels = {
+        display: true,
+        formatter: function(v, ctx){
+          var pcts = [pctSl, pctMt];
+          return pcts[ctx.dataIndex] + '%\n¥' + v.toLocaleString();
+        },
+        color: '#fff', font: { weight: 'bold', size: 13 },
+        anchor: 'center', align: 'center', textAlign: 'center'
+      };
+      chart.update();
+    } catch(e){}
+  }
 }
 function renderChart6b() {
   var data = DataStore.receivable || [];
-  makeChart('chart6b', 'bar', data.map(function(r){return r.date.slice(5);}), [
-    { data: data.map(function(r){return r.amount||0;}), backgroundColor: '#e74c3c', borderColor: '#000', borderWidth: 2 }
-  ]);
+  var items = data.filter(function(r){ return r.amount > 0; });
+  if (!items.length) return;
+  // 按金额从大到小排序
+  items.sort(function(a,b){ return (b.amount||0) - (a.amount||0); });
+  makeChart('chart6b', 'bar', items.map(function(r){ return r.party; }), [
+    { data: items.map(function(r){ return r.amount||0; }), backgroundColor: '#e74c3c', borderColor: '#c0392b', borderWidth: 1 }
+  ], {
+    plugins: {
+      tooltip: { callbacks: { label: function(ctx){ return '¥' + (ctx.raw||0).toLocaleString(); }}}
+    },
+    scales: {
+      x: { grid: { display: false }, ticks: { font: { size: 9 } } },
+      y: { ticks: { callback: function(v){ return '¥' + (v/1000).toFixed(0) + 'k'; }, font: { size: 9 } } }
+    }
+  });
+  // 金额标签
+  var chart = charts.chart6b;
+  if (chart) {
+    try {
+      chart.options.plugins.datalabels = {
+        display: function(ctx){ return ctx.raw > 0; },
+        formatter: function(v){ return '¥' + v.toLocaleString(); },
+        color: '#1a1a1a', font: { weight: 'bold', size: 9 }, anchor: 'end', align: 'end'
+      };
+      chart.update();
+    } catch(e){}
+  }
 }
 
 // ⑦ 固定资产图表
