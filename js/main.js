@@ -674,7 +674,7 @@ function renderBaseExpense() {
   if (agentData.length) {
     var agentAccent = '#8e44ad';
     var agentRows = agentData.map(function(r, idx){
-      return '<tr'+(idx%2===0?' style="background:#fafafa"':'')+'><td style="padding:4px 8px;font-size:0.68rem">'+escapeHtml(r.item||'')+'</td><td style="padding:4px 8px;font-size:0.65rem">'+(r.quantity||'')+'</td><td style="padding:4px 8px;font-size:0.65rem">¥'+(r.unit_price||0).toFixed(2)+'</td><td class="amount" style="padding:4px 8px;font-size:0.7rem;text-align:right">'+(r.amount?formatNum(r.amount):'—')+'</td><td class="amount" style="padding:4px 8px;font-size:0.7rem;text-align:right;font-weight:700;color:'+agentAccent+'">'+(r.subtotal?formatNum(r.subtotal):'—')+'</td><td style="padding:4px 8px;font-size:0.58rem;color:#888">'+(r.notes||'')+'</td></tr>';
+      return '<tr'+(idx%2===0?' style="background:#fafafa"':'')+'><td style="padding:4px 8px;font-size:0.68rem">'+(r.item||'')+'</td><td style="padding:4px 8px;font-size:0.65rem">'+(r.quantity||'')+'</td><td style="padding:4px 8px;font-size:0.65rem">¥'+(r.unit_price||0).toFixed(2)+'</td><td class="amount" style="padding:4px 8px;font-size:0.7rem;text-align:right">'+(r.amount?formatNum(r.amount):'—')+'</td><td class="amount" style="padding:4px 8px;font-size:0.7rem;text-align:right;font-weight:700;color:'+agentAccent+'">'+(r.subtotal?formatNum(r.subtotal):'—')+'</td><td style="padding:4px 8px;font-size:0.58rem;color:#888">'+(r.notes||'')+'</td></tr>';
     }).join('');
     var agentTotal = agentData.reduce(function(s,r){return s+(r.subtotal||0);},0);
     html += '<div class="base-card" style="border:1px solid '+agentAccent+'44;box-shadow:0 2px 8px '+agentAccent+'11">' +
