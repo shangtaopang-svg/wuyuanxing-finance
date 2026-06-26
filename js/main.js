@@ -692,6 +692,7 @@ function openCatDetail(cat, color, total, itemsJson, baseName) {
       '<th style="'+bc+';padding:3px 4px;font-weight:400;font-size:0.62rem">支付方式（支付方） | 支付日期 | 接收方 | 特别说明</th>' +
       '<th style="width:40px;'+bc+';padding:3px 4px">票据</th>' +
       '</tr></thead><tbody>' + rows + '</tbody></table></div>';
+    if (EDIT_MODE && typeof enableFileUploadOnFields === 'function') setTimeout(enableFileUploadOnFields, 100);
   }
   if (chartHtml) {
     body.innerHTML = '<h4 style="font-size:0.9rem;color:'+color+';margin:0 0 12px">'+cat+' · '+baseName+' · 合计'+formatNum(total)+'</h4>' +
