@@ -673,7 +673,7 @@ function openCatDetail(cat, color, total, itemsJson, baseName) {
 
   if (!chartHtml) {
     var rows = items.map(function(r, i){
-      var n = (r.note||'').replace(/公司账户/g,'🏦').replace(/庞尚韬备用金/g,'💰').replace(/任海涛/g,'👤');
+      var n = (r.note||'').replace(/公司账户/g,'🏦公司账户').replace(/庞尚韬备用金/g,'💰庞备用金').replace(/任海涛/g,'👤任海涛');
       return '<tr'+(i%2===0?' style="background:#fafafa"':'')+'>' +
         '<td style="padding:4px 6px;font-size:0.7rem;'+bc+'">'+(r.date||'')+'</td>' +
         '<td style="padding:4px 6px;font-size:0.7rem;'+bc+'">'+(r.item||'')+'</td>' +
@@ -720,7 +720,7 @@ function closeBaseFull() {
 function buildCatSection(cat, items, catTotal, cc, grandTotal) {
   var rows = items.map(function(r){
     var inv = r.invoices; var invHtml = ''; if(inv && inv.length){try{var f=typeof inv==='string'?JSON.parse(inv):inv;if(f.length)invHtml=' <span class="invoice-link" onclick="previewFile(\''+encodeURIComponent(f[0])+'\')">\u{1f4ce}</span>';}catch(e){}}
-    var note = (r.note||'').replace(/公司账户/g,'\u{1f3e6}').replace(/庞尚韬备用金/g,'\u{1f4b0}').replace(/任海涛/g,'\u{1f464}');
+    var note = (r.note||'').replace(/公司账户/g,'\u{1f3e6}公司').replace(/庞尚韬备用金/g,'\u{1f4b0}庞').replace(/任海涛/g,'\u{1f464}任');
     return '<div style="display:flex;align-items:center;padding:2px 0;border-bottom:1px solid rgba(255,255,255,0.04);font-size:0.5rem;gap:4px">' +
       '<span style="min-width:48px;color:#888">'+(r.date||'')+'</span>' +
       '<span style="flex:1;color:#ddd">'+(r.item||'')+'</span>' +
