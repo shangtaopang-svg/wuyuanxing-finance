@@ -597,12 +597,23 @@ function openCatDetail(cat, color, total, itemsJson, baseName) {
   var body = document.getElementById('baseFullBody');
   if (!modal || !body) return;
   title.textContent = cat + ' · ' + baseName;
+  var bc = 'border:1px solid #e0e0e0';
   var rows = items.map(function(r, i){
     var n = (r.note||'').replace(/公司账户/g,'🏦').replace(/庞尚韬备用金/g,'💰').replace(/任海涛/g,'👤');
-    return '<tr'+(i%2===0?' style="background:#fafafa"':'')+'><td style="padding:5px 8px;font-size:0.72rem">'+(r.date||'')+'</td><td style="padding:5px 8px;font-size:0.72rem">'+(r.item||'')+'</td><td class="amount" style="padding:5px 8px;font-size:0.75rem;text-align:right">'+formatNum(r.amount)+'</td><td style="padding:5px 8px;font-size:0.65rem;color:#888">'+n+'</td></tr>';
+    return '<tr'+(i%2===0?' style="background:#fafafa"':'')+'>' +
+      '<td style="padding:4px 6px;font-size:0.7rem;'+bc+'">'+(r.date||'')+'</td>' +
+      '<td style="padding:4px 6px;font-size:0.7rem;'+bc+'">'+(r.item||'')+'</td>' +
+      '<td class="amount" style="padding:4px 6px;font-size:0.72rem;text-align:right;'+bc+'">'+formatNum(r.amount)+'</td>' +
+      '<td style="padding:4px 6px;font-size:0.62rem;color:#666;'+bc+';line-height:1.4">'+n+'</td></tr>';
   }).join('');
   body.innerHTML = '<h4 style="font-size:0.9rem;color:'+color+';margin:0 0 12px">'+cat+' · '+baseName+' · 合计'+formatNum(total)+'</h4>' +
-    '<div style="overflow-x:auto"><table class="data-table" style="font-size:0.72rem;width:100%"><thead><tr><th style="width:80px">日期</th><th>项目</th><th style="width:80px">金额</th><th>说明</th></tr></thead><tbody>' + rows + '</tbody></table></div>';
+    '<div style="overflow-x:auto"><table class="data-table" style="font-size:0.72rem;width:100%;border-collapse:collapse">' +
+    '<thead><tr>' +
+    '<th style="width:70px;'+bc+';padding:5px 6px">日期</th>' +
+    '<th style="'+bc+';padding:5px 6px">项目</th>' +
+    '<th style="width:65px;'+bc+';padding:5px 6px;text-align:right">金额</th>' +
+    '<th style="'+bc+';padding:5px 6px">支付方式（支付方） · 支付日期 · 接收方 · 特别说明</th>' +
+    '</tr></thead><tbody>' + rows + '</tbody></table></div>';
   modal.style.display = 'block';
   overlay.style.display = 'block';
 }
