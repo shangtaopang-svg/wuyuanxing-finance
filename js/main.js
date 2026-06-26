@@ -619,22 +619,24 @@ function openCatDetail(cat, color, total, itemsJson, baseName) {
   // 工种分类（仅人工费用）
   var chartHtml = '', tableHtml = '', cardsHtml = '';
   if (cat === '人工费用' && items.length > 1) {
+    // Pre-classify each item
+    function classifyItem(r) {
+      var n = r.item||'';
+      if (n.indexOf('三轮车') >= 0) return '三轮车人工';
+      if (n.indexOf('育苗') >= 0) return '育苗';
+      if (n.indexOf('打药') >= 0 && n.indexOf('拔') < 0) return '打药';
+      if (n.indexOf('拔') >= 0 || n.indexOf('除草') >= 0) return '拔（除）草';
+      if (n.indexOf('采挖') >= 0) return '采挖';
+      if (n.indexOf('种植') >= 0 || n.indexOf('栽培') >= 0) return '种植';
+      if (n.indexOf('拖拉机') >= 0 || n.indexOf('机械') >= 0) return '机械作业';
+      if (n.indexOf('指导') >= 0 || n.indexOf('师傅') >= 0) return '技术指导';
+      if (n.indexOf('捡石头') >= 0) return '整地';
+      if (n.indexOf('工(') >= 0 || n.indexOf('亩×') >= 0) return '种植';
+      return '其他';
+    }
+    items.forEach(function(r){ r._wt = classifyItem(r); });
     var workTypes = {};
-    items.forEach(function(r){
-      var name = r.item||'';
-      var wt = '其他';
-      if (name.indexOf('三轮车') >= 0) wt = '三轮车人工';
-      else if (name.indexOf('育苗') >= 0) wt = '育苗';
-      else if (name.indexOf('打药') >= 0 && name.indexOf('拔') < 0) wt = '打药';
-      else if (name.indexOf('拔') >= 0 || name.indexOf('除草') >= 0) wt = '拔（除）草';
-      else if (name.indexOf('采挖') >= 0) wt = '采挖';
-      else if (name.indexOf('种植') >= 0 || name.indexOf('栽培') >= 0) wt = '种植';
-      else if (name.indexOf('拖拉机') >= 0 || name.indexOf('机械') >= 0) wt = '机械作业';
-      else if (name.indexOf('指导') >= 0 || name.indexOf('师傅') >= 0) wt = '技术指导';
-      else if (name.indexOf('捡石头') >= 0) wt = '整地';
-      else if (name.indexOf('工(') >= 0 || name.indexOf('亩×') >= 0) wt = '种植';
-      workTypes[wt] = (workTypes[wt]||0) + (r.amount||0);
-    });
+    items.forEach(function(r){ var w = r._wt; workTypes[w] = (workTypes[w]||0) + (r.amount||0); });
     var wtKeys = Object.keys(workTypes);
     if (wtKeys.length > 1) {
       var chartId2 = 'workTypeChart_' + Date.now();
@@ -650,20 +652,7 @@ function openCatDetail(cat, color, total, itemsJson, baseName) {
       cardsHtml = '<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-top:14px">' +
         wtKeys.map(function(k){
           var bg = wtColors[k]||'#95a5a6';
-          var wtItems = items.filter(function(r){
-            var n = r.item||'';
-            if (k === '三轮车人工') return n.indexOf('三轮车')>=0;
-            if (k === '育苗') return n.indexOf('育苗')>=0;
-            if (k === '打药') return n.indexOf('打药')>=0 && n.indexOf('拔')<0;
-            if (k === '拔（除）草') return n.indexOf('拔')>=0||n.indexOf('除草')>=0;
-            if (k === '采挖') return n.indexOf('采挖')>=0;
-            if (k === '种植') return n.indexOf('种植')>=0||n.indexOf('工(')>=0||n.indexOf('亩×')>=0;
-            if (k === '机械作业') return n.indexOf('拖拉机')>=0||n.indexOf('机械')>=0;
-            if (k === '整地') return n.indexOf('捡石头')>=0 && n.indexOf('机械')<0;
-            if (k === '技术指导') return n.indexOf('指导')>=0||n.indexOf('师傅')>=0;
-            if (k === '其他') return n.indexOf('其他：')>=0;
-            return false;
-          });
+          var wtItems = items.filter(function(r){ return r._wt === k; });
           var json = encodeURIComponent(JSON.stringify(wtItems.map(function(r){return{date:r.date,item:r.item,amount:r.amount,note:r.note,invoices:r.invoices};})));
           return '<div style="background:'+bg+'11;border:1px solid '+bg+'44;border-radius:8px;cursor:pointer;text-align:center;padding:12px 8px" '+
             'onclick="openCatDetail(\''+k+'\',\''+bg+'\','+workTypes[k]+',\''+json+'\',\''+baseName+'\')">'+
