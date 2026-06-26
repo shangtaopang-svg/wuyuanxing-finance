@@ -625,14 +625,17 @@ function openCatDetail(cat, color, total, itemsJson, baseName) {
   if (cat === '人工费用' && items.length > 1) {
     var workTypes = {};
     items.forEach(function(r){
-      var wt = (r.item||'').replace(/[\d\s\-\.\/]+/g,'').substring(0,4);
-      if (!wt) wt = '其他';
+      var name = r.item||'';
+      var wt = '其他';
+      if (name.indexOf('采挖') >= 0) wt = '采挖';
+      else if (name.indexOf('拔') >= 0 || name.indexOf('除草') >= 0 || name.indexOf('除草打药') >= 0) wt = '除草打药';
+      else if (name.indexOf('打药') >= 0) wt = '打药';
       workTypes[wt] = (workTypes[wt]||0) + (r.amount||0);
     });
     var wtKeys = Object.keys(workTypes);
     if (wtKeys.length > 1) {
       var chartId2 = 'workTypeChart_' + Date.now();
-      var wtColors = {'采挖':'#e74c3c','拔草':'#27ae60','除草':'#3498db','打药':'#f39c12','其他':'#95a5a6'};
+      var wtColors = {'采挖':'#e74c3c','除草打药':'#27ae60','打药':'#f39c12','其他':'#95a5a6'};
       chartExtra = '<div style="margin-bottom:12px;display:flex;gap:16px;align-items:center"><div style="width:120px;height:120px"><canvas id="'+chartId2+'"></canvas></div><div style="font-size:0.7rem;color:#888">按工种分类</div></div>';
       setTimeout(function(){
         makeChart(chartId2, 'doughnut', wtKeys, [
