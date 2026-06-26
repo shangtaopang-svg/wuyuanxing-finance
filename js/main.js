@@ -595,8 +595,12 @@ function historyBack() {
   if (_navStack.length > 0) _navStack.pop();
   if (_navStack.length > 0) {
     var prev = _navStack[_navStack.length - 1];
-    if (prev.type === 'base') {
+    if (prev.type === 'base' && prev.base) {
       openBaseFull(prev.base, prev.color, prev.total, prev.items, false);
+      return;
+    }
+    if (prev.type === 'cat' && prev.items) {
+      openCatDetail(prev.cat, prev.color, prev.total, prev.items, prev.baseName);
       return;
     }
   }
@@ -610,7 +614,7 @@ function openCatDetail(cat, color, total, itemsJson, baseName) {
   var body = document.getElementById('baseFullBody');
   if (!modal || !body) return;
   title.textContent = cat + ' · ' + baseName;
-  _navStack.push({type: 'cat', cat: cat});
+  _navStack.push({type: 'cat', cat: cat, color: color, total: total, items: itemsJson, baseName: baseName});
   var bc = 'border:1px solid #e0e0e0';
   // 工种分类（仅人工费用）
   var chartHtml = '', tableHtml = '', cardsHtml = '';
