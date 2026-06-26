@@ -683,7 +683,7 @@ function openCatDetail(cat, color, total, itemsJson, baseName) {
     body.innerHTML = '<h4 style="font-size:0.9rem;color:'+color+';margin:0 0 12px">'+cat+' · '+baseName+' · 合计'+formatNum(total)+'</h4>' +
       '<div style="overflow-x:auto"><table class="data-table" style="font-size:0.72rem;width:100%;border-collapse:collapse">' +
       '<thead>' +
-      '<tr><th colspan="3" style="'+bc+';padding:4px 6px;text-align:center;background:#f5f5f5">📋 明细</th><th style="'+bc+';padding:4px 6px;text-align:center;background:#f5f5f5;border-bottom:2px solid #ccc">📝 备注</th></tr>' +
+      '<tr><th colspan="3" style="'+bc+';padding:4px 6px;text-align:center;background:#f5f5f5;color:#1a1a1a">📋 明细</th><th style="'+bc+';padding:4px 6px;text-align:center;background:#f5f5f5;border-bottom:2px solid #ccc;color:#1a1a1a">📝 备注</th></tr>' +
       '<tr>' +
       '<th style="width:70px;'+bc+';padding:4px 6px">日期</th>' +
       '<th style="'+bc+';padding:4px 6px">项目</th>' +
