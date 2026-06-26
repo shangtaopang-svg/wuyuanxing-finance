@@ -673,21 +673,24 @@ function openCatDetail(cat, color, total, itemsJson, baseName) {
   if (!chartHtml) {
     var rows = items.map(function(r, i){
       var n = (r.note||'').replace(/公司账户/g,'🏦公司账户').replace(/庞尚韬备用金/g,'💰庞备用金').replace(/任海涛/g,'👤任海涛');
+      var inv = r.invoices; var invHtml = '—'; if(inv && inv.length){try{var f=typeof inv==='string'?JSON.parse(inv):inv;if(f.length)invHtml=f.map(function(x){return '<span class="invoice-link" onclick="previewFile(\''+encodeURIComponent(x)+'\')">📎</span>';}).join('');}catch(e){}}
       return '<tr'+(i%2===0?' style="background:#fafafa"':'')+'>' +
         '<td style="padding:4px 6px;font-size:0.7rem;'+bc+'">'+(r.date||'')+'</td>' +
         '<td style="padding:4px 6px;font-size:0.7rem;'+bc+'">'+(r.item||'')+'</td>' +
         '<td class="amount" style="padding:4px 6px;font-size:0.72rem;text-align:right;'+bc+'">'+formatNum(r.amount)+'</td>' +
-        '<td style="padding:4px 6px;font-size:0.62rem;color:#666;'+bc+';line-height:1.4">'+n+'</td></tr>';
+        '<td style="padding:4px 6px;font-size:0.62rem;color:#666;'+bc+';line-height:1.4">'+n+'</td>' +
+        '<td style="padding:4px 6px;font-size:0.55rem;text-align:center;'+bc+'">'+invHtml+'</td></tr>';
     }).join('');
     body.innerHTML = '<h4 style="font-size:0.9rem;color:'+color+';margin:0 0 12px">'+cat+' · '+baseName+' · 合计'+formatNum(total)+'</h4>' +
       '<div style="overflow-x:auto"><table class="data-table" style="font-size:0.72rem;width:100%;border-collapse:collapse">' +
       '<thead>' +
-      '<tr><th colspan="3" style="'+bc+';padding:4px 6px;text-align:center;background:#f5f5f5;color:#1a1a1a">📋 明细</th><th style="'+bc+';padding:4px 6px;text-align:center;background:#f5f5f5;border-bottom:2px solid #ccc;color:#1a1a1a">📝 备注</th></tr>' +
+      '<tr><th colspan="4" style="'+bc+';padding:4px 6px;text-align:center;background:#f5f5f5;color:#1a1a1a">📋 明细</th><th style="'+bc+';padding:4px 6px;text-align:center;background:#f5f5f5;border-bottom:2px solid #ccc;color:#1a1a1a">📎 票据</th></tr>' +
       '<tr>' +
       '<th style="width:70px;'+bc+';padding:4px 6px">日期</th>' +
       '<th style="'+bc+';padding:4px 6px">项目</th>' +
       '<th style="width:65px;'+bc+';padding:4px 6px;text-align:right">金额</th>' +
       '<th style="'+bc+';padding:3px 4px;font-weight:400;font-size:0.62rem">支付方式（支付方） | 支付日期 | 接收方 | 特别说明</th>' +
+      '<th style="width:40px;'+bc+';padding:3px 4px">票据</th>' +
       '</tr></thead><tbody>' + rows + '</tbody></table></div>';
   }
   if (chartHtml) {
