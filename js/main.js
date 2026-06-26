@@ -673,7 +673,10 @@ function openCatDetail(cat, color, total, itemsJson, baseName) {
   if (!chartHtml) {
     var rows = items.map(function(r, i){
       var n = (r.note||'').replace(/公司账户/g,'🏦公司账户').replace(/庞尚韬备用金/g,'💰庞备用金').replace(/任海涛/g,'👤任海涛');
-      var inv = r.invoices; var invHtml = '—'; if(inv && inv.length){try{var f=typeof inv==='string'?JSON.parse(inv):inv;if(f.length)invHtml=f.map(function(x){return '<span class="invoice-link" onclick="previewFile(\''+encodeURIComponent(x)+'\')">📎</span>';}).join('');}catch(e){}}
+      var inv = r.invoices; var fname = '';
+      if(inv && inv.length){try{var f=typeof inv==='string'?JSON.parse(inv):inv;if(f.length)fname=f[0];}catch(e){}}
+      var invHtml = fname ? '<span class="invoice-link" onclick="previewFile(\''+encodeURIComponent(fname)+'\')">📎</span>' : '—';
+      if (EDIT_MODE) invHtml += ' <button onclick="var inp=document.createElement(\'input\');inp.type=\'file\';inp.accept=\'.jpg,.jpeg,.png,.gif,.pdf\';inp.onchange=function(){if(!inp.files[0])return;var fd=new FormData();fd.append(\'file\',inp.files[0]);fd.append(\'password\',\'87700020\');var x=new XMLHttpRequest();x.open(\'POST\',(typeof API_BASE!==\'undefined\'?API_BASE:\'\')+\'/api/public/upload\',true);x.onload=function(){if(x.status===200&&x.responseText){var fn;try{fn=JSON.parse(x.responseText).filename;}catch(e){fn=inp.files[0].name;}window.location.reload();}};x.send(fd);};inp.click();" style="background:none;border:none;cursor:pointer;font-size:14px;padding:2px;opacity:0.6" title="上传票据">📤</button>';
       return '<tr'+(i%2===0?' style="background:#fafafa"':'')+'>' +
         '<td style="padding:4px 6px;font-size:0.7rem;'+bc+'">'+(r.date||'')+'</td>' +
         '<td style="padding:4px 6px;font-size:0.7rem;'+bc+'">'+(r.item||'')+'</td>' +
