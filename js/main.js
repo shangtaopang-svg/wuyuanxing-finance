@@ -620,7 +620,30 @@ function openCatDetail(cat, color, total, itemsJson, baseName) {
       '<td class="amount" style="padding:4px 6px;font-size:0.72rem;text-align:right;'+bc+'">'+formatNum(r.amount)+'</td>' +
       '<td style="padding:4px 6px;font-size:0.62rem;color:#666;'+bc+';line-height:1.4">'+n+'</td></tr>';
   }).join('');
+  // 人工费用工作类型分析图
+  var chartExtra = '';
+  if (cat === '人工费用' && items.length > 1) {
+    var workTypes = {};
+    items.forEach(function(r){
+      var wt = (r.item||'').replace(/[\d\s\-\.\/]+/g,'').substring(0,4);
+      if (!wt) wt = '其他';
+      workTypes[wt] = (workTypes[wt]||0) + (r.amount||0);
+    });
+    var wtKeys = Object.keys(workTypes);
+    if (wtKeys.length > 1) {
+      var chartId2 = 'workTypeChart_' + Date.now();
+      var wtColors = {'采挖':'#e74c3c','拔草':'#27ae60','除草':'#3498db','打药':'#f39c12','其他':'#95a5a6'};
+      chartExtra = '<div style="margin-bottom:12px;display:flex;gap:16px;align-items:center"><div style="width:120px;height:120px"><canvas id="'+chartId2+'"></canvas></div><div style="font-size:0.7rem;color:#888">按工种分类</div></div>';
+      setTimeout(function(){
+        makeChart(chartId2, 'doughnut', wtKeys, [
+          { data: wtKeys.map(function(k){return workTypes[k];}), backgroundColor: wtKeys.map(function(k){return wtColors[k]||'#95a5a6';}), borderColor: '#fff', borderWidth: 2 }
+        ]);
+      }, 200);
+    }
+  }
+
   body.innerHTML = '<h4 style="font-size:0.9rem;color:'+color+';margin:0 0 12px">'+cat+' · '+baseName+' · 合计'+formatNum(total)+'</h4>' +
+    chartExtra +
     '<div style="overflow-x:auto"><table class="data-table" style="font-size:0.72rem;width:100%;border-collapse:collapse">' +
     '<thead>' +
     '<tr><th colspan="3" style="'+bc+';padding:4px 6px;text-align:center;background:#f5f5f5">📋 明细</th><th style="'+bc+';padding:4px 6px;text-align:center;background:#f5f5f5;border-bottom:2px solid #ccc">📝 备注</th></tr>' +
