@@ -659,9 +659,9 @@ function openCatDetail(cat, color, total, itemsJson, baseName) {
             if (k === '采挖') return n.indexOf('采挖')>=0;
             if (k === '种植') return n.indexOf('种植')>=0||n.indexOf('工(')>=0||n.indexOf('亩×')>=0;
             if (k === '机械作业') return n.indexOf('拖拉机')>=0||n.indexOf('机械')>=0;
-            if (k === '整地') return n.indexOf('捡石头')>=0;
+            if (k === '整地') return n.indexOf('捡石头')>=0 && n.indexOf('机械')<0;
             if (k === '技术指导') return n.indexOf('指导')>=0||n.indexOf('师傅')>=0;
-            if (k === '其他') return true;
+            if (k === '其他') return n.indexOf('其他：')>=0;
             return false;
           });
           var json = encodeURIComponent(JSON.stringify(wtItems.map(function(r){return{date:r.date,item:r.item,amount:r.amount,note:r.note,invoices:r.invoices};})));
