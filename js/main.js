@@ -641,7 +641,7 @@ function openCatDetail(cat, color, total, itemsJson, baseName) {
     if (wtKeys.length > 1) {
       var chartId2 = 'workTypeChart_' + Date.now();
       var wtColors = {'打药':'#f39c12','拔（除）草':'#27ae60','育苗':'#3498db','采挖':'#e74c3c','三轮车人工':'#95a5a6','种植':'#2ecc71','机械作业':'#8B4513','技术指导':'#9b59b6','整地':'#D2691E','其他':'#95a5a6'};
-      chartHtml = '<div style="width:200px;height:200px;flex-shrink:0"><canvas id="'+chartId2+'" style="width:100%;height:100%"></canvas></div>';
+      chartHtml = '<div style="width:240px;height:220px;flex-shrink:0"><canvas id="'+chartId2+'" style="width:100%;height:100%"></canvas></div>';
       tableHtml = '<table style="width:100%;border-collapse:collapse;font-size:0.75rem"><tbody>' +
         wtKeys.map(function(k){
           var pct = total>0?(workTypes[k]/total*100).toFixed(1):0;
@@ -665,7 +665,7 @@ function openCatDetail(cat, color, total, itemsJson, baseName) {
         var wtLabels = wtKeys.map(function(k){ return k + ' ' + formatNum(workTypes[k]); });
         makeChart(chartId2, 'doughnut', wtLabels, [
           { data: wtKeys.map(function(k){return workTypes[k];}), backgroundColor: wtKeys.map(function(k){return wtColors[k]||'#95a5a6';}), borderColor: '#fff', borderWidth: 2 }
-        ], { plugins: { legend: { position: 'right', labels: { font: { size: 11, weight: 'bold' }, boxWidth: 12, padding: 8 } } } });
+        ], { plugins: { legend: { position: 'bottom', labels: { font: { size: 10 }, boxWidth: 10, padding: 6 } } } });
       }, 200);
     }
   }
