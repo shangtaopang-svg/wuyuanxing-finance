@@ -567,9 +567,9 @@ function openBaseFull(base, color, total, itemsJson) {
         '<div style="font-size:0.6rem;color:#888;margin-top:2px">'+catItems.length+'笔 · '+pct+'%</div></div>';
     }).join('') + '</div>';
 
-  body.innerHTML = '<div style="display:flex;gap:24px;flex-wrap:wrap">' +
-    '<div style="width:260px;height:260px;margin-bottom:20px">'+chartHtml+'</div>' +
-    '<div style="flex:1;min-width:200px">'+tableHtml+'</div>' +
+  body.innerHTML = '<div style="display:flex;gap:24px;align-items:stretch;flex-wrap:wrap">' +
+    '<div style="width:260px;height:260px;flex-shrink:0">'+chartHtml+'</div>' +
+    '<div style="flex:1;min-width:200px;display:flex;align-items:center">'+tableHtml+'</div>' +
     '</div>' + cardsHtml;
 
   // Store context for back button
