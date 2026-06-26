@@ -504,7 +504,7 @@ function showToast(msg, type) {
   <div class="modal-overlay" id="baseFullOverlay" onclick="closeBaseFull()" style="display:none"></div>
   <div id="baseFullModal" style="display:none;position:fixed;top:0;left:0;right:0;bottom:0;z-index:999999;background:#fff;overflow:auto;">
     <div style="position:sticky;top:0;z-index:10;background:#fff;padding:12px 16px;border-bottom:1px solid #eee;display:flex;align-items:center;gap:8px">
-      <button id="baseBackBtn" onclick="if(_lastBaseContext){openBaseFull(_lastBaseContext.base,_lastBaseContext.color,_lastBaseContext.total,_lastBaseContext.items)}else{closeBaseFull()}" style="padding:8px 16px;border:none;border-radius:6px;background:#e74c3c;color:#fff;cursor:pointer;font-size:14px;font-weight:700;margin-right:8px">← 返回</button>
+      <button id="baseBackBtn" onclick="closeBaseFull()" style="padding:8px 16px;border:none;border-radius:6px;background:#e74c3c;color:#fff;cursor:pointer;font-size:14px;font-weight:700;margin-right:8px">← 关闭</button>
       <h3 id="baseFullTitle" style="font-size:16px;font-weight:700;margin:0;flex:1">基地详情</h3>
       <button onclick="closeBaseFull()" style="width:32px;height:32px;border:none;border-radius:50%;background:#f0f0f0;font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center">✕</button>
     </div>
