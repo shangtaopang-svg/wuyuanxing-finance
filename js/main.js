@@ -1771,7 +1771,11 @@ function renderContracts() {
   body.innerHTML = '';
   if (!data.length) { var e=document.getElementById('empty12'); if(e)e.style.display='block'; return; }
   var e=document.getElementById('empty12'); if(e)e.style.display='none';
-  data.forEach(function(r){ body.innerHTML += '<tr><td>'+(r.date||'')+'</td><td>'+(r.contract_name||'')+'</td><td>'+(r.party||'')+'</td><td class="amount">'+formatNum(r.amount||0)+'</td><td>'+(r.status||'')+'</td><td>'+(r.note||'')+'</td></tr>'; });
+  data.forEach(function(r){
+    var fn = ''; try { var m = (r.note||'').match(/合同文件：(.+)/); if(m) fn = m[1]; } catch(e){}
+    var fileHtml = fn ? '<span class="invoice-link" onclick="previewFile(\''+encodeURIComponent(fn)+'\')">📄 查看</span>' : '—';
+    body.innerHTML += '<tr><td>'+(r.date||'')+'</td><td>'+(r.contract_name||'')+'</td><td>'+(r.party||'')+'</td><td class="amount">'+formatNum(r.amount||0)+'</td><td>'+(r.status||'')+'</td><td>'+fileHtml+'</td><td>'+(r.note||'')+'</td></tr>';
+  });
 }
 function renderBankAccounts() {
   var data = (typeof SERVER_DATA !== 'undefined' ? SERVER_DATA : {}).bankAccounts || DataStore.bankAccounts || [];
@@ -2214,7 +2218,7 @@ var COL_FIELDS = {
   baseSeedlingBody:   ['date','item','amount','note','invoices'],
   baseDetailBody:     ['date','category','item','amount','note','invoices'],
   companyInfoBody:    ['field_name','field_value'],
-  contractsBody:      ['date','contract_name','party','amount','status','note'],
+  contractsBody:      ['date','contract_name','party','amount','status','file','note'],
   bankAccountsBody:   ['bank_name','account_name','account_number','balance','note'],
   tempLaborBody:     ['date','headcount','work_content','amount','notes']
 };
