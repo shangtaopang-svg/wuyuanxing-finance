@@ -608,11 +608,13 @@ function openCatDetail(cat, color, total, itemsJson, baseName) {
   }).join('');
   body.innerHTML = '<h4 style="font-size:0.9rem;color:'+color+';margin:0 0 12px">'+cat+' · '+baseName+' · 合计'+formatNum(total)+'</h4>' +
     '<div style="overflow-x:auto"><table class="data-table" style="font-size:0.72rem;width:100%;border-collapse:collapse">' +
-    '<thead><tr>' +
-    '<th style="width:70px;'+bc+';padding:5px 6px">日期</th>' +
-    '<th style="'+bc+';padding:5px 6px">项目</th>' +
-    '<th style="width:65px;'+bc+';padding:5px 6px;text-align:right">金额</th>' +
-    '<th style="'+bc+';padding:5px 6px">支付方式（支付方） · 支付日期 · 接收方 · 特别说明</th>' +
+    '<thead>' +
+    '<tr><th colspan="3" style="'+bc+';padding:4px 6px;text-align:center;background:#f5f5f5">📋 明细</th><th style="'+bc+';padding:4px 6px;text-align:center;background:#f5f5f5;border-bottom:2px solid #ccc">📝 备注</th></tr>' +
+    '<tr>' +
+    '<th style="width:70px;'+bc+';padding:4px 6px">日期</th>' +
+    '<th style="'+bc+';padding:4px 6px">项目</th>' +
+    '<th style="width:65px;'+bc+';padding:4px 6px;text-align:right">金额</th>' +
+    '<th style="'+bc+';padding:3px 4px;font-weight:400;font-size:0.62rem">支付方式（支付方） | 支付日期 | 接收方 | 特别说明</th>' +
     '</tr></thead><tbody>' + rows + '</tbody></table></div>';
   modal.style.display = 'block';
   overlay.style.display = 'block';
