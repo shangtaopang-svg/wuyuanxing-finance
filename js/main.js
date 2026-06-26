@@ -640,7 +640,8 @@ function openCatDetail(cat, color, total, itemsJson, baseName) {
       var wtColors = {'打药':'#f39c12','拔（除）草':'#27ae60','育苗':'#3498db','采挖':'#e74c3c','其他（三轮车人工）':'#95a5a6','其他':'#95a5a6'};
       chartExtra = '<div style="margin-bottom:12px;display:flex;gap:16px;align-items:flex-start;flex-wrap:wrap"><div style="width:180px;height:180px"><canvas id="'+chartId2+'"></canvas></div></div>';
       setTimeout(function(){
-        makeChart(chartId2, 'doughnut', wtKeys, [
+        var wtLabels = wtKeys.map(function(k){ return k + ' ' + formatNum(workTypes[k]); });
+        makeChart(chartId2, 'doughnut', wtLabels, [
           { data: wtKeys.map(function(k){return workTypes[k];}), backgroundColor: wtKeys.map(function(k){return wtColors[k]||'#95a5a6';}), borderColor: '#fff', borderWidth: 2 }
         ], { plugins: { legend: { position: 'right', labels: { font: { size: 12, weight: 'bold' }, boxWidth: 14, padding: 10 } } } });
       }, 200);
