@@ -628,12 +628,17 @@ function openCatDetail(cat, color, total, itemsJson, baseName) {
       else if (name.indexOf('打药') >= 0 && name.indexOf('拔') < 0) wt = '打药';
       else if (name.indexOf('拔') >= 0 || name.indexOf('除草') >= 0) wt = '拔（除）草';
       else if (name.indexOf('采挖') >= 0) wt = '采挖';
+      else if (name.indexOf('种植') >= 0 || name.indexOf('栽培') >= 0) wt = '种植';
+      else if (name.indexOf('拖拉机') >= 0 || name.indexOf('机械') >= 0) wt = '机械作业';
+      else if (name.indexOf('指导') >= 0 || name.indexOf('师傅') >= 0) wt = '技术指导';
+      else if (name.indexOf('捡石头') >= 0) wt = '整地';
+      else if (name.indexOf('工(') >= 0 || name.indexOf('亩×') >= 0) wt = '种植';
       workTypes[wt] = (workTypes[wt]||0) + (r.amount||0);
     });
     var wtKeys = Object.keys(workTypes);
     if (wtKeys.length > 1) {
       var chartId2 = 'workTypeChart_' + Date.now();
-      var wtColors = {'打药':'#f39c12','拔（除）草':'#27ae60','育苗':'#3498db','采挖':'#e74c3c','三轮车人工':'#95a5a6','其他':'#95a5a6'};
+      var wtColors = {'打药':'#f39c12','拔（除）草':'#27ae60','育苗':'#3498db','采挖':'#e74c3c','三轮车人工':'#95a5a6','种植':'#2ecc71','机械作业':'#8B4513','技术指导':'#9b59b6','整地':'#D2691E','其他':'#95a5a6'};
       chartHtml = '<div style="width:200px;height:200px;flex-shrink:0"><canvas id="'+chartId2+'" style="width:100%;height:100%"></canvas></div>';
       tableHtml = '<table style="width:100%;border-collapse:collapse;font-size:0.75rem"><tbody>' +
         wtKeys.map(function(k){
