@@ -691,7 +691,7 @@ function openCatDetail(cat, color, total, itemsJson, baseName) {
       '<th style="width:65px;'+bc+';padding:4px 6px;text-align:right">金额</th>' +
       '<th style="'+bc+';padding:3px 4px;font-weight:400;font-size:0.62rem">支付方式（支付方） | 支付日期 | 接收方 | 特别说明</th>' +
       '<th style="width:40px;'+bc+';padding:3px 4px">票据</th>' +
-      '</tr></thead><tbody>' + rows + '</tbody></table></div>';
+      '</tr></thead><tbody id="catDetailBody">' + rows + '</tbody></table></div>';
     if (EDIT_MODE && typeof enableFileUploadOnFields === 'function') setTimeout(enableFileUploadOnFields, 100);
   }
   if (chartHtml) {
@@ -2224,7 +2224,8 @@ var COL_FIELDS = {
   companyInfoBody:    ['field_name','field_value'],
   contractsBody:      ['date','contract_name','party','amount','status','file','note'],
   bankAccountsBody:   ['bank_name','account_name','account_number','balance','note'],
-  tempLaborBody:     ['date','headcount','work_content','amount','notes']
+  tempLaborBody:     ['date','headcount','work_content','amount','notes'],
+  catDetailBody:     ['date','item','amount','note','invoices']
 };
 
 // 给所有数据行加上 data-idx 和删除按钮，以及表下方的"新增"按钮
