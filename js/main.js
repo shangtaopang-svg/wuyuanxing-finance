@@ -612,22 +612,14 @@ function openCatDetail(cat, color, total, itemsJson, baseName) {
   title.textContent = cat + ' · ' + baseName;
   _navStack.push({type: 'cat', cat: cat});
   var bc = 'border:1px solid #e0e0e0';
-  var rows = items.map(function(r, i){
-    var n = (r.note||'').replace(/公司账户/g,'🏦').replace(/庞尚韬备用金/g,'💰').replace(/任海涛/g,'👤');
-    return '<tr'+(i%2===0?' style="background:#fafafa"':'')+'>' +
-      '<td style="padding:4px 6px;font-size:0.7rem;'+bc+'">'+(r.date||'')+'</td>' +
-      '<td style="padding:4px 6px;font-size:0.7rem;'+bc+'">'+(r.item||'')+'</td>' +
-      '<td class="amount" style="padding:4px 6px;font-size:0.72rem;text-align:right;'+bc+'">'+formatNum(r.amount)+'</td>' +
-      '<td style="padding:4px 6px;font-size:0.62rem;color:#666;'+bc+';line-height:1.4">'+n+'</td></tr>';
-  }).join('');
-  // 人工费用工作类型分析图
-  var chartExtra = '';
+  // 工种分类（仅人工费用）
+  var chartHtml = '', tableHtml = '', cardsHtml = '';
   if (cat === '人工费用' && items.length > 1) {
     var workTypes = {};
     items.forEach(function(r){
       var name = r.item||'';
       var wt = '其他';
-      if (name.indexOf('三轮车') >= 0) wt = '其他（三轮车人工）';
+      if (name.indexOf('三轮车') >= 0) wt = '三轮车人工';
       else if (name.indexOf('育苗') >= 0) wt = '育苗';
       else if (name.indexOf('打药') >= 0 && name.indexOf('拔') < 0) wt = '打药';
       else if (name.indexOf('拔') >= 0 || name.indexOf('除草') >= 0) wt = '拔（除）草';
@@ -637,28 +629,68 @@ function openCatDetail(cat, color, total, itemsJson, baseName) {
     var wtKeys = Object.keys(workTypes);
     if (wtKeys.length > 1) {
       var chartId2 = 'workTypeChart_' + Date.now();
-      var wtColors = {'打药':'#f39c12','拔（除）草':'#27ae60','育苗':'#3498db','采挖':'#e74c3c','其他（三轮车人工）':'#95a5a6','其他':'#95a5a6'};
-      chartExtra = '<div style="margin-bottom:12px;display:flex;gap:16px;align-items:flex-start;flex-wrap:wrap"><div style="width:180px;height:180px"><canvas id="'+chartId2+'"></canvas></div></div>';
+      var wtColors = {'打药':'#f39c12','拔（除）草':'#27ae60','育苗':'#3498db','采挖':'#e74c3c','三轮车人工':'#95a5a6','其他':'#95a5a6'};
+      chartHtml = '<div style="width:200px;height:200px;flex-shrink:0"><canvas id="'+chartId2+'" style="width:100%;height:100%"></canvas></div>';
+      tableHtml = '<table style="width:100%;border-collapse:collapse;font-size:0.75rem"><tbody>' +
+        wtKeys.map(function(k){
+          var pct = total>0?(workTypes[k]/total*100).toFixed(1):0;
+          return '<tr><td style="padding:4px 10px;color:'+wtColors[k]+';font-weight:600">'+k+'</td><td style="padding:4px 10px;text-align:right;font-weight:600">'+formatNum(workTypes[k])+'</td><td style="padding:4px 10px;text-align:center;color:#888">'+pct+'%</td></tr>';
+        }).join('') +
+        '<tr style="border-top:2px solid '+color+'"><td style="padding:4px 10px;font-weight:700">合计</td><td style="padding:4px 10px;text-align:right;font-weight:700;font-size:0.9rem">'+formatNum(total)+'</td><td></td></tr>' +
+        '</tbody></table>';
+      cardsHtml = '<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-top:14px">' +
+        wtKeys.map(function(k){
+          var bg = wtColors[k]||'#95a5a6';
+          var wtItems = items.filter(function(r){
+            var n = r.item||'';
+            if (k === '三轮车人工') return n.indexOf('三轮车')>=0;
+            if (k === '育苗') return n.indexOf('育苗')>=0;
+            if (k === '打药') return n.indexOf('打药')>=0 && n.indexOf('拔')<0;
+            if (k === '拔（除）草') return n.indexOf('拔')>=0||n.indexOf('除草')>=0;
+            if (k === '采挖') return n.indexOf('采挖')>=0;
+            return false;
+          });
+          var json = encodeURIComponent(JSON.stringify(wtItems.map(function(r){return{date:r.date,item:r.item,amount:r.amount,note:r.note,invoices:r.invoices};})));
+          return '<div style="background:'+bg+'11;border:1px solid '+bg+'44;border-radius:8px;cursor:pointer;text-align:center;padding:12px 8px" '+
+            'onclick="openCatDetail(\''+k+'\',\''+bg+'\','+workTypes[k]+',\''+json+'\',\''+baseName+'\')">'+
+            '<div style="font-size:0.68rem;font-weight:700;color:'+bg+'">'+k+'</div>'+
+            '<div style="font-size:0.85rem;font-weight:800;color:#1a1a1a;margin-top:2px">'+formatNum(workTypes[k])+'</div>'+
+            '<div style="font-size:0.55rem;color:#888;margin-top:1px">'+wtItems.length+'笔 · '+(total>0?(workTypes[k]/total*100).toFixed(1)+'%':'')+'</div></div>';
+        }).join('') + '</div>';
+      // Render chart
       setTimeout(function(){
         var wtLabels = wtKeys.map(function(k){ return k + ' ' + formatNum(workTypes[k]); });
         makeChart(chartId2, 'doughnut', wtLabels, [
           { data: wtKeys.map(function(k){return workTypes[k];}), backgroundColor: wtKeys.map(function(k){return wtColors[k]||'#95a5a6';}), borderColor: '#fff', borderWidth: 2 }
-        ], { plugins: { legend: { position: 'right', labels: { font: { size: 12, weight: 'bold' }, boxWidth: 14, padding: 10 } } } });
+        ], { plugins: { legend: { position: 'right', labels: { font: { size: 11, weight: 'bold' }, boxWidth: 12, padding: 8 } } } });
       }, 200);
     }
   }
 
-  body.innerHTML = '<h4 style="font-size:0.9rem;color:'+color+';margin:0 0 12px">'+cat+' · '+baseName+' · 合计'+formatNum(total)+'</h4>' +
-    chartExtra +
-    '<div style="overflow-x:auto"><table class="data-table" style="font-size:0.72rem;width:100%;border-collapse:collapse">' +
-    '<thead>' +
-    '<tr><th colspan="3" style="'+bc+';padding:4px 6px;text-align:center;background:#f5f5f5">📋 明细</th><th style="'+bc+';padding:4px 6px;text-align:center;background:#f5f5f5;border-bottom:2px solid #ccc">📝 备注</th></tr>' +
-    '<tr>' +
-    '<th style="width:70px;'+bc+';padding:4px 6px">日期</th>' +
-    '<th style="'+bc+';padding:4px 6px">项目</th>' +
-    '<th style="width:65px;'+bc+';padding:4px 6px;text-align:right">金额</th>' +
-    '<th style="'+bc+';padding:3px 4px;font-weight:400;font-size:0.62rem">支付方式（支付方） | 支付日期 | 接收方 | 特别说明</th>' +
-    '</tr></thead><tbody>' + rows + '</tbody></table></div>';
+  if (!chartHtml) {
+    var rows = items.map(function(r, i){
+      var n = (r.note||'').replace(/公司账户/g,'🏦').replace(/庞尚韬备用金/g,'💰').replace(/任海涛/g,'👤');
+      return '<tr'+(i%2===0?' style="background:#fafafa"':'')+'>' +
+        '<td style="padding:4px 6px;font-size:0.7rem;'+bc+'">'+(r.date||'')+'</td>' +
+        '<td style="padding:4px 6px;font-size:0.7rem;'+bc+'">'+(r.item||'')+'</td>' +
+        '<td class="amount" style="padding:4px 6px;font-size:0.72rem;text-align:right;'+bc+'">'+formatNum(r.amount)+'</td>' +
+        '<td style="padding:4px 6px;font-size:0.62rem;color:#666;'+bc+';line-height:1.4">'+n+'</td></tr>';
+    }).join('');
+    body.innerHTML = '<h4 style="font-size:0.9rem;color:'+color+';margin:0 0 12px">'+cat+' · '+baseName+' · 合计'+formatNum(total)+'</h4>' +
+      '<div style="overflow-x:auto"><table class="data-table" style="font-size:0.72rem;width:100%;border-collapse:collapse">' +
+      '<thead>' +
+      '<tr><th colspan="3" style="'+bc+';padding:4px 6px;text-align:center;background:#f5f5f5">📋 明细</th><th style="'+bc+';padding:4px 6px;text-align:center;background:#f5f5f5;border-bottom:2px solid #ccc">📝 备注</th></tr>' +
+      '<tr>' +
+      '<th style="width:70px;'+bc+';padding:4px 6px">日期</th>' +
+      '<th style="'+bc+';padding:4px 6px">项目</th>' +
+      '<th style="width:65px;'+bc+';padding:4px 6px;text-align:right">金额</th>' +
+      '<th style="'+bc+';padding:3px 4px;font-weight:400;font-size:0.62rem">支付方式（支付方） | 支付日期 | 接收方 | 特别说明</th>' +
+      '</tr></thead><tbody>' + rows + '</tbody></table></div>';
+  }
+  if (chartHtml) {
+    body.innerHTML = '<h4 style="font-size:0.9rem;color:'+color+';margin:0 0 12px">'+cat+' · '+baseName+' · 合计'+formatNum(total)+'</h4>' +
+      '<div style="display:flex;gap:16px;align-items:center">'+chartHtml+'<div style="flex:1">'+tableHtml+'</div></div>'+cardsHtml;
+  }
   modal.style.display = 'block';
   overlay.style.display = 'block';
 }
