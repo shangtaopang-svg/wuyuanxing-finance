@@ -551,7 +551,7 @@ function openBaseFull(base, color, total, itemsJson) {
     '<tr style="border-top:2px solid '+color+'"><td style="padding:4px 10px;font-weight:700">合计</td><td style="padding:4px 10px;text-align:right;font-weight:700;font-size:0.9rem">'+formatNum(total)+'</td><td></td></tr>' +
     '</tbody></table>';
 
-  var cardsHtml = '<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-top:14px">' +
+  var cardsHtml = '<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-top:30px">' +
     cats.filter(function(c){return catTotals[c]>0;}).map(function(cat){
       var bg = catColors[cat] || '#95a5a6';
       var icon = {'土地流转':'🏞️','土地处理':'🚜','种苗采购':'🌱','种苗采购（含运费）':'🌱','农资采购（含农药化肥和地膜及运输费）':'🧪','人工费用':'👷','其他':'📦'}[cat] || '📋';
