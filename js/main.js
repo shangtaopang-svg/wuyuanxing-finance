@@ -568,7 +568,7 @@ function openBaseFull(base, color, total, itemsJson) {
     }).join('') + '</div>';
 
   body.innerHTML = '<div style="display:flex;gap:16px;align-items:center">' +
-    '<div style="width:160px;height:180px;flex-shrink:0">'+chartHtml+'</div>' +
+    '<div style="width:180px;height:220px;flex-shrink:0">'+chartHtml+'</div>' +
     '<div style="flex:1">'+tableHtml+'</div>' +
     '</div>' + cardsHtml;
 
@@ -584,8 +584,8 @@ function openBaseFull(base, color, total, itemsJson) {
     var chart = charts['baseFullChart'];
     if (chart) chart.destroy();
     makeChart('baseFullChart', 'doughnut', actCats.map(function(c){ return c; }), [
-      { data: actCats.map(function(c){ return catTotals[c]; }), backgroundColor: actCats.map(function(c){ return catColors[c]||'#95a5a6'; }), borderColor: '#fff', borderWidth: 3 }
-    ]);
+      { data: actCats.map(function(c){ return catTotals[c]; }), backgroundColor: actCats.map(function(c){ return catColors[c]||'#95a5a6'; }), borderColor: '#fff', borderWidth: 2 }
+    ], { plugins: { legend: { labels: { font: { size: 10 }, boxWidth: 10, padding: 6 }, position: 'bottom' } } });
   }, 100);
 }
 var _navStack = [];
