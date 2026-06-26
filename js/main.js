@@ -541,7 +541,7 @@ function openBaseFull(base, color, total, itemsJson) {
     }
   });
 
-  var chartHtml = '<canvas id="baseFullChart"></canvas>';
+  var chartHtml = '<canvas id="baseFullChart" style="width:100%;height:100%"></canvas>';
   var tableHtml = '<table style="width:100%;border-collapse:collapse;font-size:0.75rem">' +
     '<tbody>' +
     cats.filter(function(c){return catTotals[c]>0;}).map(function(c){
@@ -568,7 +568,7 @@ function openBaseFull(base, color, total, itemsJson) {
     }).join('') + '</div>';
 
   body.innerHTML = '<div style="display:flex;gap:24px;flex-wrap:wrap">' +
-    '<div style="width:200px;height:200px">'+chartHtml+'</div>' +
+    '<div style="width:260px;height:260px;margin-bottom:20px">'+chartHtml+'</div>' +
     '<div style="flex:1;min-width:200px">'+tableHtml+'</div>' +
     '</div>' + cardsHtml;
 
