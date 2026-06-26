@@ -591,16 +591,17 @@ function openBaseFull(base, color, total, itemsJson) {
 var _navStack = [];
 
 function historyBack() {
+  // Pop current view
+  if (_navStack.length > 0) _navStack.pop();
+  // Restore previous view
   if (_navStack.length > 0) {
-    var prev = _navStack.pop();
+    var prev = _navStack[_navStack.length - 1];
     if (prev.type === 'base') {
       openBaseFull(prev.base, prev.color, prev.total, prev.items);
-    } else {
-      closeBaseFull();
+      return;
     }
-  } else {
-    closeBaseFull();
   }
+  closeBaseFull();
 }
 function openCatDetail(cat, color, total, itemsJson, baseName) {
   var items = JSON.parse(decodeURIComponent(itemsJson));
