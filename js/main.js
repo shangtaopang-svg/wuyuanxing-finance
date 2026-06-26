@@ -568,7 +568,7 @@ function openBaseFull(base, color, total, itemsJson) {
     }).join('') + '</div>';
 
   body.innerHTML = '<div style="display:flex;gap:16px;align-items:center">' +
-    '<div style="width:140px;height:140px;flex-shrink:0">'+chartHtml+'</div>' +
+    '<div style="width:160px;height:180px;flex-shrink:0">'+chartHtml+'</div>' +
     '<div style="flex:1">'+tableHtml+'</div>' +
     '</div>' + cardsHtml;
 
