@@ -692,7 +692,7 @@ function renderBaseExpense() {
   var html = '';
   baseNames.forEach(function(base, bi){
     var items = baseMap[base] || [];
-    var cc = coverColors[bi % 3];
+    var cc = coverColors[bi % coverColors.length];
     var total = items.reduce(function(s,r){return s+(r.amount||0);},0);
     var catTotals = {};
     categories.forEach(function(c){ catTotals[c]=0; });
