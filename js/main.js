@@ -573,7 +573,7 @@ function openBaseFull(base, color, total, itemsJson) {
     '</div>' + cardsHtml;
 
   // Store context for back button
-  _lastBaseContext = {base: base, color: color, total: total, items: JSON.stringify(items)};
+  _navStack.push({type: 'base', base: base, color: color, total: total, items: JSON.stringify(items)});
   modal.style.display = 'block';
   overlay.style.display = 'block';
 
@@ -588,7 +588,20 @@ function openBaseFull(base, color, total, itemsJson) {
     ]);
   }, 100);
 }
-var _lastBaseContext = null;
+var _navStack = [];
+
+function historyBack() {
+  if (_navStack.length > 0) {
+    var prev = _navStack.pop();
+    if (prev.type === 'base') {
+      openBaseFull(prev.base, prev.color, prev.total, prev.items);
+    } else {
+      closeBaseFull();
+    }
+  } else {
+    closeBaseFull();
+  }
+}
 function openCatDetail(cat, color, total, itemsJson, baseName) {
   var items = JSON.parse(decodeURIComponent(itemsJson));
   var modal = document.getElementById('baseFullModal');
@@ -597,6 +610,7 @@ function openCatDetail(cat, color, total, itemsJson, baseName) {
   var body = document.getElementById('baseFullBody');
   if (!modal || !body) return;
   title.textContent = cat + ' · ' + baseName;
+  _navStack.push({type: 'cat', cat: cat});
   var bc = 'border:1px solid #e0e0e0';
   var rows = items.map(function(r, i){
     var n = (r.note||'').replace(/公司账户/g,'🏦').replace(/庞尚韬备用金/g,'💰').replace(/任海涛/g,'👤');
