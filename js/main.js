@@ -672,12 +672,12 @@ function buildCatSection(cat, items, catTotal, cc, grandTotal) {
 }
 function renderBaseExpense() {
   var allData = DataStore.baseExpense || [];
-  var baseNames = ['金银花基地','党参基地','党参育苗基地'];
-  var baseScales = {'金银花基地':'规模（流转）101.4亩','党参基地':'','党参育苗基地':''};
+  var baseNames = ['金银花基地','党参基地','党参育苗基地','元胡试种基地'];
+  var baseScales = {'金银花基地':'规模（流转）101.4亩','党参基地':'','党参育苗基地':'','元胡试种基地':'3亩'};
   var categories = ['土地流转','土地处理','种苗采购（含运费）','农资采购（含农药化肥和地膜及运输费）','人工费用','其他'];
   var catColors = {'土地流转':'#8B4513','土地处理':'#D2691E','种苗采购（含运费）':'#27ae60','农资采购（含农药化肥和地膜及运输费）':'#f39c12','人工费用':'#e74c3c','其他':'#95a5a6'};
-  var coverColors = ['#27ae60','#3498db','#e67e22'];
-  var emojis = ['🌿','🌱','🌰'];
+  var coverColors = ['#27ae60','#3498db','#e67e22','#e91e63'];
+  var emojis = ['🌿','🌱','🌰','🌼'];
 
   var container = $('baseCards');
   var emptyEl = $('empty10');
