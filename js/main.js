@@ -501,7 +501,8 @@ function closeFullModal() {
   if (modal) modal.style.display = 'none';
 }
 // 基地全屏查看
-function openBaseFull(base, color, total, itemsJson) {
+function openBaseFull(base, color, total, itemsJson, pushHistory) {
+  if (pushHistory === undefined) pushHistory = true;
   var items = typeof itemsJson === 'string' ? JSON.parse(itemsJson) : itemsJson;
   var modal = document.getElementById('baseFullModal');
   var overlay = document.getElementById('baseFullOverlay');
@@ -573,7 +574,7 @@ function openBaseFull(base, color, total, itemsJson) {
     '</div>' + cardsHtml;
 
   // Store context for back button
-  _navStack.push({type: 'base', base: base, color: color, total: total, items: JSON.stringify(items)});
+  if (pushHistory) _navStack.push({type: 'base', base: base, color: color, total: total, items: JSON.stringify(items)});
   modal.style.display = 'block';
   overlay.style.display = 'block';
 
@@ -591,13 +592,11 @@ function openBaseFull(base, color, total, itemsJson) {
 var _navStack = [];
 
 function historyBack() {
-  // Pop current view
   if (_navStack.length > 0) _navStack.pop();
-  // Restore previous view
   if (_navStack.length > 0) {
     var prev = _navStack[_navStack.length - 1];
     if (prev.type === 'base') {
-      openBaseFull(prev.base, prev.color, prev.total, prev.items);
+      openBaseFull(prev.base, prev.color, prev.total, prev.items, false);
       return;
     }
   }
