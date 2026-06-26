@@ -551,7 +551,7 @@ function openBaseFull(base, color, total, itemsJson) {
     '<tr style="border-top:2px solid '+color+'"><td style="padding:4px 10px;font-weight:700">合计</td><td style="padding:4px 10px;text-align:right;font-weight:700;font-size:0.9rem">'+formatNum(total)+'</td><td></td></tr>' +
     '</tbody></table>';
 
-  var cardsHtml = '<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:12px;margin-top:16px">' +
+  var cardsHtml = '<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:16px;margin-top:20px">' +
     cats.filter(function(c){return catTotals[c]>0;}).map(function(cat){
       var bg = catColors[cat] || '#95a5a6';
       var icon = {'土地流转':'🏞️','土地处理':'🚜','种苗采购':'🌱','种苗采购（含运费）':'🌱','农资采购（含农药化肥和地膜及运输费）':'🧪','人工费用':'👷','其他':'📦'}[cat] || '📋';
@@ -559,7 +559,7 @@ function openBaseFull(base, color, total, itemsJson) {
       var catAmt = catItems.reduce(function(s,r){return s+(r.amount||0);},0);
       var pct = total>0?(catAmt/total*100).toFixed(1):0;
       var json = encodeURIComponent(JSON.stringify(catItems.map(function(r){return{date:r.date,item:r.item,amount:r.amount,note:r.note,invoices:r.invoices};})));
-      return '<div style="background:'+bg+'11;border:1px solid '+bg+'44;border-radius:10px;cursor:pointer;text-align:center;padding:16px 8px" '+
+      return '<div style="background:'+bg+'11;border:1px solid '+bg+'44;border-radius:10px;cursor:pointer;text-align:center;padding:20px 12px" '+
         'onclick="openCatDetail(\''+cat+'\',\''+bg+'\','+catAmt+',\''+json+'\',\''+(base||'')+'\')">'+
         '<div style="font-size:2rem;margin-bottom:4px">'+icon+'</div>'+
         '<div style="font-size:0.75rem;font-weight:700;color:'+bg+'">'+cat+'</div>'+
